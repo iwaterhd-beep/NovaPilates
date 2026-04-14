@@ -3,438 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Acceder — NŌVA Pilates Studio</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Acceder - NŌVA PILATES STUDIO</title>
   <style>
-    body { min-height: 100svh; display: flex; flex-direction: column; }
-
-    .login-wrap {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: 100svh;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Cormorant+Garamond:wght@300;400;500&display=swap');
+    :root {
+      --bg: #f6f4ef;
+      --panel: #fffdfa;
+      --ink: #4a453d;
+      --ink-soft: #6f695f;
+      --line: #e8e2d8;
+      --line-strong: #d9d0c3;
+      --accent: #8a9a8c;
     }
-
-    /* Left — image panel */
-    .login-visual {
-      position: relative;
-      overflow: hidden;
-      background: var(--color-bg-soft);
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, sans-serif; background: var(--bg); color: var(--ink); min-height: 100svh; }
+    .wrap { min-height: 100svh; display: grid; place-items: center; padding: 2rem; }
+    .card {
+      width: 100%; max-width: 460px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 2rem;
     }
-    .login-visual-bg {
-      position: absolute; inset: 0;
-      background:
-        linear-gradient(135deg, rgba(14,14,13,0.55) 0%, rgba(14,14,13,0.2) 60%, rgba(201,169,110,0.12) 100%),
-        url('https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1000&q=80&auto=format&fit=crop')
-        center/cover no-repeat;
+    .brand { display: flex; justify-content: center; margin-bottom: 1rem; }
+    .brand img { max-width: 260px; width: 100%; height: auto; object-fit: contain; }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 400; margin-bottom: .2rem; text-align: center; }
+    .sub { text-align: center; color: var(--ink-soft); font-size: .88rem; margin-bottom: 1.5rem; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); margin-bottom: 1rem; }
+    .tab { border: 0; background: #f9f6f0; padding: .7rem; font-size: .64rem; text-transform: uppercase; letter-spacing: .16em; color: var(--ink-soft); cursor: pointer; }
+    .tab.active { background: #fffdfa; color: var(--ink); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .group { margin-bottom: .9rem; }
+    label { display: block; font-size: .62rem; letter-spacing: .16em; text-transform: uppercase; color: #8f887d; margin-bottom: .35rem; }
+    input {
+      width: 100%; min-height: 44px; border: 1px solid var(--line-strong); background: #fff;
+      padding: .72rem .85rem; color: var(--ink);
     }
-    .login-visual-content {
-      position: relative; z-index: 1;
-      height: 100%; display: flex; flex-direction: column;
-      justify-content: space-between; padding: 2.5rem;
+    .btn {
+      width: 100%; min-height: 44px; border: 1px solid var(--accent); background: var(--accent);
+      color: #f7f5f0; text-transform: uppercase; letter-spacing: .16em; font-size: .64rem; cursor: pointer;
     }
-    .login-logo {
-      font-family: var(--font-display);
-      font-size: 1.2rem; font-weight: 300;
-      letter-spacing: 0.22em; color: var(--color-cream);
-      text-decoration: none;
-    }
-    .login-logo em { font-style: normal; color: var(--color-accent); }
-
-    .login-visual-quote {
-      font-family: var(--font-display);
-      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
-      font-weight: 300; line-height: 1.2;
-      color: var(--color-cream);
-      font-style: italic;
-      max-width: 340px;
-    }
-    .login-visual-quote span {
-      display: block; margin-top: 1rem;
-      font-family: var(--font-body); font-style: normal;
-      font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--color-accent);
-    }
-
-    /* Right — form panel */
-    .login-form-panel {
-      display: flex; flex-direction: column;
-      justify-content: center; align-items: center;
-      padding: 3rem 2rem;
-      background: var(--color-bg);
-    }
-    .login-form-inner {
-      width: 100%; max-width: 380px;
-    }
-
-    .login-header { margin-bottom: 2.5rem; }
-    .login-title {
-      font-family: var(--font-display);
-      font-size: 2.2rem; font-weight: 300;
-      margin-bottom: 0.5rem; color: var(--color-cream);
-    }
-    .login-sub {
-      font-size: 0.83rem; color: var(--color-muted); font-weight: 300;
-    }
-
-    /* Form */
-    .form-group { margin-bottom: 1.2rem; }
-    .form-label {
-      display: block;
-      font-size: 0.63rem; letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--color-muted); margin-bottom: 0.5rem;
-      font-family: var(--font-body);
-    }
-    .form-input {
-      width: 100%;
-      background: var(--color-bg-soft);
-      border: 0.5px solid var(--color-border);
-      color: var(--color-cream);
-      font-family: var(--font-body);
-      font-size: 0.9rem; font-weight: 300;
-      padding: 0.85rem 1rem;
-      outline: none;
-      transition: border-color 0.3s ease;
-      -webkit-appearance: none;
-    }
-    .form-input:focus { border-color: var(--color-accent); }
-    .form-input::placeholder { color: var(--color-muted); }
-
-    .form-input-wrap { position: relative; }
-    .form-toggle-pass {
-      position: absolute; right: 1rem; top: 50%;
-      transform: translateY(-50%);
-      background: none; border: none;
-      color: var(--color-muted); cursor: pointer;
-      font-size: 0.72rem; letter-spacing: 0.08em;
-      font-family: var(--font-body);
-      transition: color 0.2s;
-      padding: 0;
-    }
-    .form-toggle-pass:hover { color: var(--color-accent); }
-
-    .form-forgot {
-      display: block; text-align: right;
-      font-size: 0.7rem; color: var(--color-muted);
-      font-weight: 300; margin-top: 0.4rem;
-      transition: color 0.2s;
-    }
-    .form-forgot:hover { color: var(--color-accent); }
-
-    .btn-login {
-      width: 100%; margin-top: 0.5rem;
-      background: var(--color-accent);
-      color: var(--color-bg);
-      font-family: var(--font-body);
-      font-size: 0.7rem; font-weight: 400;
-      letter-spacing: 0.2em; text-transform: uppercase;
-      padding: 1rem;
-      border: none; cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease;
-      position: relative; overflow: hidden;
-    }
-    .btn-login:hover { background: var(--color-accent-lt); }
-    .btn-login:active { transform: scale(0.99); }
-    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* Spinner inside button */
-    .btn-spinner {
-      display: none;
-      width: 14px; height: 14px;
-      border: 1.5px solid rgba(14,14,13,0.3);
-      border-top-color: var(--color-bg);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      position: absolute; right: 1.2rem; top: 50%;
-      transform: translateY(-50%);
-    }
-    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
-
-    .login-divider {
-      display: flex; align-items: center; gap: 1rem;
-      margin: 1.8rem 0;
-    }
-    .login-divider-line { flex: 1; height: 0.5px; background: var(--color-border); }
-    .login-divider span { font-size: 0.65rem; color: var(--color-muted); letter-spacing: 0.1em; }
-
-    /* Error / success messages */
-    .form-msg {
-      padding: 0.8rem 1rem;
-      font-size: 0.8rem; font-weight: 300;
-      border: 0.5px solid;
-      margin-bottom: 1.2rem;
-      display: none;
-    }
-    .form-msg.error { background: rgba(226,75,74,0.08); border-color: rgba(226,75,74,0.3); color: #e24b4a; }
-    .form-msg.success { background: rgba(29,158,117,0.08); border-color: rgba(29,158,117,0.3); color: #1d9e75; }
-    .form-msg.show { display: block; }
-
-    /* Tabs: login / recuperar */
-    .form-tabs {
-      display: flex; gap: 0;
-      border-bottom: 0.5px solid var(--color-border);
-      margin-bottom: 2rem;
-    }
-    .form-tab {
-      flex: 1; padding: 0.75rem 0;
-      font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--color-muted); background: none; border: none;
-      cursor: pointer; transition: color 0.2s;
-      font-family: var(--font-body);
-      border-bottom: 1px solid transparent;
-      margin-bottom: -0.5px;
-    }
-    .form-tab.active { color: var(--color-cream); border-bottom-color: var(--color-accent); }
-
-    .form-panel { display: none; }
-    .form-panel.active { display: block; }
-
-    /* Back to landing */
-    .login-back {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
-      color: var(--color-muted); margin-top: 2.5rem;
-      transition: color 0.2s;
-    }
-    .login-back:hover { color: var(--color-accent); }
-    .login-back svg { width: 12px; height: 12px; }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .login-wrap { grid-template-columns: 1fr; }
-      .login-visual { display: none; }
-      .login-form-panel { padding: 4rem 1.5rem; min-height: 100svh; justify-content: flex-start; padding-top: 5rem; }
-      .login-form-inner { max-width: 100%; }
-    }
+    .msg { display: none; margin-bottom: .8rem; padding: .7rem .8rem; border: 1px solid var(--line); font-size: .82rem; }
+    .msg.show { display: block; }
+    .msg.error { color: #8b4d4d; background: #fbf0ef; }
+    .msg.success { color: #4a644f; background: #eef5ef; }
+    .back { display: inline-block; margin-top: 1rem; font-size: .75rem; color: var(--ink-soft); }
   </style>
 </head>
 <body>
-
-<div class="login-wrap">
-
-  <!-- ── Left visual panel ── -->
-  <div class="login-visual">
-    <div class="login-visual-bg"></div>
-    <div class="login-visual-content">
-      <a href="index.html" class="login-logo">NŌV<em>A</em> PILATES</a>
-      <div>
-        <p class="login-visual-quote">
-          "El movimiento es medicina para crear cambio en el cuerpo, la mente y el espíritu."
-          <span>— Joseph Pilates</span>
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Right form panel ── -->
-  <div class="login-form-panel">
-    <div class="login-form-inner">
-
-      <div class="login-header">
-        <h1 class="login-title">Bienvenida</h1>
-        <p class="login-sub">Accede a tu espacio en NŌVA</p>
-      </div>
-
-      <!-- Tabs -->
-      <div class="form-tabs">
-        <button class="form-tab active" data-tab="login">Iniciar sesión</button>
-        <button class="form-tab" data-tab="recover">Recuperar acceso</button>
-      </div>
-
-      <!-- Message -->
-      <div class="form-msg" id="formMsg"></div>
-
-      <!-- LOGIN PANEL -->
-      <div class="form-panel active" id="panel-login">
-        <form id="loginForm" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="email">Correo electrónico</label>
-            <input
-              type="email" id="email" name="email"
-              class="form-input" placeholder="tu@email.com"
-              autocomplete="email" required
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="password">Contraseña</label>
-            <div class="form-input-wrap">
-              <input
-                type="password" id="password" name="password"
-                class="form-input" placeholder="••••••••"
-                autocomplete="current-password" required
-                style="padding-right:4rem;"
-              />
-              <button type="button" class="form-toggle-pass" id="togglePass">Mostrar</button>
-            </div>
-            <a href="#" class="form-forgot" id="forgotLink">¿Olvidaste tu contraseña?</a>
-          </div>
-          <button type="submit" class="btn-login" id="loginBtn">
-            Entrar
-            <div class="btn-spinner" id="loginSpinner"></div>
-          </button>
-        </form>
-      </div>
-
-      <!-- RECOVER PANEL -->
-      <div class="form-panel" id="panel-recover">
-        <form id="recoverForm" novalidate>
-          <p style="font-size:0.83rem; color:var(--color-muted); font-weight:300; margin-bottom:1.5rem; line-height:1.7;">
-            Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña.
-          </p>
-          <div class="form-group">
-            <label class="form-label" for="recoverEmail">Correo electrónico</label>
-            <input
-              type="email" id="recoverEmail" name="recoverEmail"
-              class="form-input" placeholder="tu@email.com"
-              autocomplete="email" required
-            />
-          </div>
-          <button type="submit" class="btn-login" id="recoverBtn">
-            Enviar enlace
-            <div class="btn-spinner" id="recoverSpinner"></div>
-          </button>
-        </form>
-      </div>
-
-      <a href="index.html" class="login-back">
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1">
-          <path d="M8 1L3 6l5 5"/>
-        </svg>
-        Volver al inicio
+  <main class="wrap">
+    <section class="card">
+      <a href="index.html" class="brand">
+        <img src="assets/branding/logo-nova-main.PNG" alt="NOVA PILATES STUDIO" />
       </a>
+      <h1>Bienvenida</h1>
+      <p class="sub">Accede a tu espacio personal</p>
 
-    </div>
-  </div>
-</div>
+      <div class="tabs">
+        <button class="tab active" data-tab="login">Iniciar sesion</button>
+        <button class="tab" data-tab="recover">Recuperar</button>
+      </div>
 
-<!-- Supabase CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-<script>
-  // ── Tab switching ──
-  const tabs = document.querySelectorAll('.form-tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-      hideMsg();
-    });
-  });
+      <div id="msg" class="msg"></div>
 
-  // "Forgot password" link also switches to recover tab
-  document.getElementById('forgotLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    tabs.forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-    document.querySelector('[data-tab="recover"]').classList.add('active');
-    document.getElementById('panel-recover').classList.add('active');
-  });
+      <div id="panel-login" class="panel active">
+        <form id="loginForm" novalidate>
+          <div class="group">
+            <label for="email">Correo</label>
+            <input id="email" type="email" required autocomplete="email" />
+          </div>
+          <div class="group">
+            <label for="password">Contrasena</label>
+            <input id="password" type="password" required autocomplete="current-password" />
+          </div>
+          <button class="btn" id="loginBtn" type="submit">Entrar</button>
+        </form>
+      </div>
 
-  // ── Password toggle ──
-  const passInput = document.getElementById('password');
-  const toggleBtn = document.getElementById('togglePass');
-  toggleBtn.addEventListener('click', () => {
-    const isPass = passInput.type === 'password';
-    passInput.type = isPass ? 'text' : 'password';
-    toggleBtn.textContent = isPass ? 'Ocultar' : 'Mostrar';
-  });
+      <div id="panel-recover" class="panel">
+        <form id="recoverForm" novalidate>
+          <div class="group">
+            <label for="recoverEmail">Correo</label>
+            <input id="recoverEmail" type="email" required autocomplete="email" />
+          </div>
+          <button class="btn" id="recoverBtn" type="submit">Enviar enlace</button>
+        </form>
+      </div>
 
-  // ── Message helpers ──
-  const msgEl = document.getElementById('formMsg');
-  function showMsg(text, type) {
-    msgEl.textContent = text;
-    msgEl.className = 'form-msg show ' + type;
-  }
-  function hideMsg() {
-    msgEl.className = 'form-msg';
-  }
+      <a class="back" href="index.html">Volver al inicio</a>
+    </section>
+  </main>
 
-  // ── Login form ──
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideMsg();
-    const email    = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    if (!email || !password) { showMsg('Por favor, completa todos los campos.', 'error'); return; }
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
+    const msg = document.getElementById('msg');
+    function showMsg(text, type) { msg.textContent = text; msg.className = `msg show ${type}`; }
+    function hideMsg() { msg.className = 'msg'; msg.textContent = ''; }
 
-    const btn = document.getElementById('loginBtn');
-    const spinner = document.getElementById('loginSpinner');
-    btn.disabled = true;
-    spinner.style.display = 'block';
-
-    try {
-      const { data, error } = await novaSupabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-
-      // Get user role and redirect
-      const { data: profile } = await novaSupabase
-        .from('perfiles')
-        .select('rol')
-        .eq('id', data.user.id)
-        .single();
-
-      const rol = profile?.rol || 'cliente';
-      const redirects = {
-        cliente:  'dashboard_cliente.html',
-        empleado: 'dashboard_cliente.html',
-        admin:    'dashboard_cliente.html',
-      };
-      window.location.href = redirects[rol] || 'dashboard_cliente.html';
-
-    } catch (err) {
-      const msgs = {
-        'Invalid login credentials': 'Correo o contraseña incorrectos.',
-        'Email not confirmed': 'Debes confirmar tu correo antes de acceder.',
-        'Too many requests': 'Demasiados intentos. Espera unos minutos.',
-      };
-      showMsg(msgs[err.message] || 'Error al iniciar sesión. Inténtalo de nuevo.', 'error');
-      btn.disabled = false;
-      spinner.style.display = 'none';
-    }
-  });
-
-  // ── Recover form ──
-  document.getElementById('recoverForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideMsg();
-    const email = document.getElementById('recoverEmail').value.trim();
-    if (!email) { showMsg('Introduce tu correo electrónico.', 'error'); return; }
-
-    const btn = document.getElementById('recoverBtn');
-    const spinner = document.getElementById('recoverSpinner');
-    btn.disabled = true;
-    spinner.style.display = 'block';
-
-    try {
-      const { error } = await novaSupabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/login.html?reset=true',
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => t.classList.remove('active'));
+        panels.forEach((p) => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+        hideMsg();
       });
-      if (error) throw error;
-      showMsg('¡Listo! Revisa tu correo para restablecer la contraseña.', 'success');
-    } catch (err) {
-      showMsg('No se pudo enviar el correo. Comprueba la dirección.', 'error');
-    } finally {
-      btn.disabled = false;
-      spinner.style.display = 'none';
-    }
-  });
+    });
 
-  // ── Check if already logged in ──
-  (async () => {
-    const { data: { session } } = await novaSupabase.auth.getSession();
-    if (session) {
-      const { data: profile } = await novaSupabase
-        .from('perfiles')
-        .select('rol')
-        .eq('id', session.user.id)
-        .single();
-      const rol = profile?.rol || 'cliente';
-      const redirects = { cliente: 'dashboard_cliente.html', empleado: 'dashboard_cliente.html', admin: 'dashboard_cliente.html' };
-      window.location.href = redirects[rol] || 'dashboard_cliente.html';
-    }
-  })();
-</script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMsg();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) return showMsg('Completa todos los campos.', 'error');
+      try {
+        const { data, error } = await novaSupabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        const { data: profile } = await novaSupabase.from('perfiles').select('rol').eq('id', data.user.id).single();
+        const rol = profile?.rol || 'cliente';
+        const redirects = { cliente: 'dashboard_cliente.html', empleado: 'dashboard_cliente.html', admin: 'dashboard_cliente.html' };
+        window.location.href = redirects[rol] || 'dashboard_cliente.html';
+      } catch (err) {
+        const m = err?.message === 'Invalid login credentials' ? 'Correo o contrasena incorrectos.' : 'Error al iniciar sesion.';
+        showMsg(m, 'error');
+      }
+    });
+
+    document.getElementById('recoverForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMsg();
+      const email = document.getElementById('recoverEmail').value.trim();
+      if (!email) return showMsg('Introduce un correo.', 'error');
+      try {
+        const { error } = await novaSupabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/login.html?reset=true' });
+        if (error) throw error;
+        showMsg('Revisa tu correo para restablecer la contrasena.', 'success');
+      } catch {
+        showMsg('No se pudo enviar el correo.', 'error');
+      }
+    });
+  </script>
 </body>
 </html>
