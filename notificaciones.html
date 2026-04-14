@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notificaciones — NŌVA Pilates Studio</title>
+  <link rel="stylesheet" href="portal.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+    <nav class="sidebar-nav">
+      <a href="dashboard_cliente.html" class="sidebar-link">Inicio</a>
+      <a href="calendario.html" class="sidebar-link">Reservar clase</a>
+      <a href="mis-clases.html" class="sidebar-link">Mis clases</a>
+      <a href="bono.html" class="sidebar-link">Mi bono</a>
+      <a href="notificaciones.html" class="sidebar-link active">Notificaciones</a>
+      <a href="perfil.html" class="sidebar-link">Mi perfil</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <header class="topbar"><span class="topbar-title">Notificaciones</span></header>
+    <div class="content">
+      <div id="list" class="card">Cargando...</div>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    async function init() {
+      const session = await getSession();
+      if (!session) { window.location.href = 'login.html'; return; }
+      const perfil = await getUserProfile(session.user.id);
+      const { data, error } = await novaSupabase
+        .from('notificaciones')
+        .select('*')
+        .or(`perfil_id.eq.${perfil.id},perfil_id.is.null`)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      const el = document.getElementById('list');
+      el.innerHTML = '';
+      if (!data?.length) {
+        el.innerHTML = '<div class="empty-state"><p>Sin notificaciones.</p></div>';
+        return;
+      }
+      data.forEach((n) => {
+        const item = document.createElement('div');
+        item.style.padding = '1rem 0';
+        item.style.borderBottom = '0.5px solid var(--color-border)';
+        item.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;">
+            <strong style="font-weight:400">${n.titulo}</strong>
+            ${n.leida ? '<span class="badge badge-neutral">Leída</span>' : '<span class="badge badge-accent">Nueva</span>'}
+          </div>
+          <p style="font-size:.82rem;color:var(--color-cream-dim);margin-top:.3rem;">${n.mensaje}</p>
+          <p style="font-size:.7rem;color:var(--color-muted);margin-top:.3rem;">${new Date(n.created_at).toLocaleString('es-ES')}</p>`;
+        el.appendChild(item);
+      });
+    }
+    init().catch((e) => {
+      document.getElementById('list').innerHTML = `<p style="color:var(--color-danger)">Error: ${e.message}</p>`;
+    });
+  </script>
+</body>
+</html>

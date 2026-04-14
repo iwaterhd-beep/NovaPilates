@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi bono — NŌVA Pilates Studio</title>
+  <link rel="stylesheet" href="portal.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+    <nav class="sidebar-nav">
+      <a href="dashboard_cliente.html" class="sidebar-link">Inicio</a>
+      <a href="calendario.html" class="sidebar-link">Reservar clase</a>
+      <a href="mis-clases.html" class="sidebar-link">Mis clases</a>
+      <a href="bono.html" class="sidebar-link active">Mi bono</a>
+      <a href="notificaciones.html" class="sidebar-link">Notificaciones</a>
+      <a href="perfil.html" class="sidebar-link">Mi perfil</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <header class="topbar"><span class="topbar-title">Mi bono</span></header>
+    <div class="content">
+      <div class="card" id="bonoCard">Cargando bono...</div>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    async function init() {
+      const session = await getSession();
+      if (!session) { window.location.href = 'login.html'; return; }
+      const bono = await getBonoActivo(session.user.id);
+      const el = document.getElementById('bonoCard');
+      if (!bono) {
+        el.innerHTML = '<div class="empty-state"><p>No tienes bono activo. Contacta con el centro.</p></div>';
+        return;
+      }
+      const total = bono.sesiones_totales ?? 'Ilimitado';
+      const usadas = bono.sesiones_usadas ?? 0;
+      const restantes = bono.sesiones_totales == null ? 'Ilimitado' : (bono.sesiones_totales - bono.sesiones_usadas);
+      el.innerHTML = `
+        <div class="card-label">Bono actual</div>
+        <h2 style="font-family:var(--font-display);font-size:2rem;font-weight:300">${bono.tipo_bono?.nombre || 'Bono activo'}</h2>
+        <p style="margin-top:.5rem;color:var(--color-muted)">Vigencia: ${bono.fecha_inicio} → ${bono.fecha_fin}</p>
+        <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
+          <span class="badge badge-accent">Totales: ${total}</span>
+          <span class="badge badge-warning">Usadas: ${usadas}</span>
+          <span class="badge badge-success">Restantes: ${restantes}</span>
+        </div>`;
+    }
+    init().catch((e) => {
+      document.getElementById('bonoCard').innerHTML = `<p style="color:var(--color-danger)">Error: ${e.message}</p>`;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Staff — NŌVA Pilates Studio</title>
+  <link rel="stylesheet" href="portal.css" />
+</head>
+<body>
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="userAvatar">S</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="userName">Cargando...</div>
+        <div class="sidebar-user-role" id="userRole">Staff</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Gestión</div>
+      <a href="#clases" class="sidebar-link active js-tab" data-tab="clases">Clases</a>
+      <a href="#bonos" class="sidebar-link js-tab" data-tab="bonos">Bonos</a>
+      <a href="#finanzas" class="sidebar-link js-tab" data-tab="finanzas">Finanzas</a>
+      <a href="#usuarios" class="sidebar-link js-tab" data-tab="usuarios">Usuarios</a>
+    </nav>
+    <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar"><span class="topbar-title" id="pageTitle">Panel Staff</span></header>
+    <div class="content">
+      <section class="panel-tab" id="tab-clases">
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label">Nueva clase</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
+            <select class="form-input" id="disciplinaSelect"></select>
+            <select class="form-input" id="salaSelect"></select>
+            <input class="form-input" id="tituloClase" placeholder="Titulo (opcional)" />
+            <input class="form-input" id="fechaHoraClase" type="datetime-local" />
+            <input class="form-input" id="aforoClase" type="number" min="1" value="12" />
+            <button class="btn btn-primary" id="crearClaseBtn">Crear clase</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Próximas clases</div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Clase</th><th>Fecha</th><th>Aforo</th></tr></thead><tbody id="rowsClases"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel-tab" id="tab-bonos" style="display:none;">
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label">Asignar bono manual</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
+            <select class="form-input" id="clienteSelect"></select>
+            <select class="form-input" id="tipoBonoSelect"></select>
+            <input class="form-input" id="fechaFinBono" type="date" />
+            <button class="btn btn-primary" id="asignarBonoBtn">Asignar bono</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Bonos activos</div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Cliente</th><th>Bono</th><th>Uso</th><th>Vence</th></tr></thead><tbody id="rowsBonos"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel-tab" id="tab-finanzas" style="display:none;">
+        <div class="card">
+          <div class="card-label">Transacciones recientes</div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Cliente</th><th>Importe</th><th>Método</th><th>Fecha</th></tr></thead><tbody id="rowsFinanzas"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel-tab" id="tab-usuarios" style="display:none;">
+        <div class="card">
+          <div class="card-label">Usuarios del centro</div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th></tr></thead><tbody id="rowsUsuarios"></tbody></table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    const sidebarEl = document.getElementById('sidebar');
+    document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+      if (!sidebarEl.contains(e.target) && !e.target.closest('#sidebarToggle')) sidebarEl.classList.remove('open');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut());
+
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      c.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+
+    function setTab(tab) {
+      document.querySelectorAll('.js-tab').forEach((a) => a.classList.toggle('active', a.dataset.tab === tab));
+      document.querySelectorAll('.panel-tab').forEach((p) => p.style.display = 'none');
+      document.getElementById(`tab-${tab}`).style.display = 'block';
+      document.getElementById('pageTitle').textContent = `Panel Staff · ${tab}`;
+    }
+    document.querySelectorAll('.js-tab').forEach((a) => a.addEventListener('click', (e) => {
+      e.preventDefault();
+      setTab(a.dataset.tab);
+    }));
+
+    let staffProfile = null;
+
+    async function initAuth() {
+      const session = await getSession();
+      if (!session) { window.location.href = 'login.html'; return false; }
+      const profile = await getUserProfile(session.user.id);
+      if (!['admin', 'empleado'].includes(profile.rol)) {
+        window.location.href = 'dashboard_cliente.html';
+        return false;
+      }
+      staffProfile = profile;
+      document.getElementById('userName').textContent = profile.nombre || profile.email;
+      document.getElementById('userAvatar').textContent = (profile.nombre?.[0] || 'S').toUpperCase();
+      document.getElementById('userRole').textContent = profile.rol;
+      return true;
+    }
+
+    async function loadCatalogs() {
+      const [{ data: d }, { data: s }, { data: c }, { data: tb }] = await Promise.all([
+        novaSupabase.from('disciplinas').select('id,nombre').eq('activa', true).order('orden'),
+        novaSupabase.from('salas').select('id,nombre').eq('activa', true).order('nombre'),
+        novaSupabase.from('perfiles').select('id,nombre,email,rol,activo').order('nombre'),
+        novaSupabase.from('tipos_bono').select('id,nombre,sesiones,duracion_dias').eq('activo', true).order('orden')
+      ]);
+      const ds = document.getElementById('disciplinaSelect');
+      ds.innerHTML = (d || []).map(x => `<option value="${x.id}">${x.nombre}</option>`).join('');
+      const ss = document.getElementById('salaSelect');
+      ss.innerHTML = (s || []).map(x => `<option value="${x.id}">${x.nombre}</option>`).join('');
+      const cs = document.getElementById('clienteSelect');
+      cs.innerHTML = (c || []).filter(x => x.rol === 'cliente').map(x => `<option value="${x.id}">${x.nombre || x.email}</option>`).join('');
+      const tbs = document.getElementById('tipoBonoSelect');
+      tbs.innerHTML = (tb || []).map(x => `<option value="${x.id}" data-sesiones="${x.sesiones ?? ''}" data-dias="${x.duracion_dias}">${x.nombre}</option>`).join('');
+
+      const rowsU = document.getElementById('rowsUsuarios');
+      rowsU.innerHTML = (c || []).map(x => `<tr><td>${x.nombre || '-'}</td><td>${x.email}</td><td>${x.rol}</td><td>${x.activo ? 'Sí' : 'No'}</td></tr>`).join('') || '<tr><td colspan="4">Sin usuarios</td></tr>';
+    }
+
+    async function loadClases() {
+      const { data } = await novaSupabase
+        .from('clases')
+        .select('titulo,fecha_hora,aforo_max,disciplina:disciplina_id(nombre)')
+        .gte('fecha_hora', new Date().toISOString())
+        .eq('cancelada', false)
+        .order('fecha_hora', { ascending: true })
+        .limit(40);
+      const rows = document.getElementById('rowsClases');
+      rows.innerHTML = (data || []).map(c => `<tr><td>${c.titulo || c.disciplina?.nombre || 'Clase'}</td><td>${new Date(c.fecha_hora).toLocaleString('es-ES')}</td><td>${c.aforo_max}</td></tr>`).join('') || '<tr><td colspan="3">Sin clases</td></tr>';
+    }
+
+    async function loadBonos() {
+      const { data } = await novaSupabase
+        .from('bonos_activos')
+        .select('sesiones_totales,sesiones_usadas,fecha_fin,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,email)')
+        .eq('activo', true)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      const rows = document.getElementById('rowsBonos');
+      rows.innerHTML = (data || []).map(b => `<tr><td>${b.perfil?.nombre || b.perfil?.email || '-'}</td><td>${b.tipo_bono?.nombre || '-'}</td><td>${b.sesiones_usadas}/${b.sesiones_totales ?? '∞'}</td><td>${b.fecha_fin}</td></tr>`).join('') || '<tr><td colspan="4">Sin bonos</td></tr>';
+    }
+
+    async function loadFinanzas() {
+      const { data } = await novaSupabase
+        .from('transacciones')
+        .select('importe,metodo_pago,created_at,perfil:perfil_id(nombre,email)')
+        .order('created_at', { ascending: false })
+        .limit(80);
+      const rows = document.getElementById('rowsFinanzas');
+      rows.innerHTML = (data || []).map(t => `<tr><td>${t.perfil?.nombre || t.perfil?.email || '-'}</td><td>${t.importe} €</td><td>${t.metodo_pago || '-'}</td><td>${new Date(t.created_at).toLocaleString('es-ES')}</td></tr>`).join('') || '<tr><td colspan="4">Sin transacciones</td></tr>';
+    }
+
+    document.getElementById('crearClaseBtn').addEventListener('click', async () => {
+      try {
+        const payload = {
+          disciplina_id: document.getElementById('disciplinaSelect').value,
+          sala_id: document.getElementById('salaSelect').value,
+          instructora_id: staffProfile.id,
+          titulo: document.getElementById('tituloClase').value.trim() || null,
+          fecha_hora: new Date(document.getElementById('fechaHoraClase').value).toISOString(),
+          aforo_max: Number(document.getElementById('aforoClase').value || 12),
+          created_by: staffProfile.id
+        };
+        const { error } = await novaSupabase.from('clases').insert(payload);
+        if (error) throw error;
+        toast('Clase creada', 'success');
+        loadClases();
+      } catch (e) { toast(e.message || 'No se pudo crear la clase', 'error'); }
+    });
+
+    document.getElementById('asignarBonoBtn').addEventListener('click', async () => {
+      try {
+        const clienteId = document.getElementById('clienteSelect').value;
+        const tipoSel = document.getElementById('tipoBonoSelect');
+        const option = tipoSel.selectedOptions[0];
+        const tipoId = tipoSel.value;
+        const sesiones = option.getAttribute('data-sesiones');
+        const dias = Number(option.getAttribute('data-dias') || 30);
+        const fechaFinInput = document.getElementById('fechaFinBono').value;
+        const fechaFin = fechaFinInput || new Date(Date.now() + dias * 86400000).toISOString().slice(0, 10);
+
+        const { error: disableErr } = await novaSupabase.from('bonos_activos').update({ activo: false }).eq('perfil_id', clienteId).eq('activo', true);
+        if (disableErr) throw disableErr;
+
+        const { error } = await novaSupabase.from('bonos_activos').insert({
+          perfil_id: clienteId,
+          tipo_bono_id: tipoId,
+          sesiones_totales: sesiones ? Number(sesiones) : null,
+          sesiones_usadas: 0,
+          fecha_inicio: new Date().toISOString().slice(0, 10),
+          fecha_fin: fechaFin,
+          activo: true,
+          asignado_por: staffProfile.id
+        });
+        if (error) throw error;
+        toast('Bono asignado', 'success');
+        loadBonos();
+      } catch (e) { toast(e.message || 'No se pudo asignar bono', 'error'); }
+    });
+
+    async function bootstrap() {
+      const ok = await initAuth();
+      if (!ok) return;
+      await loadCatalogs();
+      await Promise.all([loadClases(), loadBonos(), loadFinanzas()]);
+      setTab('clases');
+    }
+    bootstrap().catch((e) => toast(e.message || 'Error de carga', 'error'));
+  </script>
+</body>
+</html>

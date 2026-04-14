@@ -50,7 +50,7 @@ async function getBonoActivo(perfilId) {
   const hoy = new Date().toISOString().split('T')[0];
   const { data, error } = await novaSupabase
     .from('bonos_activos')
-    .select('id, sesiones_totales, sesiones_usadas, fecha_inicio, fecha_fin, activo')
+    .select('id, sesiones_totales, sesiones_usadas, fecha_inicio, fecha_fin, activo, tipo_bono:tipo_bono_id(nombre, ilimitado)')
     .eq('perfil_id', perfilId)
     .eq('activo', true)
     .gte('fecha_fin', hoy)

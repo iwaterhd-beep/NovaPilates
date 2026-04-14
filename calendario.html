@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reservar clase — NŌVA Pilates Studio</title>
+  <link rel="stylesheet" href="portal.css" />
+</head>
+<body>
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="userAvatar">C</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="userName">Cargando...</div>
+        <div class="sidebar-user-role">Cliente</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Mi espacio</div>
+      <a href="dashboard_cliente.html" class="sidebar-link">Inicio</a>
+      <a href="calendario.html" class="sidebar-link active">Reservar clase</a>
+      <a href="mis-clases.html" class="sidebar-link">Mis clases</a>
+      <a href="bono.html" class="sidebar-link">Mi bono</a>
+      <a href="notificaciones.html" class="sidebar-link">Notificaciones</a>
+      <div class="sidebar-section-label">Cuenta</div>
+      <a href="perfil.html" class="sidebar-link">Mi perfil</a>
+    </nav>
+    <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar"><span class="topbar-title">Reservar clase</span></header>
+    <div class="content">
+      <div class="page-header">
+        <h1 class="page-title">Calendario de clases</h1>
+        <p class="page-subtitle">Reserva y cancela tus clases disponibles.</p>
+      </div>
+      <div id="clasesList" class="card">Cargando clases...</div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const DIAS  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    const sidebarEl = document.getElementById('sidebar');
+    document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut());
+    document.addEventListener('click', (e) => {
+      if (!sidebarEl.contains(e.target) && !e.target.closest('#sidebarToggle')) sidebarEl.classList.remove('open');
+    });
+
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      c.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+
+    function fmt(iso) {
+      const d = new Date(iso);
+      return `${DIAS[d.getDay()]} ${d.getDate()} ${MESES[d.getMonth()]} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    async function loadPage() {
+      const session = await getSession();
+      if (!session) { window.location.href = 'login.html'; return; }
+      const perfil = await getUserProfile(session.user.id);
+      document.getElementById('userName').textContent = perfil.nombre || perfil.email;
+      document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
+
+      const nowIso = new Date().toISOString();
+      const { data: clases, error: errClases } = await novaSupabase
+        .from('clases')
+        .select('id, titulo, fecha_hora, duracion_min, disciplina:disciplina_id(nombre,color_hex), sala:sala_id(nombre)')
+        .eq('cancelada', false)
+        .gte('fecha_hora', nowIso)
+        .order('fecha_hora', { ascending: true })
+        .limit(25);
+      if (errClases) throw errClases;
+
+      const { data: reservas, error: errRes } = await novaSupabase
+        .from('reservas')
+        .select('id, clase_id, estado')
+        .eq('perfil_id', perfil.id)
+        .in('estado', ['confirmada', 'asistida']);
+      if (errRes) throw errRes;
+
+      const reservasMap = new Map((reservas || []).map(r => [r.clase_id, r]));
+      const wrap = document.getElementById('clasesList');
+      wrap.innerHTML = '';
+      if (!clases?.length) {
+        wrap.innerHTML = '<div class="empty-state"><p>No hay clases próximas todavía.</p></div>';
+        return;
+      }
+
+      clases.forEach((c) => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+        row.style.gap = '1rem';
+        row.style.padding = '0.9rem 0';
+        row.style.borderBottom = '0.5px solid var(--color-border)';
+        const reserva = reservasMap.get(c.id);
+        row.innerHTML = `
+          <div>
+            <div style="font-size:0.92rem;">${c.titulo || c.disciplina?.nombre || 'Clase'}</div>
+            <div style="font-size:0.75rem;color:var(--color-muted)">${fmt(c.fecha_hora)} · ${c.sala?.nombre || 'Sala'} · ${c.duracion_min} min</div>
+          </div>
+          <div></div>
+        `;
+        const actions = row.lastElementChild;
+        if (reserva?.estado === 'confirmada') {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-danger btn-sm';
+          btn.textContent = 'Cancelar';
+          btn.onclick = async () => {
+            try {
+              await cancelarReservaSegura(reserva.id);
+              toast('Reserva cancelada', 'success');
+              loadPage();
+            } catch (e) { toast(e.message || 'No se pudo cancelar', 'error'); }
+          };
+          actions.appendChild(btn);
+        } else {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-primary btn-sm';
+          btn.textContent = 'Reservar';
+          btn.onclick = async () => {
+            try {
+              await crearReservaSegura(c.id);
+              toast('Clase reservada', 'success');
+              loadPage();
+            } catch (e) { toast(e.message || 'No se pudo reservar', 'error'); }
+          };
+          actions.appendChild(btn);
+        }
+        wrap.appendChild(row);
+      });
+    }
+
+    loadPage().catch((e) => {
+      document.getElementById('clasesList').innerHTML = `<p style="color:var(--color-danger)">Error: ${e.message}</p>`;
+    });
+  </script>
+</body>
+</html>

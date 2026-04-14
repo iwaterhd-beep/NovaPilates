@@ -124,7 +124,7 @@
         if (error) throw error;
         const { data: profile } = await novaSupabase.from('perfiles').select('rol').eq('id', data.user.id).single();
         const rol = profile?.rol || 'cliente';
-        const redirects = { cliente: 'dashboard_cliente.html', empleado: 'dashboard_cliente.html', admin: 'dashboard_cliente.html' };
+        const redirects = { cliente: 'dashboard_cliente.html', empleado: 'dashboard_staff.html', admin: 'dashboard_staff.html' };
         window.location.href = redirects[rol] || 'dashboard_cliente.html';
       } catch (err) {
         const m = err?.message === 'Invalid login credentials' ? 'Correo o contrasena incorrectos.' : 'Error al iniciar sesion.';

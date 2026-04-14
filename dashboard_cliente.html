@@ -150,7 +150,7 @@
 
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <a href="../index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a>
+    <a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a>
   </div>
 
   <div class="sidebar-user">
@@ -163,7 +163,7 @@
 
   <nav class="sidebar-nav">
     <div class="sidebar-section-label">Mi espacio</div>
-    <a href="dashboard.html" class="sidebar-link active">
+    <a href="dashboard_cliente.html" class="sidebar-link active">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>
       Inicio
     </a>
@@ -478,9 +478,13 @@ async function init() {
 
   try {
     const session = await getSession();
-    if (!session) { window.location.href = '../login.html'; return; }
+    if (!session) { window.location.href = 'login.html'; return; }
 
     perfil = await getUserProfile(session.user.id);
+    if (perfil?.rol && perfil.rol !== 'cliente') {
+      window.location.href = 'dashboard_staff.html';
+      return;
+    }
     bonoActivo = await getBonoActivo(perfil.id);
     // Próximas reservas
     const { data: res } = await novaSupabase
@@ -557,7 +561,7 @@ function renderBonoSection(bono) {
   if (!bono) return;
   const ilimitado = bono.tipo_bono?.ilimitado;
   const restantes = ilimitado ? 999 : (bono.sesiones_totales - bono.sesiones_usadas);
-  document.getElementById('bonoNombre').textContent = bono.nombre || 'Bono activo';
+  document.getElementById('bonoNombre').textContent = bono.tipo_bono?.nombre || bono.nombre || 'Bono activo';
   document.getElementById('bonoMeta').textContent = `${bono.sesiones_usadas} sesiones utilizadas`;
   document.getElementById('bonoEstado').style.display = 'inline-block';
   document.getElementById('bonoVence').textContent = `Vence: ${bono.fecha_fin}`;
@@ -638,7 +642,7 @@ document.getElementById('cancelModalSi').addEventListener('click', async () => {
   document.getElementById('cancelModal').classList.remove('open');
   try {
     const session = await getSession();
-    if (session) await cancelarReserva(cancelReservaId, session.user.id);
+    if (session) await cancelarReservaSegura(cancelReservaId);
     toast('Reserva cancelada. La sesión ha vuelto a tu bono.', 'success');
     setTimeout(() => location.reload(), 1500);
   } catch(e) {
@@ -659,6 +663,13 @@ document.addEventListener('click', (e) => {
 
 // ── Logout ─────────────────────────────────────────────────
 document.getElementById('logoutBtn').addEventListener('click', () => signOut());
+
+function renderStats(stats) {
+  document.getElementById('statProxima').textContent = stats.proxima || '—';
+  document.getElementById('statProximaFecha').textContent = stats.proximaFecha || 'Sin reservas próximas';
+  document.getElementById('statMes').textContent = String(stats.mes ?? 0);
+  document.getElementById('statTotal').textContent = String(stats.total ?? 0);
+}
 
 // ── Arrancar ───────────────────────────────────────────────
 init();
