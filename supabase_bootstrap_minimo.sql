@@ -120,6 +120,18 @@ CREATE TABLE IF NOT EXISTS public.transacciones (
   created_at     TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS public.ajustes_centro (
+  id                       INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  margen_reserva_dias      INTEGER NOT NULL DEFAULT 0 CHECK (margen_reserva_dias >= 0),
+  margen_cancelacion_dias  INTEGER NOT NULL DEFAULT 0 CHECK (margen_cancelacion_dias >= 0),
+  updated_by               UUID REFERENCES public.perfiles(id),
+  updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO public.ajustes_centro (id, margen_reserva_dias, margen_cancelacion_dias)
+VALUES (1, 0, 0)
+ON CONFLICT (id) DO NOTHING;
+
 INSERT INTO public.tipos_bono (nombre, sesiones, ilimitado, periodicidad, duracion_dias, precio, orden)
 SELECT 'Bono 8 clases', 8, FALSE, 'mensual', 30, 110.00, 2
 WHERE NOT EXISTS (SELECT 1 FROM public.tipos_bono WHERE nombre = 'Bono 8 clases');

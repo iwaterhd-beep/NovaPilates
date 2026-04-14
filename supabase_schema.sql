@@ -247,6 +247,22 @@ CREATE TABLE public.transacciones (
 CREATE INDEX idx_transacciones_perfil ON public.transacciones(perfil_id);
 CREATE INDEX idx_transacciones_fecha ON public.transacciones(created_at);
 
+-- ══════════════════════════════════════════════
+--  TABLA: ajustes_centro
+--  Configuración global editable por admin
+-- ══════════════════════════════════════════════
+CREATE TABLE public.ajustes_centro (
+  id                       INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  margen_reserva_dias      INTEGER NOT NULL DEFAULT 0 CHECK (margen_reserva_dias >= 0),
+  margen_cancelacion_dias  INTEGER NOT NULL DEFAULT 0 CHECK (margen_cancelacion_dias >= 0),
+  updated_by               UUID REFERENCES public.perfiles(id),
+  updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO public.ajustes_centro (id, margen_reserva_dias, margen_cancelacion_dias)
+VALUES (1, 0, 0)
+ON CONFLICT (id) DO NOTHING;
+
 
 -- ══════════════════════════════════════════════
 --  FUNCIONES RPC (lógica de negocio en DB)
@@ -317,6 +333,7 @@ ALTER TABLE public.transacciones    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tipos_bono       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.disciplinas      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.salas            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ajustes_centro   ENABLE ROW LEVEL SECURITY;
 
 -- Helper: obtener rol del usuario autenticado
 CREATE OR REPLACE FUNCTION public.mi_rol()
@@ -375,6 +392,12 @@ CREATE POLICY "Admin ve todas las transacciones" ON public.transacciones
 CREATE POLICY "Empleado registra transacciones" ON public.transacciones
   FOR INSERT WITH CHECK (mi_rol() IN ('empleado', 'admin'));
 
+-- ── ajustes_centro ──
+CREATE POLICY "Usuarios autenticados leen ajustes" ON public.ajustes_centro
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Admin actualiza ajustes" ON public.ajustes_centro
+  FOR UPDATE USING (mi_rol() = 'admin');
+
 
 -- ══════════════════════════════════════════════
 --  VISTA: calendario_semanal
@@ -413,6 +436,7 @@ DECLARE
   v_bono RECORD;
   v_reserva_id UUID;
   v_ocupacion INTEGER;
+  v_margen_reserva_dias INTEGER := 0;
 BEGIN
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'Debes iniciar sesión.';
@@ -432,6 +456,16 @@ BEGIN
   END IF;
   IF v_clase.fecha_hora <= NOW() THEN
     RAISE EXCEPTION 'No se puede reservar una clase pasada.';
+  END IF;
+
+  SELECT margen_reserva_dias
+  INTO v_margen_reserva_dias
+  FROM public.ajustes_centro
+  WHERE id = 1;
+
+  IF COALESCE(v_margen_reserva_dias, 0) > 0
+    AND v_clase.fecha_hora < NOW() + make_interval(days => v_margen_reserva_dias) THEN
+    RAISE EXCEPTION 'Debes reservar con al menos % días de antelación.', v_margen_reserva_dias;
   END IF;
 
   SELECT COUNT(*)::INTEGER
@@ -488,7 +522,7 @@ RETURNS VOID AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_reserva RECORD;
-  v_horas_restantes NUMERIC;
+  v_margen_cancelacion_dias INTEGER := 0;
 BEGIN
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'Debes iniciar sesión.';
@@ -510,9 +544,14 @@ BEGIN
     RETURN;
   END IF;
 
-  v_horas_restantes := EXTRACT(EPOCH FROM (v_reserva.fecha_hora - NOW())) / 3600.0;
-  IF v_horas_restantes < 2 THEN
-    RAISE EXCEPTION 'No se puede cancelar con menos de 2 horas de antelación.';
+  SELECT margen_cancelacion_dias
+  INTO v_margen_cancelacion_dias
+  FROM public.ajustes_centro
+  WHERE id = 1;
+
+  IF COALESCE(v_margen_cancelacion_dias, 0) > 0
+    AND v_reserva.fecha_hora < NOW() + make_interval(days => v_margen_cancelacion_dias) THEN
+    RAISE EXCEPTION 'No se puede cancelar con menos de % días de antelación.', v_margen_cancelacion_dias;
   END IF;
 
   UPDATE public.reservas
