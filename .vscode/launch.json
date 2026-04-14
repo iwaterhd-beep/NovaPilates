@@ -2,6 +2,18 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "node-terminal",
+      "request": "launch",
+      "name": "Abrir localhost estable (recomendado)",
+      "command": "npx --yes serve . -l 8080",
+      "cwd": "${workspaceFolder}",
+      "serverReadyAction": {
+        "pattern": "http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s",
+        "action": "openExternally"
+      }
+    },
+    {
       "type": "pwa-chrome",
       "request": "launch",
       "name": "Iniciar Chrome para localhost",
