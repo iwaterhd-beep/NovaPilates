@@ -8,11 +8,14 @@ RETURNS TEXT AS $$
   SELECT rol::TEXT FROM public.perfiles WHERE id = auth.uid();
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
+DROP FUNCTION IF EXISTS public.admin_crear_usuario(TEXT, TEXT, TEXT, rol_usuario);
+DROP FUNCTION IF EXISTS public.admin_crear_usuario(TEXT, TEXT, TEXT, TEXT);
+
 CREATE OR REPLACE FUNCTION public.admin_crear_usuario(
   p_email TEXT,
   p_password TEXT,
   p_nombre TEXT,
-  p_rol rol_usuario DEFAULT 'cliente'
+  p_rol TEXT DEFAULT 'cliente'
 )
 RETURNS UUID
 LANGUAGE plpgsql
@@ -22,6 +25,7 @@ AS $$
 DECLARE
   v_new_user_id UUID := gen_random_uuid();
   v_now TIMESTAMPTZ := NOW();
+  v_rol rol_usuario;
 BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Debes iniciar sesión.';
@@ -40,6 +44,15 @@ BEGIN
   IF p_nombre IS NULL OR btrim(p_nombre) = '' THEN
     RAISE EXCEPTION 'El nombre es obligatorio.';
   END IF;
+
+  IF p_rol IS NULL OR btrim(p_rol) = '' THEN
+    p_rol := 'cliente';
+  END IF;
+
+  IF p_rol NOT IN ('cliente', 'empleado', 'admin') THEN
+    RAISE EXCEPTION 'Rol no válido. Usa cliente, empleado o admin.';
+  END IF;
+  v_rol := p_rol::rol_usuario;
 
   IF EXISTS (SELECT 1 FROM auth.users WHERE email = lower(btrim(p_email))) THEN
     RAISE EXCEPTION 'Ya existe un usuario con ese email.';
@@ -66,7 +79,7 @@ BEGIN
     crypt(p_password, gen_salt('bf')),
     v_now,
     jsonb_build_object('provider', 'email', 'providers', ARRAY['email']),
-    jsonb_build_object('nombre', p_nombre, 'rol', p_rol::text),
+    jsonb_build_object('nombre', p_nombre, 'rol', v_rol::text),
     v_now,
     v_now
   );
@@ -90,7 +103,7 @@ BEGIN
   );
 
   INSERT INTO public.perfiles (id, email, nombre, rol, activo, created_at, updated_at)
-  VALUES (v_new_user_id, lower(btrim(p_email)), p_nombre, p_rol, TRUE, v_now, v_now)
+  VALUES (v_new_user_id, lower(btrim(p_email)), p_nombre, v_rol, TRUE, v_now, v_now)
   ON CONFLICT (id) DO UPDATE
   SET email = EXCLUDED.email,
       nombre = EXCLUDED.nombre,
@@ -102,5 +115,5 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.admin_crear_usuario(TEXT, TEXT, TEXT, rol_usuario) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_crear_usuario(TEXT, TEXT, TEXT, rol_usuario) TO authenticated;
+REVOKE ALL ON FUNCTION public.admin_crear_usuario(TEXT, TEXT, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_crear_usuario(TEXT, TEXT, TEXT, TEXT) TO authenticated;
