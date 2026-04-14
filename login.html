@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Acceder — NŌVA Pilates Studio</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
   <style>
     body { min-height: 100svh; display: flex; flex-direction: column; }
 
@@ -309,7 +309,7 @@
 
 <!-- Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
+<script src="supabase.js"></script>
 <script>
   // ── Tab switching ──
   const tabs = document.querySelectorAll('.form-tab');
@@ -377,11 +377,11 @@
 
       const rol = profile?.rol || 'cliente';
       const redirects = {
-        cliente:  'cliente/dashboard.html',
-        empleado: 'empleado/dashboard.html',
-        admin:    'admin/dashboard.html',
+        cliente:  'dashboard_cliente.html',
+        empleado: 'dashboard_cliente.html',
+        admin:    'dashboard_cliente.html',
       };
-      window.location.href = redirects[rol] || 'cliente/dashboard.html';
+      window.location.href = redirects[rol] || 'dashboard_cliente.html';
 
     } catch (err) {
       const msgs = {
@@ -431,8 +431,8 @@
         .eq('id', session.user.id)
         .single();
       const rol = profile?.rol || 'cliente';
-      const redirects = { cliente: 'cliente/dashboard.html', empleado: 'empleado/dashboard.html', admin: 'admin/dashboard.html' };
-      window.location.href = redirects[rol] || 'cliente/dashboard.html';
+      const redirects = { cliente: 'dashboard_cliente.html', empleado: 'dashboard_cliente.html', admin: 'dashboard_cliente.html' };
+      window.location.href = redirects[rol] || 'dashboard_cliente.html';
     }
   })();
 </script>
