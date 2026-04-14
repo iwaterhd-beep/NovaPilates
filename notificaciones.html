@@ -7,56 +7,171 @@
   <link rel="stylesheet" href="portal.css" />
 </head>
 <body>
-  <aside class="sidebar">
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="userAvatar">C</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="userName">Cargando...</div>
+        <div class="sidebar-user-role">Cliente</div>
+      </div>
+    </div>
     <nav class="sidebar-nav">
-      <a href="dashboard_cliente.html" class="sidebar-link">Inicio</a>
-      <a href="calendario.html" class="sidebar-link">Reservar clase</a>
-      <a href="mis-clases.html" class="sidebar-link">Mis clases</a>
-      <a href="bono.html" class="sidebar-link">Mi bono</a>
-      <a href="notificaciones.html" class="sidebar-link active">Notificaciones</a>
-      <a href="perfil.html" class="sidebar-link">Mi perfil</a>
+      <div class="sidebar-section-label">Mi espacio</div>
+      <a href="dashboard_cliente.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>Inicio</a>
+      <a href="calendario.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Reservar clase</a>
+      <a href="mis-clases.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Mis clases</a>
+      <a href="bono.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Mi bono</a>
+      <a href="notificaciones.html" class="sidebar-link active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
+      <div class="sidebar-section-label">Cuenta</div>
+      <a href="perfil.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Mi perfil</a>
     </nav>
+    <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
   </aside>
   <main class="main">
     <header class="topbar"><span class="topbar-title">Notificaciones</span></header>
     <div class="content">
+      <div class="page-header">
+        <h1 class="page-title">Centro de notificaciones</h1>
+        <p class="page-subtitle">Mantente al día con cambios de horario, recordatorios y avisos del estudio.</p>
+      </div>
+      <div class="card" style="margin-bottom:1rem;">
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm js-filter" data-filter="all">Todas</button>
+            <button class="btn btn-outline btn-sm js-filter" data-filter="unread">No leídas</button>
+            <button class="btn btn-outline btn-sm js-filter" data-filter="own">Mías</button>
+            <button class="btn btn-outline btn-sm js-filter" data-filter="global">Generales</button>
+          </div>
+          <button class="btn btn-ghost" id="markAllBtn">Marcar mías como leídas</button>
+        </div>
+      </div>
       <div id="list" class="card">Cargando...</div>
     </div>
   </main>
+  <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>
   <script>
+    const state = { perfilId: null, items: [], filter: 'all' };
+    const sidebarEl = document.getElementById('sidebar');
+    document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+      if (!sidebarEl.contains(e.target) && !e.target.closest('#sidebarToggle')) sidebarEl.classList.remove('open');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut());
+
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      c.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+
+    function filteredItems() {
+      if (state.filter === 'unread') return state.items.filter(n => !n.leida);
+      if (state.filter === 'own') return state.items.filter(n => n.perfil_id === state.perfilId);
+      if (state.filter === 'global') return state.items.filter(n => n.perfil_id == null);
+      return state.items;
+    }
+
+    async function loadNotifs() {
+      const { data, error } = await novaSupabase
+        .from('notificaciones')
+        .select('*')
+        .or(`perfil_id.eq.${state.perfilId},perfil_id.is.null`)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      state.items = data || [];
+      renderList();
+    }
+
+    function renderList() {
+      const el = document.getElementById('list');
+      const data = filteredItems();
+      el.innerHTML = '';
+      if (!data.length) {
+        el.innerHTML = '<div class="empty-state"><p>Sin notificaciones para este filtro.</p></div>';
+        return;
+      }
+      data.forEach((n) => {
+        const isOwn = n.perfil_id === state.perfilId;
+        const item = document.createElement('article');
+        item.className = 'day-detail-card';
+        item.style.marginBottom = '.6rem';
+        item.innerHTML = `
+          <div>
+            <h3 style="font-size:1.05rem;">${n.titulo}</h3>
+            <p style="margin-top:.2rem;font-size:.82rem;color:var(--color-cream-dim)">${n.mensaje}</p>
+            <p style="font-size:.7rem;color:var(--color-muted);margin-top:.35rem;">${new Date(n.created_at).toLocaleString('es-ES')} · ${isOwn ? 'Personal' : 'General'}</p>
+          </div>
+          <div class="day-detail-actions">
+            ${n.leida ? '<span class="badge badge-neutral">Leída</span>' : '<span class="badge badge-accent">Nueva</span>'}
+            ${(!n.leida && isOwn) ? `<button class="btn btn-outline btn-sm js-read-one" data-id="${n.id}">Marcar leída</button>` : ''}
+          </div>`;
+        el.appendChild(item);
+      });
+    }
+
+    document.querySelectorAll('.js-filter').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.filter = btn.dataset.filter;
+        document.querySelectorAll('.js-filter').forEach((b) => b.classList.remove('btn-primary'));
+        btn.classList.add('btn-primary');
+        renderList();
+      });
+    });
+
+    document.addEventListener('click', async (e) => {
+      const b = e.target.closest('.js-read-one');
+      if (!b) return;
+      try {
+        const { error } = await novaSupabase
+          .from('notificaciones')
+          .update({ leida: true })
+          .eq('id', b.dataset.id)
+          .eq('perfil_id', state.perfilId);
+        if (error) throw error;
+        await loadNotifs();
+        toast('Notificación marcada como leída', 'success');
+      } catch (err) {
+        toast(err.message || 'No se pudo marcar', 'error');
+      }
+    });
+
+    document.getElementById('markAllBtn').addEventListener('click', async () => {
+      try {
+        const ids = state.items.filter(n => !n.leida && n.perfil_id === state.perfilId).map(n => n.id);
+        if (!ids.length) {
+          toast('No tienes notificaciones personales pendientes', 'info');
+          return;
+        }
+        const { error } = await novaSupabase
+          .from('notificaciones')
+          .update({ leida: true })
+          .in('id', ids)
+          .eq('perfil_id', state.perfilId);
+        if (error) throw error;
+        await loadNotifs();
+        toast('Notificaciones personales marcadas como leídas', 'success');
+      } catch (err) {
+        toast(err.message || 'No se pudo completar', 'error');
+      }
+    });
+
     async function init() {
       const session = await getSession();
       if (!session) { window.location.href = 'login.html'; return; }
       const perfil = await getUserProfile(session.user.id);
-      const { data, error } = await novaSupabase
-        .from('notificaciones')
-        .select('*')
-        .or(`perfil_id.eq.${perfil.id},perfil_id.is.null`)
-        .order('created_at', { ascending: false })
-        .limit(100);
-      if (error) throw error;
-      const el = document.getElementById('list');
-      el.innerHTML = '';
-      if (!data?.length) {
-        el.innerHTML = '<div class="empty-state"><p>Sin notificaciones.</p></div>';
-        return;
-      }
-      data.forEach((n) => {
-        const item = document.createElement('div');
-        item.style.padding = '1rem 0';
-        item.style.borderBottom = '0.5px solid var(--color-border)';
-        item.innerHTML = `
-          <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;">
-            <strong style="font-weight:400">${n.titulo}</strong>
-            ${n.leida ? '<span class="badge badge-neutral">Leída</span>' : '<span class="badge badge-accent">Nueva</span>'}
-          </div>
-          <p style="font-size:.82rem;color:var(--color-cream-dim);margin-top:.3rem;">${n.mensaje}</p>
-          <p style="font-size:.7rem;color:var(--color-muted);margin-top:.3rem;">${new Date(n.created_at).toLocaleString('es-ES')}</p>`;
-        el.appendChild(item);
-      });
+      state.perfilId = perfil.id;
+      document.getElementById('userName').textContent = perfil.nombre || perfil.email;
+      document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
+      document.querySelector('.js-filter[data-filter="all"]').classList.add('btn-primary');
+      await loadNotifs();
     }
     init().catch((e) => {
       document.getElementById('list').innerHTML = `<p style="color:var(--color-danger)">Error: ${e.message}</p>`;

@@ -7,66 +7,134 @@
   <link rel="stylesheet" href="portal.css" />
 </head>
 <body>
-  <aside class="sidebar">
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="userAvatar">C</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="userName">Cargando...</div>
+        <div class="sidebar-user-role">Cliente</div>
+      </div>
+    </div>
     <nav class="sidebar-nav">
-      <a href="dashboard_cliente.html" class="sidebar-link">Inicio</a>
-      <a href="calendario.html" class="sidebar-link">Reservar clase</a>
-      <a href="mis-clases.html" class="sidebar-link active">Mis clases</a>
-      <a href="bono.html" class="sidebar-link">Mi bono</a>
-      <a href="notificaciones.html" class="sidebar-link">Notificaciones</a>
-      <a href="perfil.html" class="sidebar-link">Mi perfil</a>
+      <div class="sidebar-section-label">Mi espacio</div>
+      <a href="dashboard_cliente.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>Inicio</a>
+      <a href="calendario.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Reservar clase</a>
+      <a href="mis-clases.html" class="sidebar-link active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Mis clases</a>
+      <a href="bono.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Mi bono</a>
+      <a href="notificaciones.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
+      <div class="sidebar-section-label">Cuenta</div>
+      <a href="perfil.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Mi perfil</a>
     </nav>
+    <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
   </aside>
   <main class="main">
     <header class="topbar"><span class="topbar-title">Mis clases</span></header>
     <div class="content">
+      <div class="page-header">
+        <h1 class="page-title">Tus clases</h1>
+        <p class="page-subtitle">Consulta las clases reservadas y tu historial con toda la información del centro.</p>
+      </div>
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-label">Próximas clases</div>
+        <div id="upcomingList">
+          <p class="calendar-empty">Cargando...</p>
+        </div>
+      </div>
       <div class="card">
-        <div class="card-label">Historial y próximas</div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Clase</th><th>Fecha</th><th>Estado</th></tr></thead>
-            <tbody id="rows"><tr><td colspan="3">Cargando...</td></tr></tbody>
-          </table>
+        <div class="card-label">Historial</div>
+        <div id="historyList">
+          <p class="calendar-empty">Cargando...</p>
         </div>
       </div>
     </div>
   </main>
+  <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>
   <script>
+    const sidebarEl = document.getElementById('sidebar');
+    document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+      if (!sidebarEl.contains(e.target) && !e.target.closest('#sidebarToggle')) sidebarEl.classList.remove('open');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut());
+
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      c.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+
+    function renderClaseCard(r) {
+      const c = r.clase || {};
+      const fecha = c.fecha_hora ? new Date(c.fecha_hora).toLocaleString('es-ES') : '-';
+      const estadoBadge = r.estado === 'confirmada'
+        ? '<span class="badge badge-success">Confirmada</span>'
+        : r.estado === 'asistida'
+          ? '<span class="badge badge-accent">Asistida</span>'
+          : r.estado === 'cancelada'
+            ? '<span class="badge badge-danger">Cancelada</span>'
+            : `<span class="badge badge-neutral">${r.estado || '-'}</span>`;
+      return `
+        <article class="day-detail-card">
+          <div>
+            <h3>${c.titulo || c.disciplina?.nombre || 'Clase'}</h3>
+            <p>${fecha}</p>
+            <p>Disciplina: ${c.disciplina?.nombre || '-'}</p>
+            <p>Monitora: ${c.instructora?.nombre || 'Por asignar'}</p>
+            <p>Sala: ${c.sala?.nombre || '-'}</p>
+            <p>Duración: ${c.duracion_min || '-'} min</p>
+          </div>
+          <div class="day-detail-actions">${estadoBadge}</div>
+        </article>
+      `;
+    }
+
     async function init() {
       const session = await getSession();
       if (!session) { window.location.href = 'login.html'; return; }
       const perfil = await getUserProfile(session.user.id);
+      document.getElementById('userName').textContent = perfil.nombre || perfil.email;
+      document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
+
       const { data, error } = await novaSupabase
         .from('reservas')
-        .select('estado, clase:clase_id(fecha_hora, titulo, disciplina:disciplina_id(nombre))')
+        .select('id,estado,fecha_reserva,clase:clase_id(fecha_hora,titulo,duracion_min,disciplina:disciplina_id(nombre),sala:sala_id(nombre),instructora:instructora_id(nombre))')
         .eq('perfil_id', perfil.id)
         .order('fecha_reserva', { ascending: false })
         .limit(50);
       if (error) throw error;
-      const tb = document.getElementById('rows');
-      tb.innerHTML = '';
+
+      const now = Date.now();
+      const upcoming = (data || []).filter(r => r.clase?.fecha_hora && new Date(r.clase.fecha_hora).getTime() >= now && r.estado !== 'cancelada');
+      const history = (data || []).filter(r => !r.clase?.fecha_hora || new Date(r.clase.fecha_hora).getTime() < now || r.estado === 'cancelada' || r.estado === 'asistida');
+
+      const upcomingEl = document.getElementById('upcomingList');
+      const historyEl = document.getElementById('historyList');
+
       if (!data?.length) {
-        tb.innerHTML = '<tr><td colspan="3">No tienes clases aún.</td></tr>';
+        upcomingEl.innerHTML = '<div class="empty-state"><p>Aún no tienes clases registradas.</p></div>';
+        historyEl.innerHTML = '<div class="empty-state"><p>Tu historial aparecerá aquí.</p></div>';
         return;
       }
-      data.forEach((r) => {
-        const tr = document.createElement('tr');
-        const estado = r.estado === 'confirmada' ? '<span class="badge badge-success">Confirmada</span>' :
-                      r.estado === 'cancelada' ? '<span class="badge badge-danger">Cancelada</span>' :
-                      r.estado === 'asistida' ? '<span class="badge badge-accent">Asistida</span>' :
-                      `<span class="badge badge-neutral">${r.estado}</span>`;
-        tr.innerHTML = `
-          <td>${r.clase?.titulo || r.clase?.disciplina?.nombre || 'Clase'}</td>
-          <td>${new Date(r.clase?.fecha_hora).toLocaleString('es-ES')}</td>
-          <td>${estado}</td>`;
-        tb.appendChild(tr);
-      });
+
+      upcomingEl.innerHTML = upcoming.length
+        ? upcoming.map(renderClaseCard).join('')
+        : '<div class="empty-state"><p>No tienes clases próximas.</p></div>';
+
+      historyEl.innerHTML = history.length
+        ? history.map(renderClaseCard).join('')
+        : '<div class="empty-state"><p>No hay historial por ahora.</p></div>';
     }
     init().catch((e) => {
-      document.getElementById('rows').innerHTML = `<tr><td colspan="3">Error: ${e.message}</td></tr>`;
+      document.getElementById('upcomingList').innerHTML = '<div class="empty-state"><p>No se pudieron cargar tus clases.</p></div>';
+      document.getElementById('historyList').innerHTML = `<div class="empty-state"><p>Error: ${e.message}</p></div>`;
+      toast(e.message || 'Error al cargar Mis clases', 'error');
     });
   </script>
 </body>

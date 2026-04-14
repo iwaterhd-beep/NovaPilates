@@ -7,41 +7,132 @@
   <link rel="stylesheet" href="portal.css" />
 </head>
 <body>
-  <aside class="sidebar">
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="userAvatar">C</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="userName">Cargando...</div>
+        <div class="sidebar-user-role">Cliente</div>
+      </div>
+    </div>
     <nav class="sidebar-nav">
-      <a href="dashboard_cliente.html" class="sidebar-link">Inicio</a>
-      <a href="calendario.html" class="sidebar-link">Reservar clase</a>
-      <a href="mis-clases.html" class="sidebar-link">Mis clases</a>
-      <a href="bono.html" class="sidebar-link">Mi bono</a>
-      <a href="notificaciones.html" class="sidebar-link">Notificaciones</a>
-      <a href="perfil.html" class="sidebar-link active">Mi perfil</a>
+      <div class="sidebar-section-label">Mi espacio</div>
+      <a href="dashboard_cliente.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>Inicio</a>
+      <a href="calendario.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Reservar clase</a>
+      <a href="mis-clases.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Mis clases</a>
+      <a href="bono.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Mi bono</a>
+      <a href="notificaciones.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
+      <div class="sidebar-section-label">Cuenta</div>
+      <a href="perfil.html" class="sidebar-link active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Mi perfil</a>
     </nav>
+    <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
   </aside>
   <main class="main">
     <header class="topbar"><span class="topbar-title">Mi perfil</span></header>
     <div class="content">
-      <div class="card">
+      <div class="page-header">
+        <h1 class="page-title">Tu perfil</h1>
+        <p class="page-subtitle">Mantén tus datos actualizados para una mejor gestión de tus clases.</p>
+      </div>
+      <div class="card" style="margin-bottom:1rem;">
         <div class="card-label">Datos personales</div>
-        <div id="perfilInfo">Cargando...</div>
+        <form id="perfilForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;">
+          <div>
+            <label class="form-label" for="nombre">Nombre</label>
+            <input class="form-input" id="nombre" type="text" />
+          </div>
+          <div>
+            <label class="form-label" for="apellidos">Apellidos</label>
+            <input class="form-input" id="apellidos" type="text" />
+          </div>
+          <div>
+            <label class="form-label" for="email">Email</label>
+            <input class="form-input" id="email" type="email" disabled />
+          </div>
+          <div>
+            <label class="form-label" for="telefono">Teléfono</label>
+            <input class="form-input" id="telefono" type="text" />
+          </div>
+          <div>
+            <label class="form-label" for="rol">Rol</label>
+            <input class="form-input" id="rol" type="text" disabled />
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn btn-primary" id="guardarPerfilBtn" type="submit">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-label">Información de cuenta</div>
+        <div id="perfilInfo" style="font-size:.82rem;color:var(--color-cream-dim);display:grid;gap:.4rem;">Cargando...</div>
       </div>
     </div>
   </main>
+  <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>
   <script>
+    let currentProfile = null;
+    const sidebarEl = document.getElementById('sidebar');
+    document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+      if (!sidebarEl.contains(e.target) && !e.target.closest('#sidebarToggle')) sidebarEl.classList.remove('open');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut());
+
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      c.appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+
+    function fillForm(p) {
+      document.getElementById('userName').textContent = p.nombre || p.email;
+      document.getElementById('userAvatar').textContent = (p.nombre?.[0] || 'C').toUpperCase();
+      document.getElementById('nombre').value = p.nombre || '';
+      document.getElementById('apellidos').value = p.apellidos || '';
+      document.getElementById('email').value = p.email || '';
+      document.getElementById('telefono').value = p.telefono || '';
+      document.getElementById('rol').value = p.rol || '';
+      document.getElementById('perfilInfo').innerHTML = `
+        <p><strong>ID usuario:</strong> ${p.id}</p>
+        <p><strong>Estado:</strong> ${p.activo ? 'Activo' : 'Inactivo'}</p>
+        <p><strong>Alta:</strong> ${p.created_at ? new Date(p.created_at).toLocaleString('es-ES') : '-'}</p>
+        <p><strong>Última actualización:</strong> ${p.updated_at ? new Date(p.updated_at).toLocaleString('es-ES') : '-'}</p>
+      `;
+    }
+
     async function init() {
       const session = await getSession();
       if (!session) { window.location.href = 'login.html'; return; }
-      const p = await getUserProfile(session.user.id);
-      document.getElementById('perfilInfo').innerHTML = `
-        <p><strong>Nombre:</strong> ${p.nombre || '-'}</p>
-        <p><strong>Apellidos:</strong> ${p.apellidos || '-'}</p>
-        <p><strong>Email:</strong> ${p.email || '-'}</p>
-        <p><strong>Teléfono:</strong> ${p.telefono || '-'}</p>
-        <p><strong>Rol:</strong> ${p.rol || '-'}</p>
-        <p style="margin-top:1rem;color:var(--color-muted);font-size:.8rem;">Si quieres, en el siguiente paso te hago formulario editable de perfil.</p>`;
+      currentProfile = await getUserProfile(session.user.id);
+      fillForm(currentProfile);
     }
+
+    document.getElementById('perfilForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentProfile) return;
+      try {
+        const payload = {
+          nombre: document.getElementById('nombre').value.trim(),
+          apellidos: document.getElementById('apellidos').value.trim() || null,
+          telefono: document.getElementById('telefono').value.trim() || null
+        };
+        const { error } = await novaSupabase.from('perfiles').update(payload).eq('id', currentProfile.id);
+        if (error) throw error;
+        currentProfile = await getUserProfile(currentProfile.id);
+        fillForm(currentProfile);
+        toast('Perfil actualizado correctamente', 'success');
+      } catch (err) {
+        toast(err.message || 'No se pudo guardar el perfil', 'error');
+      }
+    });
+
     init().catch((e) => {
       document.getElementById('perfilInfo').innerHTML = `<p style="color:var(--color-danger)">Error: ${e.message}</p>`;
     });

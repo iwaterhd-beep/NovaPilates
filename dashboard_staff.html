@@ -19,10 +19,11 @@
     </div>
     <nav class="sidebar-nav">
       <div class="sidebar-section-label">Gestión</div>
-      <a href="#clases" class="sidebar-link active js-tab" data-tab="clases">Clases</a>
-      <a href="#bonos" class="sidebar-link js-tab" data-tab="bonos">Bonos</a>
-      <a href="#finanzas" class="sidebar-link js-tab" data-tab="finanzas">Finanzas</a>
-      <a href="#usuarios" class="sidebar-link js-tab" data-tab="usuarios">Usuarios</a>
+      <a href="#clases" class="sidebar-link active js-tab" data-tab="clases"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Clases</a>
+      <a href="#bonos" class="sidebar-link js-tab" data-tab="bonos"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Bonos</a>
+      <a href="#finanzas" class="sidebar-link js-tab" data-tab="finanzas"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 12V7m4 5V4m4 8V9"/></svg>Finanzas</a>
+      <a href="#notificaciones" class="sidebar-link js-tab" data-tab="notificaciones"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
+      <a href="#usuarios" class="sidebar-link js-tab" data-tab="usuarios"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1.5 13c0-2 1.8-3.5 3.5-3.5S8.5 11 8.5 13"/><path d="M7.5 13c0-2 1.8-3.5 3.5-3.5S14.5 11 14.5 13"/></svg>Usuarios</a>
     </nav>
     <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
   </aside>
@@ -80,6 +81,36 @@
           <div class="card-label">Transacciones recientes</div>
           <div class="table-wrap">
             <table><thead><tr><th>Cliente</th><th>Importe</th><th>Método</th><th>Fecha</th></tr></thead><tbody id="rowsFinanzas"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel-tab" id="tab-notificaciones" style="display:none;">
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label">Enviar notificación</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
+            <select class="form-input" id="notifDestino">
+              <option value="">Todos los clientes</option>
+            </select>
+            <select class="form-input" id="notifTipo">
+              <option value="info">Info</option>
+              <option value="aviso">Aviso</option>
+              <option value="recordatorio">Recordatorio</option>
+              <option value="promo">Promoción</option>
+            </select>
+            <input class="form-input" id="notifTitulo" placeholder="Título de la notificación" />
+          </div>
+          <div style="margin-top:.8rem;">
+            <textarea class="form-input" id="notifMensaje" rows="4" placeholder="Mensaje..." style="resize:vertical;"></textarea>
+          </div>
+          <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
+            <button class="btn btn-primary" id="enviarNotifBtn">Enviar notificación</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Notificaciones recientes enviadas</div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Título</th><th>Destino</th><th>Tipo</th><th>Fecha</th></tr></thead><tbody id="rowsNotifs"></tbody></table>
           </div>
         </div>
       </section>
@@ -198,6 +229,11 @@
       ss.innerHTML = (s || []).map(x => `<option value="${x.id}">${x.nombre}</option>`).join('');
       const cs = document.getElementById('clienteSelect');
       cs.innerHTML = (c || []).filter(x => x.rol === 'cliente').map(x => `<option value="${x.id}">${x.nombre || x.email}</option>`).join('');
+      const notifDestino = document.getElementById('notifDestino');
+      notifDestino.innerHTML = '<option value="">Todos los clientes</option>' + (c || [])
+        .filter(x => x.rol === 'cliente')
+        .map(x => `<option value="${x.id}">${x.nombre || x.email}</option>`)
+        .join('');
       const tbs = document.getElementById('tipoBonoSelect');
       tbs.innerHTML = (tb || []).map(x => `<option value="${x.id}" data-sesiones="${x.sesiones ?? ''}" data-dias="${x.duracion_dias}">${x.nombre}</option>`).join('');
 
@@ -273,6 +309,18 @@
         .limit(80);
       const rows = document.getElementById('rowsFinanzas');
       rows.innerHTML = (data || []).map(t => `<tr><td>${t.perfil?.nombre || t.perfil?.email || '-'}</td><td>${t.importe} €</td><td>${t.metodo_pago || '-'}</td><td>${new Date(t.created_at).toLocaleString('es-ES')}</td></tr>`).join('') || '<tr><td colspan="4">Sin transacciones</td></tr>';
+    }
+
+    async function loadNotifs() {
+      const { data } = await novaSupabase
+        .from('notificaciones')
+        .select('titulo,tipo,created_at,perfil:perfil_id(nombre,email)')
+        .order('created_at', { ascending: false })
+        .limit(40);
+      const rows = document.getElementById('rowsNotifs');
+      rows.innerHTML = (data || [])
+        .map(n => `<tr><td>${n.titulo}</td><td>${n.perfil?.nombre || n.perfil?.email || 'Todos'}</td><td>${n.tipo || 'info'}</td><td>${new Date(n.created_at).toLocaleString('es-ES')}</td></tr>`)
+        .join('') || '<tr><td colspan="4">Sin notificaciones</td></tr>';
     }
 
     document.getElementById('crearClaseBtn').addEventListener('click', async () => {
@@ -483,11 +531,42 @@
       }
     });
 
+    document.getElementById('enviarNotifBtn').addEventListener('click', async () => {
+      try {
+        const perfilId = document.getElementById('notifDestino').value || null;
+        const tipo = document.getElementById('notifTipo').value || 'info';
+        const titulo = document.getElementById('notifTitulo').value.trim();
+        const mensaje = document.getElementById('notifMensaje').value.trim();
+        if (!titulo || !mensaje) {
+          toast('Completa título y mensaje.', 'error');
+          return;
+        }
+        const { error } = await novaSupabase
+          .from('notificaciones')
+          .insert({
+            perfil_id: perfilId,
+            titulo,
+            mensaje,
+            tipo,
+            enviada_por: staffProfile.id
+          });
+        if (error) throw error;
+        toast('Notificación enviada', 'success');
+        document.getElementById('notifTitulo').value = '';
+        document.getElementById('notifMensaje').value = '';
+        document.getElementById('notifTipo').value = 'info';
+        document.getElementById('notifDestino').value = '';
+        await loadNotifs();
+      } catch (e) {
+        toast(e.message || 'No se pudo enviar la notificación', 'error');
+      }
+    });
+
     async function bootstrap() {
       const ok = await initAuth();
       if (!ok) return;
       await loadCatalogs();
-      await Promise.all([loadClases(), loadBonos(), loadFinanzas()]);
+      await Promise.all([loadClases(), loadBonos(), loadFinanzas(), loadNotifs()]);
       setTab('clases');
     }
     bootstrap().catch((e) => toast(e.message || 'Error de carga', 'error'));

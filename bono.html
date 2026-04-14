@@ -7,29 +7,64 @@
   <link rel="stylesheet" href="portal.css" />
 </head>
 <body>
-  <aside class="sidebar">
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="userAvatar">C</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="userName">Cargando...</div>
+        <div class="sidebar-user-role">Cliente</div>
+      </div>
+    </div>
     <nav class="sidebar-nav">
-      <a href="dashboard_cliente.html" class="sidebar-link">Inicio</a>
-      <a href="calendario.html" class="sidebar-link">Reservar clase</a>
-      <a href="mis-clases.html" class="sidebar-link">Mis clases</a>
-      <a href="bono.html" class="sidebar-link active">Mi bono</a>
-      <a href="notificaciones.html" class="sidebar-link">Notificaciones</a>
-      <a href="perfil.html" class="sidebar-link">Mi perfil</a>
+      <div class="sidebar-section-label">Mi espacio</div>
+      <a href="dashboard_cliente.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>Inicio</a>
+      <a href="calendario.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Reservar clase</a>
+      <a href="mis-clases.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Mis clases</a>
+      <a href="bono.html" class="sidebar-link active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Mi bono</a>
+      <a href="notificaciones.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
+      <div class="sidebar-section-label">Cuenta</div>
+      <a href="perfil.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Mi perfil</a>
     </nav>
+    <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
   </aside>
   <main class="main">
     <header class="topbar"><span class="topbar-title">Mi bono</span></header>
     <div class="content">
+      <div class="page-header">
+        <h1 class="page-title">Tu bono activo</h1>
+        <p class="page-subtitle">Controla tus sesiones, vigencia y progreso de uso de forma clara.</p>
+      </div>
       <div class="card" id="bonoCard">Cargando bono...</div>
+      <div class="card" style="margin-top:1rem;">
+        <div class="card-label">Consejos rápidos</div>
+        <div style="display:grid;gap:.5rem;font-size:.8rem;color:var(--color-cream-dim);">
+          <p>• Si quieres asegurar tus horarios preferidos, reserva con antelación.</p>
+          <p>• Si no vas a asistir, cancela dentro del margen para recuperar la sesión.</p>
+          <p>• Para cambiar de bono o ampliar sesiones, contacta con recepción.</p>
+        </div>
+      </div>
     </div>
   </main>
+  <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>
   <script>
+    const sidebarEl = document.getElementById('sidebar');
+    document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+      if (!sidebarEl.contains(e.target) && !e.target.closest('#sidebarToggle')) sidebarEl.classList.remove('open');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut());
+
     async function init() {
       const session = await getSession();
       if (!session) { window.location.href = 'login.html'; return; }
+      const perfil = await getUserProfile(session.user.id);
+      document.getElementById('userName').textContent = perfil.nombre || perfil.email;
+      document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
+
       const bono = await getBonoActivo(session.user.id);
       const el = document.getElementById('bonoCard');
       if (!bono) {
@@ -39,6 +74,7 @@
       const total = bono.sesiones_totales ?? 'Ilimitado';
       const usadas = bono.sesiones_usadas ?? 0;
       const restantes = bono.sesiones_totales == null ? 'Ilimitado' : (bono.sesiones_totales - bono.sesiones_usadas);
+      const pct = bono.sesiones_totales ? Math.round((usadas / bono.sesiones_totales) * 100) : 0;
       el.innerHTML = `
         <div class="card-label">Bono actual</div>
         <h2 style="font-family:var(--font-display);font-size:2rem;font-weight:300">${bono.tipo_bono?.nombre || 'Bono activo'}</h2>
@@ -47,7 +83,18 @@
           <span class="badge badge-accent">Totales: ${total}</span>
           <span class="badge badge-warning">Usadas: ${usadas}</span>
           <span class="badge badge-success">Restantes: ${restantes}</span>
-        </div>`;
+        </div>
+        ${bono.sesiones_totales ? `
+          <div style="margin-top:1rem;">
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--color-muted);margin-bottom:.35rem;">
+              <span>Progreso de uso</span><span>${pct}%</span>
+            </div>
+            <div style="height:6px;background:var(--color-surface);border:0.5px solid var(--color-border);">
+              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--color-accent),var(--color-accent-lt));"></div>
+            </div>
+          </div>
+        ` : ''}
+      `;
     }
     init().catch((e) => {
       document.getElementById('bonoCard').innerHTML = `<p style="color:var(--color-danger)">Error: ${e.message}</p>`;
