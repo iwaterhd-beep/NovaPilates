@@ -15,7 +15,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 --  ENUM TYPES
 -- ══════════════════════════════════════════════
 CREATE TYPE rol_usuario AS ENUM ('cliente', 'empleado', 'admin');
-CREATE TYPE estado_reserva AS ENUM ('confirmada', 'cancelada', 'asistida', 'no_asistida');
+CREATE TYPE estado_reserva AS ENUM ('confirmada', 'cancelada', 'asistida', 'no_asistio');
 CREATE TYPE periodicidad_bono AS ENUM ('semanal', 'mensual', 'ilimitado');
 
 
@@ -295,7 +295,7 @@ RETURNS VOID AS $$
 DECLARE
   v_estado estado_reserva;
 BEGIN
-  v_estado := CASE WHEN p_asistio THEN 'asistida'::estado_reserva ELSE 'no_asistida'::estado_reserva END;
+  v_estado := CASE WHEN p_asistio THEN 'asistida'::estado_reserva ELSE 'no_asistio'::estado_reserva END;
   UPDATE public.reservas SET estado = v_estado WHERE id = p_reserva_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

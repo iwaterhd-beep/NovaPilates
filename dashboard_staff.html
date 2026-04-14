@@ -21,6 +21,7 @@
       <div class="sidebar-section-label">Gestión</div>
       <a href="#clases" class="sidebar-link active js-tab" data-tab="clases"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Clases</a>
       <a href="#bonos" class="sidebar-link js-tab" data-tab="bonos"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Bonos</a>
+      <a href="#tpv" class="sidebar-link js-tab" data-tab="tpv"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 6h6M5 9h3M5 12h6"/></svg>TPV</a>
       <a href="#finanzas" class="sidebar-link js-tab" data-tab="finanzas"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 12V7m4 5V4m4 8V9"/></svg>Finanzas</a>
       <a href="#notificaciones" class="sidebar-link js-tab" data-tab="notificaciones"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
       <a href="#usuarios" class="sidebar-link js-tab" data-tab="usuarios"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1.5 13c0-2 1.8-3.5 3.5-3.5S8.5 11 8.5 13"/><path d="M7.5 13c0-2 1.8-3.5 3.5-3.5S14.5 11 14.5 13"/></svg>Usuarios</a>
@@ -76,7 +77,69 @@
         </div>
       </section>
 
+      <section class="panel-tab" id="tab-tpv" style="display:none;">
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label">TPV · Venta rápida de bono</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:.8rem;">
+            <input class="form-input" id="tpvClientSearch" placeholder="Buscar cliente por nombre o email..." />
+            <select class="form-input" id="tpvMetodoPago">
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
+            </select>
+            <input class="form-input" id="tpvNota" placeholder="Nota (opcional)" />
+          </div>
+          <div id="tpvClientResults" style="margin-top:.8rem;display:grid;gap:.45rem;"></div>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label">Cliente seleccionado</div>
+          <div id="tpvSelectedClient" class="empty-state"><p>Selecciona un cliente para aplicar bono rápido.</p></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Bonos rápidos</div>
+          <div id="tpvBonosGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;"></div>
+        </div>
+        <div class="card" style="margin-top:1rem;">
+          <div class="card-label">Último ticket TPV</div>
+          <div id="tpvLastTicket" class="empty-state"><p>Aún no hay ventas en esta sesión.</p></div>
+          <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
+            <button class="btn btn-outline btn-sm" id="tpvPrintTicketBtn">Imprimir último ticket</button>
+          </div>
+        </div>
+      </section>
+
       <section class="panel-tab" id="tab-finanzas" style="display:none;">
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label">Apertura / cierre de caja</div>
+          <div id="cajaEstado" style="font-size:.78rem;color:var(--color-muted);margin-bottom:.8rem;">Cargando estado de caja...</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;align-items:end;">
+            <div>
+              <label class="form-label" for="cajaFondoInicial">Fondo inicial</label>
+              <input class="form-input" id="cajaFondoInicial" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div>
+              <label class="form-label" for="cajaEfectivoDeclarado">Efectivo declarado al cierre</label>
+              <input class="form-input" id="cajaEfectivoDeclarado" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div>
+              <label class="form-label" for="cajaNota">Nota</label>
+              <input class="form-input" id="cajaNota" type="text" placeholder="Observaciones..." />
+            </div>
+            <button class="btn btn-primary" id="abrirCajaBtn">Abrir caja</button>
+            <button class="btn btn-outline" id="cerrarCajaBtn">Cerrar caja</button>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label">Caja del día</div>
+          <div id="cajaResumen" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem;">
+            <div class="stat-card"><div class="card-label">Total hoy</div><div class="card-value-sm" id="cajaTotalHoy">0 €</div></div>
+            <div class="stat-card"><div class="card-label">Efectivo</div><div class="card-value-sm" id="cajaEfectivo">0 €</div></div>
+            <div class="stat-card"><div class="card-label">Tarjeta</div><div class="card-value-sm" id="cajaTarjeta">0 €</div></div>
+            <div class="stat-card"><div class="card-label">Transferencia</div><div class="card-value-sm" id="cajaTransferencia">0 €</div></div>
+          </div>
+        </div>
         <div class="card">
           <div class="card-label">Transacciones recientes</div>
           <div class="table-wrap">
@@ -199,6 +262,12 @@
     }));
 
     let staffProfile = null;
+    const appState = {
+      clientes: [],
+      tiposBono: [],
+      selectedCliente: null,
+      lastTicket: null
+    };
 
     async function initAuth() {
       const session = await getSession();
@@ -228,20 +297,136 @@
       const ss = document.getElementById('salaSelect');
       ss.innerHTML = (s || []).map(x => `<option value="${x.id}">${x.nombre}</option>`).join('');
       const cs = document.getElementById('clienteSelect');
-      cs.innerHTML = (c || []).filter(x => x.rol === 'cliente').map(x => `<option value="${x.id}">${x.nombre || x.email}</option>`).join('');
+      const clientes = (c || []).filter(x => x.rol === 'cliente');
+      appState.clientes = clientes;
+      cs.innerHTML = clientes.map(x => `<option value="${x.id}">${x.nombre || x.email}</option>`).join('');
       const notifDestino = document.getElementById('notifDestino');
       notifDestino.innerHTML = '<option value="">Todos los clientes</option>' + (c || [])
         .filter(x => x.rol === 'cliente')
         .map(x => `<option value="${x.id}">${x.nombre || x.email}</option>`)
         .join('');
       const tbs = document.getElementById('tipoBonoSelect');
-      tbs.innerHTML = (tb || []).map(x => `<option value="${x.id}" data-sesiones="${x.sesiones ?? ''}" data-dias="${x.duracion_dias}">${x.nombre}</option>`).join('');
+      appState.tiposBono = tb || [];
+      tbs.innerHTML = appState.tiposBono.map(x => `<option value="${x.id}" data-sesiones="${x.sesiones ?? ''}" data-dias="${x.duracion_dias}">${x.nombre}</option>`).join('');
 
       const rowsU = document.getElementById('rowsUsuarios');
       rowsU.innerHTML = (c || []).map(x => `<tr><td>${x.nombre || '-'}</td><td>${x.email}</td><td>${x.rol}</td><td>${x.activo ? 'Sí' : 'No'}</td></tr>`).join('') || '<tr><td colspan="4">Sin usuarios</td></tr>';
 
       document.getElementById('margenReservaDias').value = ajustes?.margen_reserva_dias ?? 0;
       document.getElementById('margenCancelacionDias').value = ajustes?.margen_cancelacion_dias ?? 0;
+      renderTpvClientResults('');
+      renderTpvBonos();
+    }
+
+    function renderTpvClientResults(query) {
+      const wrap = document.getElementById('tpvClientResults');
+      const q = query.trim().toLowerCase();
+      const matches = appState.clientes
+        .filter(c => !q || (c.nombre || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q))
+        .slice(0, 8);
+      if (!matches.length) {
+        wrap.innerHTML = '<p style="font-size:.78rem;color:var(--color-muted);">Sin resultados.</p>';
+        return;
+      }
+      wrap.innerHTML = matches.map(c => `
+        <button class="btn btn-outline btn-sm js-tpv-select-client" data-id="${c.id}" style="justify-content:space-between;">
+          <span>${c.nombre || 'Sin nombre'}</span>
+          <span style="opacity:.7">${c.email || ''}</span>
+        </button>
+      `).join('');
+    }
+
+    function renderTpvSelectedClient() {
+      const box = document.getElementById('tpvSelectedClient');
+      const c = appState.selectedCliente;
+      if (!c) {
+        box.className = 'empty-state';
+        box.innerHTML = '<p>Selecciona un cliente para aplicar bono rápido.</p>';
+        return;
+      }
+      box.className = '';
+      box.innerHTML = `
+        <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;">
+          <div>
+            <div style="font-size:1rem;color:var(--color-cream)">${c.nombre || 'Sin nombre'}</div>
+            <div style="font-size:.78rem;color:var(--color-muted)">${c.email || ''}</div>
+          </div>
+          <span class="badge badge-accent">Cliente seleccionado</span>
+        </div>
+      `;
+    }
+
+    function renderTpvBonos() {
+      const grid = document.getElementById('tpvBonosGrid');
+      if (!appState.tiposBono.length) {
+        grid.innerHTML = '<p style="font-size:.78rem;color:var(--color-muted);">No hay tipos de bono activos.</p>';
+        return;
+      }
+      grid.innerHTML = appState.tiposBono.map(b => `
+        <article class="card" style="padding:1rem;">
+          <div class="card-label">Bono</div>
+          <h3 style="font-family:var(--font-display);font-size:1.35rem;font-weight:300;">${b.nombre}</h3>
+          <p style="font-size:.75rem;color:var(--color-muted);margin-top:.25rem;">Sesiones: ${b.sesiones ?? 'Ilimitado'} · ${b.duracion_dias} días</p>
+          <div style="margin-top:.8rem;display:flex;gap:.5rem;align-items:center;">
+            <input class="form-input js-tpv-precio" data-id="${b.id}" type="number" min="0" step="0.01" placeholder="Importe €" style="max-width:120px;" />
+            <button class="btn btn-primary btn-sm js-tpv-apply-bono" data-id="${b.id}" data-sesiones="${b.sesiones ?? ''}" data-dias="${b.duracion_dias}">Aplicar</button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function renderLastTicket() {
+      const box = document.getElementById('tpvLastTicket');
+      const t = appState.lastTicket;
+      if (!t) {
+        box.className = 'empty-state';
+        box.innerHTML = '<p>Aún no hay ventas en esta sesión.</p>';
+        return;
+      }
+      box.className = '';
+      box.innerHTML = `
+        <div style="display:grid;gap:.25rem;">
+          <div style="font-size:1rem;color:var(--color-cream);">${t.bonoNombre}</div>
+          <div style="font-size:.8rem;color:var(--color-cream-dim);">Cliente: ${t.clienteNombre} · ${t.clienteEmail}</div>
+          <div style="font-size:.75rem;color:var(--color-muted);">Importe: ${t.importe.toFixed(2)} € · ${t.metodoPago} · ${new Date(t.createdAt).toLocaleString('es-ES')}</div>
+          ${t.nota ? `<div style="font-size:.75rem;color:var(--color-muted);">Nota: ${t.nota}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function printTicket() {
+      const t = appState.lastTicket;
+      if (!t) {
+        toast('No hay ticket para imprimir todavía.', 'info');
+        return;
+      }
+      const html = `
+        <html><head><title>Ticket TPV NŌVA</title><style>
+          body { font-family: Arial, sans-serif; padding: 24px; color: #2b2b2b; }
+          h1 { font-size: 18px; margin: 0 0 12px; }
+          p { margin: 4px 0; font-size: 13px; }
+          .line { border-top: 1px dashed #aaa; margin: 12px 0; }
+        </style></head><body>
+          <h1>NŌVA PILATES STUDIO · Ticket TPV</h1>
+          <p><strong>Fecha:</strong> ${new Date(t.createdAt).toLocaleString('es-ES')}</p>
+          <p><strong>Cliente:</strong> ${t.clienteNombre} (${t.clienteEmail})</p>
+          <p><strong>Bono:</strong> ${t.bonoNombre}</p>
+          <p><strong>Importe:</strong> ${t.importe.toFixed(2)} EUR</p>
+          <p><strong>Método:</strong> ${t.metodoPago}</p>
+          ${t.nota ? `<p><strong>Nota:</strong> ${t.nota}</p>` : ''}
+          <div class="line"></div>
+          <p>Gracias por confiar en NŌVA.</p>
+        </body></html>
+      `;
+      const w = window.open('', '_blank', 'width=520,height=640');
+      if (!w) {
+        toast('Bloqueador de ventanas impide imprimir ticket.', 'error');
+        return;
+      }
+      w.document.write(html);
+      w.document.close();
+      w.focus();
+      w.print();
     }
 
     async function loadClases() {
@@ -309,6 +494,49 @@
         .limit(80);
       const rows = document.getElementById('rowsFinanzas');
       rows.innerHTML = (data || []).map(t => `<tr><td>${t.perfil?.nombre || t.perfil?.email || '-'}</td><td>${t.importe} €</td><td>${t.metodo_pago || '-'}</td><td>${new Date(t.created_at).toLocaleString('es-ES')}</td></tr>`).join('') || '<tr><td colspan="4">Sin transacciones</td></tr>';
+
+      const inicioDia = new Date();
+      inicioDia.setHours(0, 0, 0, 0);
+      const hoy = (data || []).filter(t => new Date(t.created_at) >= inicioDia);
+      const suma = (arr) => arr.reduce((acc, x) => acc + Number(x.importe || 0), 0);
+      const total = suma(hoy);
+      const efectivo = suma(hoy.filter(x => (x.metodo_pago || 'efectivo') === 'efectivo'));
+      const tarjeta = suma(hoy.filter(x => x.metodo_pago === 'tarjeta'));
+      const transferencia = suma(hoy.filter(x => x.metodo_pago === 'transferencia'));
+      document.getElementById('cajaTotalHoy').textContent = `${total.toFixed(2)} €`;
+      document.getElementById('cajaEfectivo').textContent = `${efectivo.toFixed(2)} €`;
+      document.getElementById('cajaTarjeta').textContent = `${tarjeta.toFixed(2)} €`;
+      document.getElementById('cajaTransferencia').textContent = `${transferencia.toFixed(2)} €`;
+
+      try {
+        const { data: caja, error: cajaErr } = await novaSupabase
+          .from('caja_diaria')
+          .select('*')
+          .eq('fecha', new Date().toISOString().slice(0, 10))
+          .maybeSingle();
+        if (cajaErr) throw cajaErr;
+
+        const estadoEl = document.getElementById('cajaEstado');
+        const abrirBtn = document.getElementById('abrirCajaBtn');
+        const cerrarBtn = document.getElementById('cerrarCajaBtn');
+        if (!caja) {
+          estadoEl.textContent = 'Caja de hoy no abierta.';
+          abrirBtn.disabled = false;
+          cerrarBtn.disabled = true;
+        } else if (caja.estado === 'abierta') {
+          estadoEl.textContent = `Caja abierta desde ${new Date(caja.abierta_at).toLocaleString('es-ES')} · Fondo inicial ${Number(caja.fondo_inicial || 0).toFixed(2)} €`;
+          abrirBtn.disabled = true;
+          cerrarBtn.disabled = false;
+        } else {
+          estadoEl.textContent = `Caja cerrada · Declarado ${Number(caja.cierre_efectivo_declarado || 0).toFixed(2)} € · Sistema ${Number(caja.cierre_efectivo_sistema || 0).toFixed(2)} € · Diferencia ${Number(caja.diferencia_efectivo || 0).toFixed(2)} €`;
+          abrirBtn.disabled = true;
+          cerrarBtn.disabled = true;
+        }
+      } catch (err) {
+        document.getElementById('cajaEstado').textContent = 'No se pudo cargar caja diaria (ejecuta el parche de caja).';
+        document.getElementById('abrirCajaBtn').disabled = true;
+        document.getElementById('cerrarCajaBtn').disabled = true;
+      }
     }
 
     async function loadNotifs() {
@@ -442,6 +670,132 @@
         } catch (err) {
           toast(err.message || 'No se pudo actualizar estado', 'error');
         }
+      }
+
+      const btnSelectClient = e.target.closest('.js-tpv-select-client');
+      if (btnSelectClient) {
+        appState.selectedCliente = appState.clientes.find(c => c.id === btnSelectClient.dataset.id) || null;
+        renderTpvSelectedClient();
+        return;
+      }
+
+      const btnApplyBono = e.target.closest('.js-tpv-apply-bono');
+      if (btnApplyBono) {
+        try {
+          const cliente = appState.selectedCliente;
+          if (!cliente) {
+            toast('Selecciona un cliente antes de aplicar bono.', 'error');
+            return;
+          }
+          const tipoBonoId = btnApplyBono.dataset.id;
+          const tipoBono = appState.tiposBono.find(b => b.id === tipoBonoId);
+          const sesiones = btnApplyBono.dataset.sesiones ? Number(btnApplyBono.dataset.sesiones) : null;
+          const dias = Number(btnApplyBono.dataset.dias || 30);
+          const metodoPago = document.getElementById('tpvMetodoPago').value || 'efectivo';
+          const nota = document.getElementById('tpvNota').value.trim() || null;
+          const precioInput = document.querySelector(`.js-tpv-precio[data-id="${tipoBonoId}"]`);
+          const importe = Number(precioInput?.value || 0);
+          if (!importe || importe <= 0) {
+            toast('Introduce un importe válido para la venta.', 'error');
+            return;
+          }
+
+          const fechaInicio = new Date().toISOString().slice(0, 10);
+          const fechaFin = new Date(Date.now() + dias * 86400000).toISOString().slice(0, 10);
+
+          const { error: disableErr } = await novaSupabase
+            .from('bonos_activos')
+            .update({ activo: false })
+            .eq('perfil_id', cliente.id)
+            .eq('activo', true);
+          if (disableErr) throw disableErr;
+
+          const { data: bonoData, error: bonoErr } = await novaSupabase
+            .from('bonos_activos')
+            .insert({
+              perfil_id: cliente.id,
+              tipo_bono_id: tipoBonoId,
+              sesiones_totales: sesiones,
+              sesiones_usadas: 0,
+              fecha_inicio: fechaInicio,
+              fecha_fin: fechaFin,
+              activo: true,
+              asignado_por: staffProfile.id,
+              notas: 'Asignado desde TPV'
+            })
+            .select('id')
+            .single();
+          if (bonoErr) throw bonoErr;
+
+          const { error: trxErr } = await novaSupabase
+            .from('transacciones')
+            .insert({
+              perfil_id: cliente.id,
+              bono_activo_id: bonoData.id,
+              tipo_bono_id: tipoBonoId,
+              importe,
+              metodo_pago: metodoPago,
+              nota,
+              registrado_por: staffProfile.id
+            });
+          if (trxErr) throw trxErr;
+
+          if (precioInput) precioInput.value = '';
+          document.getElementById('tpvNota').value = '';
+          appState.lastTicket = {
+            clienteNombre: cliente.nombre || 'Sin nombre',
+            clienteEmail: cliente.email || '',
+            bonoNombre: tipoBono?.nombre || 'Bono',
+            importe,
+            metodoPago,
+            nota: nota || '',
+            createdAt: new Date().toISOString()
+          };
+          renderLastTicket();
+          toast('Bono aplicado y venta registrada en TPV', 'success');
+          await Promise.all([loadBonos(), loadFinanzas()]);
+        } catch (err) {
+          toast(err.message || 'No se pudo aplicar el bono en TPV', 'error');
+        }
+      }
+    });
+
+    document.getElementById('tpvClientSearch').addEventListener('input', (e) => {
+      renderTpvClientResults(e.target.value || '');
+    });
+    document.getElementById('tpvPrintTicketBtn').addEventListener('click', () => {
+      printTicket();
+    });
+
+    document.getElementById('abrirCajaBtn').addEventListener('click', async () => {
+      try {
+        const fondo = Number(document.getElementById('cajaFondoInicial').value || 0);
+        const nota = document.getElementById('cajaNota').value.trim() || null;
+        const { error } = await novaSupabase.rpc('abrir_caja_diaria', {
+          p_fondo_inicial: fondo,
+          p_notas: nota
+        });
+        if (error) throw error;
+        toast('Caja abierta correctamente', 'success');
+        await loadFinanzas();
+      } catch (err) {
+        toast(err.message || 'No se pudo abrir caja', 'error');
+      }
+    });
+
+    document.getElementById('cerrarCajaBtn').addEventListener('click', async () => {
+      try {
+        const efectivo = Number(document.getElementById('cajaEfectivoDeclarado').value || 0);
+        const nota = document.getElementById('cajaNota').value.trim() || null;
+        const { error } = await novaSupabase.rpc('cerrar_caja_diaria', {
+          p_efectivo_declarado: efectivo,
+          p_notas: nota
+        });
+        if (error) throw error;
+        toast('Caja cerrada correctamente', 'success');
+        await loadFinanzas();
+      } catch (err) {
+        toast(err.message || 'No se pudo cerrar caja', 'error');
       }
     });
 

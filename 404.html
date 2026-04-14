@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Página no encontrada — NŌVA PILATES STUDIO</title>
+  <meta name="description" content="La página que buscas no existe o fue movida." />
+  <link rel="icon" type="image/svg+xml" href="assets/branding/favicon.svg" />
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --card: #fffdfa;
+      --ink: #4a453d;
+      --muted: #8f887d;
+      --line: #e8e2d8;
+      --accent: #8a9a8c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100svh;
+      background: radial-gradient(circle at 20% 10%, rgba(138,154,140,0.12), transparent 40%), var(--bg);
+      color: var(--ink);
+      font-family: Inter, Arial, sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 1.2rem;
+    }
+    .card {
+      width: min(560px, 100%);
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 2.2rem 1.8rem;
+      text-align: center;
+      box-shadow: 0 14px 38px rgba(74,69,61,0.1);
+    }
+    .mark {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 1rem;
+      border: 1px solid #d9d0c3;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      font-size: 1.6rem;
+      font-family: "Cormorant Garamond", serif;
+    }
+    h1 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 400;
+      margin-bottom: .3rem;
+    }
+    p { color: var(--muted); line-height: 1.7; margin-bottom: 1.3rem; }
+    .actions { display: flex; justify-content: center; gap: .7rem; flex-wrap: wrap; }
+    .btn {
+      text-decoration: none;
+      padding: .68rem 1.2rem;
+      border-radius: 999px;
+      font-size: .72rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #fff;
+    }
+    .btn.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #f7f5f0;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="mark">N</div>
+    <h1>404</h1>
+    <p>La página que buscas no está disponible. Puede que la ruta haya cambiado o el enlace no sea válido.</p>
+    <div class="actions">
+      <a class="btn primary" href="/">Volver al inicio</a>
+      <a class="btn" href="/login">Ir a acceso</a>
+    </div>
+  </main>
+</body>
+</html>

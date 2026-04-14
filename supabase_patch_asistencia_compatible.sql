@@ -1,4 +1,4 @@
--- PARCHE: marcar_asistencia compatible con enum no_asistida/no_asistio
+-- PARCHE: marcar_asistencia compatible con enum no_asistio/no_asistida
 -- Ejecuta este script en Supabase SQL Editor.
 
 CREATE OR REPLACE FUNCTION public.marcar_asistencia(p_reserva_id UUID, p_asistio BOOLEAN)
