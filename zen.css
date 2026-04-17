@@ -21,7 +21,7 @@ a { text-decoration: none; color: inherit; }
 .section { padding: 6rem 0; border-top: 1px solid var(--line); }
 .label { font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: #8f887d; }
 
-.nav { position: fixed; inset: 0 0 auto 0; height: var(--nav-h); z-index: 20; background: rgba(246,244,239,.94); border-bottom: 1px solid var(--line); }
+.nav { position: fixed; inset: 0 0 auto 0; height: var(--nav-h); z-index: 20; background: rgba(255, 255, 255, 0.97); border-bottom: 1px solid rgba(232, 226, 216, 0.85); backdrop-filter: blur(8px); }
 .nav-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .nav-logo { display: inline-flex; align-items: center; }
 .logo-main { height: 52px; width: auto; object-fit: contain; }
@@ -37,10 +37,10 @@ a { text-decoration: none; color: inherit; }
 .hero {
   position: relative;
   overflow: hidden;
-  min-height: 95svh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
-  padding: calc(var(--nav-h) + 3rem) 0 4rem;
+  padding: calc(var(--nav-h) + 2.5rem) 0 3.5rem;
   background: var(--bg);
 }
 .hero-media {
@@ -55,18 +55,23 @@ a { text-decoration: none; color: inherit; }
   object-fit: cover;
   object-position: center;
   display: block;
+  transform: scale(1.02);
 }
 .hero-media-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(246, 244, 239, 0.97) 0%,
-    rgba(246, 244, 239, 0.88) 32%,
-    rgba(246, 244, 239, 0.42) 58%,
-    rgba(246, 244, 239, 0.12) 78%,
-    rgba(246, 244, 239, 0) 100%
-  );
+  /* Menos velo: solo lectura fuerte a la izquierda; arriba/abajo más suaves */
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) min(16vh, 120px)),
+    linear-gradient(to top, rgba(246, 244, 239, 0.62) 0%, rgba(246, 244, 239, 0) min(20vh, 160px)),
+    linear-gradient(
+      90deg,
+      rgba(248, 246, 241, 0.88) 0%,
+      rgba(248, 246, 241, 0.52) 22%,
+      rgba(248, 246, 241, 0.16) 42%,
+      rgba(248, 246, 241, 0.04) 58%,
+      rgba(248, 246, 241, 0) 72%
+    );
 }
 .hero-inner {
   position: relative;
@@ -75,6 +80,11 @@ a { text-decoration: none; color: inherit; }
 }
 .hero-copy {
   max-width: min(560px, 100%);
+}
+.hero-copy .label,
+.hero-copy .hero-title,
+.hero-copy .hero-sub {
+  text-shadow: 0 0 28px rgba(248, 246, 241, 0.75), 0 1px 2px rgba(255, 255, 255, 0.35);
 }
 .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 8vw, 6.5rem); line-height: .92; color: #5a5349; margin: .8rem 0 1rem; }
 .hero-sub { max-width: 520px; color: var(--ink-soft); margin-bottom: 1.5rem; }
@@ -114,12 +124,18 @@ a { text-decoration: none; color: inherit; }
 @media (max-width: 980px) {
   .nav-links { display: none; }
   .studio, .grid-3, .steps, .footer-grid { grid-template-columns: 1fr; }
+  .hero-media .hero-video {
+    transform: none;
+  }
   .hero-media-overlay {
-    background: linear-gradient(
-      180deg,
-      rgba(246, 244, 239, 0.94) 0%,
-      rgba(246, 244, 239, 0.82) 45%,
-      rgba(246, 244, 239, 0.35) 100%
-    );
+    background:
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0) 10%),
+      linear-gradient(to top, rgba(246, 244, 239, 0.72) 0%, rgba(246, 244, 239, 0) 16%),
+      linear-gradient(
+        180deg,
+        rgba(246, 244, 239, 0.78) 0%,
+        rgba(246, 244, 239, 0.52) 38%,
+        rgba(246, 244, 239, 0.2) 100%
+      );
   }
 }
