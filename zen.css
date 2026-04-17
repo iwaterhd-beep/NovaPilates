@@ -15,6 +15,17 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 html { scroll-behavior: smooth; }
 body { font-family: Inter, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
 a { text-decoration: none; color: inherit; }
@@ -24,8 +35,13 @@ a { text-decoration: none; color: inherit; }
 
 .nav { position: fixed; inset: 0 0 auto 0; height: var(--nav-h); z-index: 20; background: rgba(255, 255, 255, 0.97); border-bottom: 1px solid rgba(232, 226, 216, 0.85); backdrop-filter: blur(8px); }
 .nav-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.nav-logo { display: inline-flex; align-items: center; }
+.nav-logo {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink);
+}
 .logo-main { height: 52px; width: auto; object-fit: contain; }
+.logo-isotipo { display: block; height: 46px; width: auto; }
 .logo-mark { height: 42px; width: auto; max-height: 42px; object-fit: contain; }
 .nav-links { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem 1rem; }
 .nav-links a { font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }

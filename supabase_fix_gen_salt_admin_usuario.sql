@@ -1,15 +1,8 @@
--- PARCHE: crear usuarios desde panel admin
--- Ejecuta este script en Supabase SQL Editor.
+-- Fix: "function gen_salt(unknown) does not exist" al crear usuario (TPV / admin)
+-- Causa: pgcrypto vive en el esquema `extensions` en Supabase; la RPC solo buscaba en public,auth.
+-- Ejecuta TODO este bloque en Supabase → SQL Editor.
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
-CREATE OR REPLACE FUNCTION public.mi_rol()
-RETURNS TEXT AS $$
-  SELECT rol::TEXT FROM public.perfiles WHERE id = auth.uid();
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
-
-DROP FUNCTION IF EXISTS public.admin_crear_usuario(TEXT, TEXT, TEXT, rol_usuario);
-DROP FUNCTION IF EXISTS public.admin_crear_usuario(TEXT, TEXT, TEXT, TEXT);
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 CREATE OR REPLACE FUNCTION public.admin_crear_usuario(
   p_email TEXT,

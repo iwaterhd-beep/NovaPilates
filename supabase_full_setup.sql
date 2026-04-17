@@ -388,7 +388,7 @@ CREATE OR REPLACE FUNCTION public.admin_crear_usuario(
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, auth
+SET search_path = public, auth, extensions
 AS $$
 DECLARE
   v_new_user_id UUID := gen_random_uuid();

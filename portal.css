@@ -578,3 +578,87 @@ select.form-input { appearance: none; cursor: pointer; }
 @media (max-width: 520px) {
   .calendar-grid { grid-template-columns: 1fr; }
 }
+
+/* ── TPV (zen, legible) ── */
+.tpv-intro {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  letter-spacing: 0.06em;
+  max-width: 42rem;
+  margin-bottom: 1.1rem;
+  line-height: 1.55;
+}
+.tpv-hint {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  margin: 0 0 0.85rem;
+  line-height: 1.45;
+}
+.tpv-grid-bonos,
+.tpv-grid-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+.tpv-mini-card {
+  border: 0.5px solid var(--color-border);
+  background: var(--color-bg-card);
+  border-radius: 2px;
+  padding: 0.95rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-height: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.tpv-mini-card:hover {
+  border-color: var(--color-accent-lt);
+  box-shadow: 0 6px 20px rgba(74, 69, 61, 0.06);
+}
+.tpv-mini-card .tpv-cat {
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.tpv-mini-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--color-cream);
+  line-height: 1.2;
+}
+.tpv-mini-card .tpv-precio-ref {
+  font-size: 0.72rem;
+  color: var(--color-cream-dim);
+}
+.tpv-admin-cat {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 0.6rem;
+  align-items: end;
+  margin-bottom: 0.75rem;
+}
+@media (max-width: 900px) {
+  .tpv-admin-cat {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.tpv-table-mini {
+  width: 100%;
+  font-size: 0.75rem;
+  border-collapse: collapse;
+}
+.tpv-table-mini th,
+.tpv-table-mini td {
+  padding: 0.4rem 0.35rem;
+  text-align: left;
+  border-bottom: 0.5px solid var(--color-border);
+}
+.tpv-table-mini th {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-weight: 400;
+}
