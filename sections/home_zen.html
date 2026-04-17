@@ -14,8 +14,20 @@
 </nav>
 
 <section class="hero" id="inicio">
-  <div class="container hero-grid">
-    <div>
+  <div class="hero-media" aria-hidden="true">
+    <video
+      class="hero-video"
+      src="assets/video/nova-hero.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+    ></video>
+    <div class="hero-media-overlay"></div>
+  </div>
+  <div class="container hero-inner">
+    <div class="hero-copy">
       <p class="label">NOVA PILATES STUDIO · Sevilla</p>
       <h1 class="hero-title">Mueve tu cuerpo.<br>Transforma tu mente.</h1>
       <p class="hero-sub">Un espacio calmado para reservar clases, seguir tu bono y conectar con tu práctica.</p>
@@ -24,20 +36,6 @@
         <a href="#bonos" class="btn btn-outline">Ver bonos</a>
       </div>
     </div>
-    <aside class="hero-panel">
-      <div class="hero-video-wrap">
-        <video
-          class="hero-video"
-          src="assets/video/nova-hero.mp4"
-          autoplay
-          muted
-          loop
-          playsinline
-          preload="auto"
-          aria-label="Vídeo del estudio NŌVA Pilates"
-        ></video>
-      </div>
-    </aside>
   </div>
 </section>
 
