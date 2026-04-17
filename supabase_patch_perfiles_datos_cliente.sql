@@ -8,6 +8,7 @@ ALTER TABLE public.perfiles
   ADD COLUMN IF NOT EXISTS cp TEXT,
   ADD COLUMN IF NOT EXISTS dni TEXT,
   ADD COLUMN IF NOT EXISTS telefono_emergencia TEXT,
+  ADD COLUMN IF NOT EXISTS fecha_nacimiento DATE,
   ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT TRUE;
 
 -- Optional helper index for DNI lookups from staff tools.

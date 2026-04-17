@@ -821,23 +821,71 @@
       }
       appState.editingClienteId = clienteId;
       let perfil = null;
-      const { data: proData, error: proErr } = await novaSupabase
+      const selPro =
+        'id,nombre,apellidos,email,telefono,fecha_nacimiento,direccion,ciudad,cp,dni,telefono_emergencia,notas,rol,activo';
+      const selProNoFn =
+        'id,nombre,apellidos,email,telefono,direccion,ciudad,cp,dni,telefono_emergencia,notas,rol,activo';
+      const selBase = 'id,nombre,apellidos,email,telefono,fecha_nacimiento,notas,rol,activo';
+      const selBaseNoFn = 'id,nombre,apellidos,email,telefono,notas,rol,activo';
+
+      let { data: proData, error: proErr } = await novaSupabase
         .from('perfiles')
-        .select('id,nombre,apellidos,email,telefono,fecha_nacimiento,direccion,ciudad,cp,dni,telefono_emergencia,notas,rol,activo')
+        .select(selPro)
         .eq('id', clienteId)
         .maybeSingle();
+      if (proErr && (proErr.message || '').toLowerCase().includes('fecha_nacimiento')) {
+        ({ data: proData, error: proErr } = await novaSupabase
+          .from('perfiles')
+          .select(selProNoFn)
+          .eq('id', clienteId)
+          .maybeSingle());
+      }
       if (!proErr) {
         perfil = proData;
       } else {
-        const { data: baseData, error: baseErr } = await novaSupabase
+        let { data: baseData, error: baseErr } = await novaSupabase
           .from('perfiles')
-          .select('id,nombre,apellidos,email,telefono,fecha_nacimiento,notas,rol,activo')
+          .select(selBase)
           .eq('id', clienteId)
           .maybeSingle();
+        if (baseErr && (baseErr.message || '').toLowerCase().includes('fecha_nacimiento')) {
+          ({ data: baseData, error: baseErr } = await novaSupabase
+            .from('perfiles')
+            .select(selBaseNoFn)
+            .eq('id', clienteId)
+            .maybeSingle());
+        }
         if (baseErr) throw baseErr;
         perfil = baseData;
       }
       fillClienteEditor(perfil || {});
+    }
+
+    function omitPerfilCampo(payload, campo) {
+      const o = { ...payload };
+      delete o[campo];
+      return o;
+    }
+
+    /** Update perfiles; si falta columna fecha_nacimiento en la BD, reintenta sin ella. */
+    async function perfilesUpdateConFallbackFecha(perfilId, updatePro, updateBase) {
+      let { error } = await novaSupabase.from('perfiles').update(updatePro).eq('id', perfilId);
+      const missFn = (err) => (err?.message || '').toLowerCase().includes('fecha_nacimiento');
+      if (error && missFn(error)) {
+        ({ error } = await novaSupabase
+          .from('perfiles')
+          .update(omitPerfilCampo(updatePro, 'fecha_nacimiento'))
+          .eq('id', perfilId));
+      }
+      if (!error) return;
+      ({ error } = await novaSupabase.from('perfiles').update(updateBase).eq('id', perfilId));
+      if (error && missFn(error)) {
+        ({ error } = await novaSupabase
+          .from('perfiles')
+          .update(omitPerfilCampo(updateBase, 'fecha_nacimiento'))
+          .eq('id', perfilId));
+      }
+      if (error) throw error;
     }
 
     async function aplicarFichaTrasAlta(perfilId) {
@@ -870,11 +918,7 @@
         dni,
         telefono_emergencia: telefonoEmergencia
       };
-      const { error: updProError } = await novaSupabase.from('perfiles').update(updatePro).eq('id', perfilId);
-      if (updProError) {
-        const { error: updBaseError } = await novaSupabase.from('perfiles').update(updateBase).eq('id', perfilId);
-        if (updBaseError) throw updBaseError;
-      }
+      await perfilesUpdateConFallbackFecha(perfilId, updatePro, updateBase);
     }
 
     async function crearUsuarioDetallado() {
@@ -2288,11 +2332,7 @@
           telefono_emergencia: telefonoEmergencia
         };
 
-        const { error: proErr } = await novaSupabase.from('perfiles').update(payloadPro).eq('id', clienteId);
-        if (proErr) {
-          const { error: baseErr } = await novaSupabase.from('perfiles').update(payloadBase).eq('id', clienteId);
-          if (baseErr) throw baseErr;
-        }
+        await perfilesUpdateConFallbackFecha(clienteId, payloadPro, payloadBase);
         toast('Ficha de cliente actualizada', 'success');
         await loadCatalogs();
       } catch (err) {
