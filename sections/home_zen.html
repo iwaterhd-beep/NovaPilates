@@ -3,7 +3,7 @@
     <a href="index.html" class="nav-logo" aria-label="NŌVA PILATES STUDIO">
       <img
         class="logo-main"
-        src="assets/branding/logo-nova-main.PNG"
+        src="/assets/branding/logo-nova-main.PNG"
         width="220"
         height="52"
         alt=""
@@ -11,6 +11,7 @@
         loading="eager"
         fetchpriority="high"
         decoding="async"
+        onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';this.classList.add('logo-main--svg');"
       />
     </a>
     <ul class="nav-links">
@@ -186,12 +187,13 @@
     <div class="footer-brand">
       <img
         class="footer-logo-main"
-        src="assets/branding/logo-nova-main.PNG"
+        src="/assets/branding/logo-nova-main.PNG"
         width="200"
         height="46"
         alt="NŌVA PILATES STUDIO"
         loading="lazy"
         decoding="async"
+        onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';this.classList.add('logo-main--svg');"
       />
     </div>
     <div><ul class="footer-links"><li><a href="#empezar">Prácticas</a></li><li><a href="#bonos">Bonos</a></li></ul></div>

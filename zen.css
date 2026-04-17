@@ -42,10 +42,15 @@ a { text-decoration: none; color: inherit; }
   color: var(--ink);
   line-height: 0;
 }
-/* PNG para fondo oscuro → invert + alto contraste = trazo casi negro sobre blanco */
-.nav-logo .logo-main,
-.footer-brand .footer-logo-main {
-  filter: invert(1) grayscale(1) contrast(2.75);
+/* PNG oscuro: invert suave (contrast muy alto puede dejar la imagen en blanco en algunos navegadores) */
+.nav-logo .logo-main:not(.logo-main--svg),
+.footer-brand .footer-logo-main:not(.logo-main--svg) {
+  filter: invert(1) grayscale(1) contrast(1.25);
+}
+.nav-logo .logo-main.logo-main--svg,
+.footer-brand .footer-logo-main.logo-main--svg {
+  filter: none;
+  max-height: 44px;
 }
 .logo-main {
   display: block;

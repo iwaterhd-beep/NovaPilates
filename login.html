@@ -33,8 +33,13 @@
       padding: 2rem;
     }
     .brand { display: flex; justify-content: center; margin-bottom: 1rem; }
+    .brand .brand-logo-img:not(.brand-logo-img--svg) {
+      filter: invert(1) grayscale(1) contrast(1.25);
+    }
+    .brand .brand-logo-img.brand-logo-img--svg {
+      filter: none;
+    }
     .brand .brand-logo-img {
-      filter: invert(1) grayscale(1) contrast(2.75);
       display: block;
       max-height: 64px;
       max-width: min(260px, 86vw);
@@ -70,7 +75,7 @@
   <main class="wrap">
     <section class="card">
       <a href="index.html" class="brand" aria-label="NŌVA PILATES STUDIO">
-        <img src="/assets/branding/logo-nova-main.PNG" alt="" class="brand-logo-img" width="240" height="64" decoding="async" role="presentation" />
+        <img src="/assets/branding/logo-nova-main.PNG" alt="" class="brand-logo-img" width="240" height="64" decoding="async" role="presentation" onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';this.classList.add('brand-logo-img--svg');" />
       </a>
       <h1>Bienvenida</h1>
       <p class="sub">Accede a tu espacio personal</p>
