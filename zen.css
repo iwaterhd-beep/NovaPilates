@@ -150,6 +150,7 @@ a { text-decoration: none; color: inherit; }
 .card h3, .step h3 { font-family: 'Cormorant Garamond', serif; font-weight: 400; }
 .card h3 { font-size: 1.5rem; margin-bottom: .4rem; }
 .step h3 { font-size: 1.3rem; margin-bottom: .4rem; }
+.section-process .pillar-card .pillar-title { margin-top: 0; }
 .card p, .step p { color: var(--ink-soft); font-size: .9rem; }
 .step .num { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: #8f887d; margin-bottom: .5rem; }
 
@@ -215,49 +216,14 @@ a { text-decoration: none; color: inherit; }
   margin: 2.75rem 0 0;
 }
 
-.steps--visual {
-  position: relative;
-  padding-top: 0.25rem;
+/* Funcionamiento: mismo patrón que “Cómo empezar” (número + línea, texto, icono abajo) */
+.section-process .steps-pillars .pillar-card {
+  min-height: 17rem;
 }
-.steps--visual::before {
-  content: "";
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 1.05rem;
-  height: 1px;
-  background: var(--line-strong);
-  pointer-events: none;
-  z-index: 0;
+.section-process .process-icon svg {
+  max-width: 3.35rem;
+  height: auto;
 }
-.step--ico {
-  display: flex;
-  flex-direction: column;
-  padding-top: 1.75rem;
-}
-.step-num-row {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  margin: -0.5rem 0 1rem;
-}
-.step-num {
-  display: inline-block;
-  padding: 0 .45rem;
-  background: var(--card);
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.2rem;
-  color: #2c2a28;
-  line-height: 1;
-}
-.step-icon-svg {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto .9rem;
-  color: var(--ink-soft);
-}
-.step-icon-svg svg { width: 100%; height: 100%; display: block; }
-.steps--visual .step--ico h3 { margin-top: 0; }
 
 .section-donde { text-align: center; }
 .section-donde-inner { max-width: 32rem; margin: 0 auto; }
@@ -323,13 +289,6 @@ a { text-decoration: none; color: inherit; }
   margin: 0 auto;
 }
 
-.studio { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
-.studio-brand { border: 1px solid var(--line); background: var(--panel); padding: 1rem; display: grid; gap: 1px; }
-.studio-brand-item { min-height: 150px; border: 1px solid var(--line); background: var(--card); display: flex; align-items: center; justify-content: center; }
-.studio-brand-item img { max-width: 86%; max-height: 110px; object-fit: contain; }
-.studio-copy h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 3.5vw, 3.4rem); font-weight: 400; line-height: .95; margin-bottom: .8rem; }
-.studio-copy p { color: var(--ink-soft); }
-
 .cta { text-align: center; padding: 4rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #f9f6f0; }
 .cta h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 4rem); font-weight: 400; line-height: .95; margin: .6rem 0 .9rem; }
 .cta p { color: var(--ink-soft); margin-bottom: 1.2rem; }
@@ -356,7 +315,8 @@ a { text-decoration: none; color: inherit; }
 
 @media (max-width: 980px) {
   .nav-links { display: none; }
-  .studio, .grid-3, .steps, .footer-grid { grid-template-columns: 1fr; }
+  .grid-3, .steps, .footer-grid { grid-template-columns: 1fr; }
+  .section-process .steps-pillars .pillar-card { min-height: auto; }
   .empezar-head { flex-direction: column; align-items: flex-start; }
   .empezar-btn { align-self: flex-start; }
   .hero--video { min-height: auto; padding-bottom: 3rem; }
@@ -371,6 +331,4 @@ a { text-decoration: none; color: inherit; }
         rgba(249, 247, 242, 0.25) 100%
       );
   }
-  .steps--visual::before { display: none; }
-  .step-num-row { margin-top: 0; }
 }
