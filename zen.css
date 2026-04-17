@@ -38,14 +38,34 @@ a { text-decoration: none; color: inherit; }
 .nav-logo {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   color: var(--ink);
+  line-height: 0;
+}
+/* Logo principal exportado para fondo oscuro: se muestra sobre chip negro en cabecera clara */
+.brand-logo-darkbg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0a;
+  border-radius: 12px;
+  padding: 8px 16px;
+  line-height: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.brand-logo-darkbg--footer {
+  padding: 10px 18px;
+  border-radius: 14px;
 }
 .logo-main {
   display: block;
-  height: 48px;
+  height: auto;
+  max-height: 44px;
   width: auto;
-  max-width: min(240px, 46vw);
+  max-width: min(220px, 42vw);
   object-fit: contain;
+  object-position: center;
+  background: transparent;
 }
 .logo-isotipo { display: block; height: 46px; width: auto; }
 .logo-mark { height: 42px; width: auto; max-height: 42px; object-fit: contain; }
@@ -329,9 +349,10 @@ a { text-decoration: none; color: inherit; }
   max-width: 100%;
 }
 .footer-logo-main {
-  height: 46px;
+  height: auto;
+  max-height: 42px;
   width: auto;
-  max-width: 220px;
+  max-width: 200px;
   object-fit: contain;
 }
 .footer-links { list-style: none; display: flex; flex-direction: column; gap: .4rem; }

@@ -7,7 +7,7 @@
   <title>Panel Staff — NŌVA Pilates Studio</title>
   <link rel="stylesheet" href="portal.css?v=2" />
 </head>
-<body data-panel-build="2026-04-18-altas">
+<body data-panel-build="2026-04-18-disciplinas">
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
@@ -66,6 +66,33 @@
             <div style="display:flex;align-items:flex-end;">
               <button class="btn btn-primary" id="crearClaseBtn" type="button">Crear sesión</button>
             </div>
+          </div>
+        </div>
+        <div class="card" id="cardDisciplinasAdmin" style="display:none;margin-bottom:1rem;">
+          <div class="card-label">Disciplinas (catálogo)</div>
+          <p style="margin:0 0 .6rem;font-size:.75rem;color:var(--color-muted);">Crea disciplinas nuevas para el calendario. Solo las <strong>activas</strong> salen en el desplegable de arriba; puedes desactivar las que dejen de impartirse.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;align-items:end;margin-bottom:.9rem;">
+            <div>
+              <label class="form-label" for="nuevaDisciplinaNombre">Nombre</label>
+              <input class="form-input" id="nuevaDisciplinaNombre" placeholder="Ej. Barre" autocomplete="off" />
+            </div>
+            <div>
+              <label class="form-label" for="nuevaDisciplinaDesc">Descripción (opc.)</label>
+              <input class="form-input" id="nuevaDisciplinaDesc" placeholder="Texto breve" autocomplete="off" />
+            </div>
+            <div>
+              <label class="form-label" for="nuevaDisciplinaColor">Color</label>
+              <input class="form-input" id="nuevaDisciplinaColor" type="color" value="#c9a96e" style="min-height:42px;padding:.2rem;" />
+            </div>
+            <div>
+              <button type="button" class="btn btn-primary" id="crearDisciplinaBtn">Añadir disciplina</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nombre</th><th>Orden</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody id="rowsDisciplinas"></tbody>
+            </table>
           </div>
         </div>
         <div class="card">
@@ -170,7 +197,7 @@
             <div class="tpv-catalog-split">
               <div class="card tpv-card-compact">
                 <div class="card-label">Bonos</div>
-                <p class="tpv-hint">Toca un cuadrado para añadirlo al ticket (luego ajusta importes a la derecha).</p>
+                <p class="tpv-hint">Toca un cuadrado para añadirlo al ticket. El precio es el del catálogo (no editable en el ticket).</p>
                 <div id="tpvBonosGrid" class="tpv-tile-grid"></div>
               </div>
               <div class="card tpv-card-compact">
@@ -400,6 +427,45 @@
       </section>
     </div>
   </main>
+
+  <div class="modal-overlay" id="disciplinaModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Editar disciplina</h2>
+        <button class="modal-close" id="closeDisciplinaModal">✕</button>
+      </div>
+      <form id="disciplinaForm" style="display:grid;gap:.9rem;">
+        <input type="hidden" id="modalDisciplinaId" />
+        <div class="form-group">
+          <label class="form-label" for="modalDisciplinaNombre">Nombre</label>
+          <input class="form-input" id="modalDisciplinaNombre" type="text" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modalDisciplinaDesc">Descripción</label>
+          <textarea class="form-input" id="modalDisciplinaDesc" rows="2" style="resize:vertical;" placeholder="Opcional"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modalDisciplinaColor">Color</label>
+          <input class="form-input" id="modalDisciplinaColor" type="color" style="min-height:42px;padding:.2rem;" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modalDisciplinaOrden">Orden (menor = primero en listas)</label>
+          <input class="form-input" id="modalDisciplinaOrden" type="number" min="0" step="1" value="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modalDisciplinaActiva">Activa</label>
+          <select class="form-input" id="modalDisciplinaActiva">
+            <option value="true">Sí</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:.6rem;">
+          <button class="btn btn-outline" type="button" id="cancelDisciplinaBtn">Cancelar</button>
+          <button class="btn btn-primary" type="submit">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div class="modal-overlay" id="tipoBonoModal">
     <div class="modal">
@@ -665,6 +731,7 @@
       usuariosCatalogo: [],
       productosTienda: [],
       productosTiendaAll: [],
+      disciplinasAll: [],
       clasesLista: [],
       duplicandoClase: null,
       tpvCart: []
@@ -1026,6 +1093,8 @@
       document.getElementById('userRole').textContent = profile.rol;
       const delCliente = document.getElementById('eliminarClienteBtn');
       if (delCliente) delCliente.style.display = profile.rol === 'admin' ? '' : 'none';
+      const cardDisc = document.getElementById('cardDisciplinasAdmin');
+      if (cardDisc) cardDisc.style.display = profile.rol === 'admin' ? '' : 'none';
       applyStaffSidebarUi();
       return true;
     }
@@ -1177,9 +1246,45 @@
       rowsU.innerHTML = list.map(x => `<tr><td>${x.nombre || '-'}</td><td>${x.email}</td><td>${x.rol}</td><td>${x.activo ? 'Sí' : 'No'}</td><td>${x.rol === 'cliente' ? `<button class="btn btn-outline btn-sm js-editar-cliente" data-id="${x.id}">Editar ficha</button>` : '-'}</td></tr>`).join('') || '<tr><td colspan="5">Ningún usuario coincide con los filtros.</td></tr>';
     }
 
+    function renderDisciplinasRows() {
+      const rows = document.getElementById('rowsDisciplinas');
+      if (!rows) return;
+      const list = appState.disciplinasAll || [];
+      rows.innerHTML = list
+        .map((x) => {
+          const estado = x.activa
+            ? '<span class="badge badge-accent">Activa</span>'
+            : '<span class="badge badge-neutral">Inactiva</span>';
+          return `<tr>
+            <td><span style="display:inline-block;width:.65rem;height:.65rem;border-radius:2px;vertical-align:middle;margin-right:.35rem;background:${escHtml(x.color_hex || '#c9a96e')};"></span>${escHtml(x.nombre)}</td>
+            <td>${x.orden ?? 0}</td>
+            <td>${estado}</td>
+            <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
+              <button type="button" class="btn btn-outline btn-sm js-editar-disciplina" data-id="${x.id}">Editar</button>
+              <button type="button" class="btn btn-ghost btn-sm js-toggle-disciplina" data-id="${x.id}" data-activa="${x.activa ? '1' : '0'}">${x.activa ? 'Desactivar' : 'Activar'}</button>
+            </td>
+          </tr>`;
+        })
+        .join('') || '<tr><td colspan="4">Sin disciplinas.</td></tr>';
+    }
+
+    function openDisciplinaModal(row) {
+      document.getElementById('modalDisciplinaId').value = row.id;
+      document.getElementById('modalDisciplinaNombre').value = row.nombre || '';
+      document.getElementById('modalDisciplinaDesc').value = row.descripcion || '';
+      document.getElementById('modalDisciplinaColor').value = row.color_hex || '#c9a96e';
+      document.getElementById('modalDisciplinaOrden').value = row.orden ?? 0;
+      document.getElementById('modalDisciplinaActiva').value = row.activa ? 'true' : 'false';
+      document.getElementById('disciplinaModal').classList.add('open');
+    }
+
+    function closeDisciplinaModal() {
+      document.getElementById('disciplinaModal').classList.remove('open');
+    }
+
     async function loadCatalogs() {
-      const [{ data: d }, { data: s }, { data: tb }, { data: ajustes }] = await Promise.all([
-        novaSupabase.from('disciplinas').select('id,nombre').eq('activa', true).order('orden'),
+      const [{ data: d, error: dErr }, { data: s }, { data: tb }, { data: ajustes }] = await Promise.all([
+        novaSupabase.from('disciplinas').select('id,nombre,descripcion,color_hex,activa,orden').order('orden'),
         novaSupabase.from('salas').select('id,nombre').eq('activa', true).order('nombre'),
         novaSupabase.from('tipos_bono').select('id,nombre,sesiones,duracion_dias,precio,activo,orden,descripcion,periodicidad,color_hex').order('orden'),
         novaSupabase.from('ajustes_centro').select('margen_reserva_dias,margen_cancelacion_dias').eq('id', 1).maybeSingle()
@@ -1198,8 +1303,12 @@
         appState.productosTiendaAll = prodRes.data || [];
         appState.productosTienda = appState.productosTiendaAll.filter((p) => p.activo);
       }
+      if (dErr) console.warn('Disciplinas:', dErr.message);
+      appState.disciplinasAll = d || [];
+      const disciplinasActivas = (appState.disciplinasAll || []).filter((x) => x.activa);
       const ds = document.getElementById('disciplinaSelect');
-      ds.innerHTML = (d || []).map(x => `<option value="${x.id}">${x.nombre}</option>`).join('');
+      ds.innerHTML = disciplinasActivas.map((x) => `<option value="${x.id}">${escHtml(x.nombre)}</option>`).join('');
+      if (staffProfile && staffProfile.rol === 'admin') renderDisciplinasRows();
       const ss = document.getElementById('salaSelect');
       ss.innerHTML = (s || []).map(x => `<option value="${x.id}">${x.nombre}</option>`).join('');
       const cs = document.getElementById('clienteSelect');
@@ -1358,8 +1467,7 @@
           </div>
           <div class="tpv-cart-line-title">${escHtml(line.nombre)}</div>
           <div class="tpv-cart-line-price">
-            <input class="form-input js-tpv-cart-importe" type="number" min="0" step="0.01" data-uid="${line.uid}" value="${Number(line.importe || 0).toFixed(2)}" />
-            <span class="tpv-cart-eur">€</span>
+            <span class="tpv-cart-price-display">${Number(line.importe || 0).toFixed(2).replace('.', ',')} €</span>
           </div>
         </div>
       `).join('');
@@ -2009,6 +2117,94 @@
       }
     });
 
+    document.getElementById('crearDisciplinaBtn').addEventListener('click', async () => {
+      if (!staffProfile || staffProfile.rol !== 'admin') {
+        toast('Solo administración puede crear disciplinas.', 'error');
+        return;
+      }
+      const nombre = document.getElementById('nuevaDisciplinaNombre').value.trim();
+      if (!nombre) {
+        toast('Indica el nombre de la disciplina.', 'error');
+        return;
+      }
+      const desc = document.getElementById('nuevaDisciplinaDesc').value.trim() || null;
+      const color = document.getElementById('nuevaDisciplinaColor').value || '#c9a96e';
+      const ordenBase = Math.max(0, ...(appState.disciplinasAll || []).map((x) => Number(x.orden) || 0));
+      try {
+        const { data: ins, error } = await novaSupabase
+          .from('disciplinas')
+          .insert({
+            nombre,
+            descripcion: desc,
+            color_hex: color,
+            activa: true,
+            orden: ordenBase + 1
+          })
+          .select('id')
+          .single();
+        if (error) {
+          const msg = (error.message || '').toLowerCase();
+          if (msg.includes('duplicate') || msg.includes('unique')) {
+            toast('Ya existe una disciplina con ese nombre.', 'error');
+            return;
+          }
+          throw error;
+        }
+        document.getElementById('nuevaDisciplinaNombre').value = '';
+        document.getElementById('nuevaDisciplinaDesc').value = '';
+        toast('Disciplina creada', 'success');
+        await loadCatalogs();
+        if (ins?.id) document.getElementById('disciplinaSelect').value = ins.id;
+      } catch (err) {
+        toast(err.message || 'No se pudo crear la disciplina', 'error');
+      }
+    });
+
+    document.getElementById('disciplinaForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!staffProfile || staffProfile.rol !== 'admin') {
+        toast('Solo administración puede editar disciplinas.', 'error');
+        return;
+      }
+      const id = document.getElementById('modalDisciplinaId').value;
+      const nombre = document.getElementById('modalDisciplinaNombre').value.trim();
+      if (!nombre) {
+        toast('El nombre es obligatorio.', 'error');
+        return;
+      }
+      try {
+        const { error } = await novaSupabase
+          .from('disciplinas')
+          .update({
+            nombre,
+            descripcion: document.getElementById('modalDisciplinaDesc').value.trim() || null,
+            color_hex: document.getElementById('modalDisciplinaColor').value || '#c9a96e',
+            orden: Number(document.getElementById('modalDisciplinaOrden').value) || 0,
+            activa: document.getElementById('modalDisciplinaActiva').value === 'true'
+          })
+          .eq('id', id);
+        if (error) {
+          const msg = (error.message || '').toLowerCase();
+          if (msg.includes('duplicate') || msg.includes('unique')) {
+            toast('Ya existe otra disciplina con ese nombre.', 'error');
+            return;
+          }
+          throw error;
+        }
+        toast('Disciplina actualizada', 'success');
+        closeDisciplinaModal();
+        await loadCatalogs();
+      } catch (err) {
+        toast(err.message || 'No se pudo guardar', 'error');
+      }
+    });
+
+    document.getElementById('closeDisciplinaModal').addEventListener('click', closeDisciplinaModal);
+    document.getElementById('cancelDisciplinaBtn').addEventListener('click', closeDisciplinaModal);
+    document.getElementById('disciplinaModal').addEventListener('click', (e) => {
+      if (e.target.id === 'disciplinaModal') closeDisciplinaModal();
+    });
+
     document.addEventListener('click', async (e) => {
       const btnEditar = e.target.closest('.js-editar-clase');
       if (btnEditar) {
@@ -2032,6 +2228,37 @@
         const c = appState.clasesLista.find(x => x.id === btnDuplicar.dataset.id);
         if (c) openClaseDuplicateModal(c);
         else toast('No se encontró la clase para duplicar.', 'error');
+        return;
+      }
+
+      const btnEditDisc = e.target.closest('.js-editar-disciplina');
+      if (btnEditDisc) {
+        if (!staffProfile || staffProfile.rol !== 'admin') {
+          toast('Solo administración puede editar disciplinas.', 'error');
+          return;
+        }
+        const row = (appState.disciplinasAll || []).find((x) => x.id === btnEditDisc.dataset.id);
+        if (row) openDisciplinaModal(row);
+        else toast('No se encontró la disciplina.', 'error');
+        return;
+      }
+
+      const btnTogDisc = e.target.closest('.js-toggle-disciplina');
+      if (btnTogDisc) {
+        if (!staffProfile || staffProfile.rol !== 'admin') {
+          toast('Solo administración puede cambiar disciplinas.', 'error');
+          return;
+        }
+        const id = btnTogDisc.dataset.id;
+        const wasActiva = btnTogDisc.dataset.activa === '1';
+        try {
+          const { error } = await novaSupabase.from('disciplinas').update({ activa: !wasActiva }).eq('id', id);
+          if (error) throw error;
+          toast(wasActiva ? 'Disciplina desactivada' : 'Disciplina activada', 'success');
+          await loadCatalogs();
+        } catch (err) {
+          toast(err.message || 'No se pudo actualizar', 'error');
+        }
         return;
       }
 
@@ -2231,13 +2458,6 @@
     });
     document.getElementById('tpvPrintTicketBtn').addEventListener('click', () => {
       printTicket();
-    });
-    document.getElementById('tpvCartList').addEventListener('input', (e) => {
-      const inp = e.target.closest('.js-tpv-cart-importe');
-      if (!inp) return;
-      const line = appState.tpvCart.find((l) => l.uid === inp.dataset.uid);
-      if (line) line.importe = Number(inp.value) || 0;
-      tpvUpdateCartTotal();
     });
     document.getElementById('tpvCobrarEfectivo').addEventListener('click', () => tpvEjecutarCobro('efectivo'));
     document.getElementById('tpvCobrarTarjeta').addEventListener('click', () => tpvEjecutarCobro('tarjeta'));

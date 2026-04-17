@@ -9,7 +9,8 @@
   <meta property="og:description" content="Inicia sesión en tu espacio personal de NŌVA." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="/assets/branding/logo-nova-main.PNG" />
-  <link rel="icon" type="image/png" href="/assets/branding/logo-nova-main.PNG" />
+  <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate icon" href="/assets/branding/logo-nova-main.PNG" type="image/png" />
   <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Cormorant+Garamond:wght@300;400;500&display=swap');
@@ -32,7 +33,24 @@
       padding: 2rem;
     }
     .brand { display: flex; justify-content: center; margin-bottom: 1rem; }
-    .brand .brand-logo-img { max-height: 72px; max-width: min(280px, 88vw); width: auto; height: auto; object-fit: contain; }
+    .brand-logo-darkbg {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0a;
+      border-radius: 14px;
+      padding: 12px 22px;
+      line-height: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .brand .brand-logo-img {
+      display: block;
+      max-height: 64px;
+      max-width: min(260px, 86vw);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
     h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 400; margin-bottom: .2rem; text-align: center; }
     .sub { text-align: center; color: var(--ink-soft); font-size: .88rem; margin-bottom: 1.5rem; }
     .tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); margin-bottom: 1rem; }
@@ -60,8 +78,10 @@
 <body>
   <main class="wrap">
     <section class="card">
-      <a href="index.html" class="brand">
-        <img src="/assets/branding/logo-nova-main.PNG" alt="NŌVA PILATES STUDIO" class="brand-logo-img" />
+      <a href="index.html" class="brand" aria-label="NŌVA PILATES STUDIO">
+        <span class="brand-logo-darkbg">
+          <img src="/assets/branding/logo-nova-main.PNG" alt="" class="brand-logo-img" width="240" height="64" decoding="async" role="presentation" />
+        </span>
       </a>
       <h1>Bienvenida</h1>
       <p class="sub">Accede a tu espacio personal</p>

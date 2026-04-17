@@ -797,14 +797,11 @@ select.form-input { appearance: none; cursor: pointer; }
   align-items: center;
   gap: 0.35rem;
 }
-.tpv-cart-line-price .form-input {
-  max-width: 5.5rem;
-  padding: 0.35rem 0.45rem;
-  min-height: 36px;
-}
-.tpv-cart-eur {
-  font-size: 0.8rem;
-  color: var(--color-muted);
+.tpv-cart-price-display {
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent-dk);
+  letter-spacing: 0.02em;
 }
 .tpv-cart-total {
   display: flex;
