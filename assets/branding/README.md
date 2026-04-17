@@ -1,6 +1,6 @@
 # Branding NŌVA
 
-- **`logo-nova-main.PNG`** — Logo para **fondo oscuro**. En web clara se aplica solo **`filter: invert()`** en CSS (sin marco alrededor). Si más adelante usas un PNG ya para fondo claro, habría que quitar ese filtro en `zen.css` / `login.html`.
-- **`logo-isotipo.svg`** / **`favicon.svg`** — Isotipo y favicon.
+- **`logo-nova-main.PNG`** — Logo principal (cabecera, pie, login). Debe verse en **negro sobre fondo claro** (o con transparencia). La web **no aplica filtros CSS** al PNG.
+- **`logo-isotipo.svg`** / **`favicon.svg`** — Reserva; el favicon usa el SVG.
 
-Rutas: `assets/branding/...` o `/assets/branding/...`.
+Rutas en HTML: `/assets/branding/...` desde la raíz del sitio.
