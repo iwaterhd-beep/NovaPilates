@@ -259,8 +259,9 @@
         </div>
         <div class="card">
           <div class="card-label">Transacciones recientes</div>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .5rem;">Para corregir un cobro por error usa <strong>Anular</strong>. Las ventas de bono solo se pueden anular si el bono aún no tiene reservas activas ni sesiones consumidas.</p>
           <div class="table-wrap">
-            <table><thead><tr><th>Cliente</th><th>Tipo</th><th>Concepto</th><th>Importe</th><th>Método</th><th>Fecha</th></tr></thead><tbody id="rowsFinanzas"></tbody></table>
+            <table><thead><tr><th>Cliente</th><th>Tipo</th><th>Concepto</th><th>Importe</th><th>Método</th><th>Fecha</th><th style="white-space:nowrap;">Acción</th></tr></thead><tbody id="rowsFinanzas"></tbody></table>
           </div>
         </div>
       </section>
@@ -813,6 +814,17 @@
       document.getElementById('editClienteNotas').value = perfil?.notas || '';
     }
 
+    /** PostgREST: Could not find the 'col' column of 'perfiles' in the schema cache */
+    function parseColumnaPerfilFalta(msg) {
+      const m = String(msg || '').match(/['"](\w+)['"]\s+column of ['"]perfiles['"]/i);
+      return m ? m[1] : null;
+    }
+
+    const COLS_SELECT_PERFIL_PRO = [
+      'id', 'nombre', 'apellidos', 'email', 'telefono', 'fecha_nacimiento',
+      'direccion', 'ciudad', 'cp', 'dni', 'telefono_emergencia', 'notas', 'rol', 'activo'
+    ];
+
     async function loadClienteDetalleById(clienteId) {
       if (!clienteId) {
         appState.editingClienteId = null;
@@ -820,72 +832,48 @@
         return;
       }
       appState.editingClienteId = clienteId;
-      let perfil = null;
-      const selPro =
-        'id,nombre,apellidos,email,telefono,fecha_nacimiento,direccion,ciudad,cp,dni,telefono_emergencia,notas,rol,activo';
-      const selProNoFn =
-        'id,nombre,apellidos,email,telefono,direccion,ciudad,cp,dni,telefono_emergencia,notas,rol,activo';
-      const selBase = 'id,nombre,apellidos,email,telefono,fecha_nacimiento,notas,rol,activo';
-      const selBaseNoFn = 'id,nombre,apellidos,email,telefono,notas,rol,activo';
-
-      let { data: proData, error: proErr } = await novaSupabase
-        .from('perfiles')
-        .select(selPro)
-        .eq('id', clienteId)
-        .maybeSingle();
-      if (proErr && (proErr.message || '').toLowerCase().includes('fecha_nacimiento')) {
-        ({ data: proData, error: proErr } = await novaSupabase
-          .from('perfiles')
-          .select(selProNoFn)
-          .eq('id', clienteId)
-          .maybeSingle());
-      }
-      if (!proErr) {
-        perfil = proData;
-      } else {
-        let { data: baseData, error: baseErr } = await novaSupabase
-          .from('perfiles')
-          .select(selBase)
-          .eq('id', clienteId)
-          .maybeSingle();
-        if (baseErr && (baseErr.message || '').toLowerCase().includes('fecha_nacimiento')) {
-          ({ data: baseData, error: baseErr } = await novaSupabase
-            .from('perfiles')
-            .select(selBaseNoFn)
-            .eq('id', clienteId)
-            .maybeSingle());
+      let cols = [...COLS_SELECT_PERFIL_PRO];
+      for (let attempt = 0; attempt < 24; attempt++) {
+        const sel = cols.join(',');
+        const { data, error } = await novaSupabase.from('perfiles').select(sel).eq('id', clienteId).maybeSingle();
+        if (!error) {
+          fillClienteEditor(data || {});
+          return;
         }
-        if (baseErr) throw baseErr;
-        perfil = baseData;
+        const missing = parseColumnaPerfilFalta(error.message);
+        if (missing && cols.includes(missing)) {
+          cols = cols.filter((c) => c !== missing);
+          continue;
+        }
+        throw error;
       }
-      fillClienteEditor(perfil || {});
+      throw new Error('No se pudo cargar la ficha del cliente.');
     }
 
-    function omitPerfilCampo(payload, campo) {
-      const o = { ...payload };
-      delete o[campo];
-      return o;
-    }
-
-    /** Update perfiles; si falta columna fecha_nacimiento en la BD, reintenta sin ella. */
-    async function perfilesUpdateConFallbackFecha(perfilId, updatePro, updateBase) {
-      let { error } = await novaSupabase.from('perfiles').update(updatePro).eq('id', perfilId);
-      const missFn = (err) => (err?.message || '').toLowerCase().includes('fecha_nacimiento');
-      if (error && missFn(error)) {
-        ({ error } = await novaSupabase
-          .from('perfiles')
-          .update(omitPerfilCampo(updatePro, 'fecha_nacimiento'))
-          .eq('id', perfilId));
+    /** Update perfiles: reintenta quitando columnas que aún no existan en la BD. */
+    async function perfilesUpdateConFallbackSchema(perfilId, updatePro, updateBase) {
+      let pro = { ...updatePro };
+      let base = { ...updateBase };
+      for (let attempt = 0; attempt < 24; attempt++) {
+        let { error } = await novaSupabase.from('perfiles').update(pro).eq('id', perfilId);
+        if (!error) return;
+        const col = parseColumnaPerfilFalta(error.message);
+        if (col && Object.prototype.hasOwnProperty.call(pro, col)) {
+          delete pro[col];
+          delete base[col];
+          continue;
+        }
+        ({ error } = await novaSupabase.from('perfiles').update(base).eq('id', perfilId));
+        if (!error) return;
+        const col2 = parseColumnaPerfilFalta(error.message);
+        if (col2 && Object.prototype.hasOwnProperty.call(base, col2)) {
+          delete base[col2];
+          if (Object.prototype.hasOwnProperty.call(pro, col2)) delete pro[col2];
+          continue;
+        }
+        throw error;
       }
-      if (!error) return;
-      ({ error } = await novaSupabase.from('perfiles').update(updateBase).eq('id', perfilId));
-      if (error && missFn(error)) {
-        ({ error } = await novaSupabase
-          .from('perfiles')
-          .update(omitPerfilCampo(updateBase, 'fecha_nacimiento'))
-          .eq('id', perfilId));
-      }
-      if (error) throw error;
+      throw new Error('No se pudo guardar el perfil.');
     }
 
     async function aplicarFichaTrasAlta(perfilId) {
@@ -918,7 +906,7 @@
         dni,
         telefono_emergencia: telefonoEmergencia
       };
-      await perfilesUpdateConFallbackFecha(perfilId, updatePro, updateBase);
+      await perfilesUpdateConFallbackSchema(perfilId, updatePro, updateBase);
     }
 
     async function crearUsuarioDetallado() {
@@ -1092,19 +1080,24 @@
     }
 
     async function fetchPerfilesCatalogo() {
-      const full =
-        'id,nombre,apellidos,email,rol,activo,telefono,dni,telefono_emergencia,direccion,ciudad,cp';
-      const sinApellidos =
-        'id,nombre,email,rol,activo,telefono,dni,telefono_emergencia,direccion,ciudad,cp';
-      let r = await novaSupabase.from('perfiles').select(full).order('nombre');
-      if (r.error && (r.error.message || '').toLowerCase().includes('apellidos')) {
-        r = await novaSupabase.from('perfiles').select(sinApellidos).order('nombre');
-      }
-      if (r.error) {
+      let cols = [
+        'id', 'nombre', 'apellidos', 'email', 'rol', 'activo',
+        'telefono', 'dni', 'telefono_emergencia', 'direccion', 'ciudad', 'cp'
+      ];
+      for (let attempt = 0; attempt < 24; attempt++) {
+        const sel = cols.join(',');
+        const r = await novaSupabase.from('perfiles').select(sel).order('nombre');
+        if (!r.error) return r.data || [];
+        const missing = parseColumnaPerfilFalta(r.error.message);
+        if (missing && cols.includes(missing)) {
+          cols = cols.filter((c) => c !== missing);
+          continue;
+        }
         toast(r.error.message || 'No se pudieron cargar los perfiles', 'error');
         return [];
       }
-      return r.data || [];
+      toast('No se pudieron cargar los perfiles.', 'error');
+      return [];
     }
 
     function telefonoBusquedaCoincide(valor, qLower, qTelCompact) {
@@ -1860,7 +1853,7 @@
     async function loadFinanzas() {
       const { data, error } = await novaSupabase
         .from('transacciones')
-        .select('importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,email)')
+        .select('id,registrado_por,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,email)')
         .order('created_at', { ascending: false })
         .limit(80);
       if (error) {
@@ -1876,6 +1869,13 @@
           : '<span class="badge badge-accent">Bono</span>';
         const concepto = escHtml(finanzasConceptoLinea(t));
         const imp = Number(t.importe || 0).toFixed(2);
+        const puedeAnular =
+          staffProfile &&
+          (staffProfile.rol === 'admin' ||
+            (staffProfile.rol === 'empleado' && t.registrado_por === staffProfile.id));
+        const btnAnular = puedeAnular
+          ? `<button type="button" class="btn btn-ghost btn-sm js-anular-transaccion" data-id="${t.id}" data-es-bono="${esTienda ? '0' : '1'}">Anular</button>`
+          : '<span style="color:var(--color-muted);">—</span>';
         return `<tr>
           <td>${escHtml(cliente)}</td>
           <td>${tipoBadge}</td>
@@ -1883,8 +1883,9 @@
           <td>${imp} €</td>
           <td>${escHtml(t.metodo_pago || '-')}</td>
           <td style="white-space:nowrap;font-size:.8rem;">${new Date(t.created_at).toLocaleString('es-ES')}</td>
+          <td style="white-space:nowrap;">${btnAnular}</td>
         </tr>`;
-      }).join('') || '<tr><td colspan="6">Sin transacciones</td></tr>';
+      }).join('') || '<tr><td colspan="7">Sin transacciones</td></tr>';
 
       const inicioDia = new Date();
       inicioDia.setHours(0, 0, 0, 0);
@@ -2332,7 +2333,7 @@
           telefono_emergencia: telefonoEmergencia
         };
 
-        await perfilesUpdateConFallbackFecha(clienteId, payloadPro, payloadBase);
+        await perfilesUpdateConFallbackSchema(clienteId, payloadPro, payloadBase);
         toast('Ficha de cliente actualizada', 'success');
         await loadCatalogs();
       } catch (err) {
@@ -2691,6 +2692,33 @@
         await loadNotifs();
       } catch (e) {
         toast(e.message || 'No se pudo enviar la notificación', 'error');
+      }
+    });
+
+    document.getElementById('tab-finanzas')?.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.js-anular-transaccion');
+      if (!btn) return;
+      const id = btn.getAttribute('data-id');
+      if (!id) return;
+      const esBono = btn.getAttribute('data-es-bono') === '1';
+      const msg = esBono
+        ? 'Se anulará la venta y se desactivará el bono (solo si no tiene sesiones usadas ni reservas activas). ¿Continuar?'
+        : 'Se eliminará este cobro del registro de caja. ¿Continuar?';
+      if (!window.confirm(msg)) return;
+      try {
+        const { error } = await novaSupabase.rpc('anular_transaccion_tpv', { p_transaccion_id: id });
+        if (error) {
+          const m = error.message || '';
+          if (m.includes('function') && m.includes('does not exist')) {
+            toast('Falta ejecutar en Supabase el SQL del parche anular_transaccion_tpv.', 'error');
+            return;
+          }
+          throw error;
+        }
+        toast('Venta anulada', 'success');
+        await Promise.all([loadFinanzas(), loadBonos()]);
+      } catch (err) {
+        toast(err.message || 'No se pudo anular', 'error');
       }
     });
 
