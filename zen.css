@@ -40,9 +40,21 @@ a { text-decoration: none; color: inherit; }
 .hero-sub { max-width: 520px; color: var(--ink-soft); margin-bottom: 1.5rem; }
 .hero-actions { display: flex; gap: .8rem; flex-wrap: wrap; }
 .hero-panel { border: 1px solid var(--line); background: var(--panel); padding: 1rem; }
-.hero-logo-stack { min-height: 320px; border: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; background: linear-gradient(to bottom, #fffdfa, #f5f1ea); }
-.hero-logo-main { width: min(410px, 86%); height: auto; object-fit: contain; }
-.hero-logo-mark { width: 84px; height: 84px; object-fit: contain; }
+.hero-video-wrap {
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: #2a2825;
+  min-height: min(52vh, 420px);
+  aspect-ratio: 4 / 5;
+  max-height: 560px;
+}
+.hero-video {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  object-fit: cover;
+  display: block;
+}
 
 .split-head { display: flex; justify-content: space-between; align-items: end; gap: 1rem; margin-bottom: 1.6rem; }
 .split-head h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3.6rem); font-weight: 400; line-height: .95; }

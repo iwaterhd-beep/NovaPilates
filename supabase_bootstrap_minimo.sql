@@ -18,6 +18,13 @@ BEGIN
   END IF;
 END $$;
 
+ALTER TABLE IF EXISTS public.perfiles
+  ADD COLUMN IF NOT EXISTS direccion TEXT,
+  ADD COLUMN IF NOT EXISTS ciudad TEXT,
+  ADD COLUMN IF NOT EXISTS cp TEXT,
+  ADD COLUMN IF NOT EXISTS dni TEXT,
+  ADD COLUMN IF NOT EXISTS telefono_emergencia TEXT;
+
 CREATE TABLE IF NOT EXISTS public.tipos_bono (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   nombre        TEXT NOT NULL,

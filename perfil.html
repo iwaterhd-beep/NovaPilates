@@ -38,28 +38,57 @@
       </div>
       <div class="card" style="margin-bottom:1rem;">
         <div class="card-label">Datos personales</div>
-        <form id="perfilForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;">
-          <div>
-            <label class="form-label" for="nombre">Nombre</label>
-            <input class="form-input" id="nombre" type="text" />
+        <form id="perfilForm" style="display:grid;gap:.9rem;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;">
+            <div>
+              <label class="form-label" for="nombre">Nombre</label>
+              <input class="form-input" id="nombre" type="text" />
+            </div>
+            <div>
+              <label class="form-label" for="apellidos">Apellidos</label>
+              <input class="form-input" id="apellidos" type="text" />
+            </div>
+            <div>
+              <label class="form-label" for="email">Email</label>
+              <input class="form-input" id="email" type="email" disabled />
+            </div>
+            <div>
+              <label class="form-label" for="telefono">Teléfono</label>
+              <input class="form-input" id="telefono" type="text" placeholder="+34..." />
+            </div>
+            <div>
+              <label class="form-label" for="fechaNacimiento">Fecha de nacimiento</label>
+              <input class="form-input" id="fechaNacimiento" type="date" />
+            </div>
+            <div>
+              <label class="form-label" for="rol">Rol</label>
+              <input class="form-input" id="rol" type="text" disabled />
+            </div>
           </div>
-          <div>
-            <label class="form-label" for="apellidos">Apellidos</label>
-            <input class="form-input" id="apellidos" type="text" />
+          <div style="font-size:.72rem;color:var(--color-muted);margin-top:-.2rem;">Dirección y documento (opcional, visible solo para ti y el centro).</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;">
+            <div>
+              <label class="form-label" for="direccion">Dirección</label>
+              <input class="form-input" id="direccion" type="text" placeholder="Calle, número, piso..." />
+            </div>
+            <div>
+              <label class="form-label" for="ciudad">Ciudad</label>
+              <input class="form-input" id="ciudad" type="text" />
+            </div>
+            <div>
+              <label class="form-label" for="cp">Código postal</label>
+              <input class="form-input" id="cp" type="text" />
+            </div>
+            <div>
+              <label class="form-label" for="dni">DNI / NIE</label>
+              <input class="form-input" id="dni" type="text" />
+            </div>
+            <div>
+              <label class="form-label" for="telefonoEmergencia">Teléfono de emergencia</label>
+              <input class="form-input" id="telefonoEmergencia" type="text" />
+            </div>
           </div>
-          <div>
-            <label class="form-label" for="email">Email</label>
-            <input class="form-input" id="email" type="email" disabled />
-          </div>
-          <div>
-            <label class="form-label" for="telefono">Teléfono</label>
-            <input class="form-input" id="telefono" type="text" />
-          </div>
-          <div>
-            <label class="form-label" for="rol">Rol</label>
-            <input class="form-input" id="rol" type="text" disabled />
-          </div>
-          <div style="display:flex;align-items:flex-end;">
+          <div style="display:flex;align-items:flex-end;justify-content:flex-end;">
             <button class="btn btn-primary" id="guardarPerfilBtn" type="submit">Guardar cambios</button>
           </div>
         </form>
@@ -98,6 +127,12 @@
       document.getElementById('apellidos').value = p.apellidos || '';
       document.getElementById('email').value = p.email || '';
       document.getElementById('telefono').value = p.telefono || '';
+      document.getElementById('fechaNacimiento').value = p.fecha_nacimiento || '';
+      document.getElementById('direccion').value = p.direccion || '';
+      document.getElementById('ciudad').value = p.ciudad || '';
+      document.getElementById('cp').value = p.cp || '';
+      document.getElementById('dni').value = p.dni || '';
+      document.getElementById('telefonoEmergencia').value = p.telefono_emergencia || '';
       document.getElementById('rol').value = p.rol || '';
       document.getElementById('perfilInfo').innerHTML = `
         <p><strong>ID usuario:</strong> ${p.id}</p>
@@ -118,13 +153,31 @@
       e.preventDefault();
       if (!currentProfile) return;
       try {
-        const payload = {
-          nombre: document.getElementById('nombre').value.trim(),
+        const nombre = document.getElementById('nombre').value.trim();
+        if (!nombre) {
+          toast('El nombre es obligatorio.', 'error');
+          return;
+        }
+        const payloadBase = {
+          nombre,
           apellidos: document.getElementById('apellidos').value.trim() || null,
-          telefono: document.getElementById('telefono').value.trim() || null
+          telefono: document.getElementById('telefono').value.trim() || null,
+          fecha_nacimiento: document.getElementById('fechaNacimiento').value || null,
+          updated_at: new Date().toISOString()
         };
-        const { error } = await novaSupabase.from('perfiles').update(payload).eq('id', currentProfile.id);
-        if (error) throw error;
+        const payloadPro = {
+          ...payloadBase,
+          direccion: document.getElementById('direccion').value.trim() || null,
+          ciudad: document.getElementById('ciudad').value.trim() || null,
+          cp: document.getElementById('cp').value.trim() || null,
+          dni: document.getElementById('dni').value.trim() || null,
+          telefono_emergencia: document.getElementById('telefonoEmergencia').value.trim() || null
+        };
+        const { error: errPro } = await novaSupabase.from('perfiles').update(payloadPro).eq('id', currentProfile.id);
+        if (errPro) {
+          const { error: errBase } = await novaSupabase.from('perfiles').update(payloadBase).eq('id', currentProfile.id);
+          if (errBase) throw errBase;
+        }
         currentProfile = await getUserProfile(currentProfile.id);
         fillForm(currentProfile);
         toast('Perfil actualizado correctamente', 'success');

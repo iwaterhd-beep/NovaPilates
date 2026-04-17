@@ -73,7 +73,9 @@
     function renderClaseCard(r) {
       const c = r.clase || {};
       const fecha = c.fecha_hora ? new Date(c.fecha_hora).toLocaleString('es-ES') : '-';
-      const estadoBadge = r.estado === 'confirmada'
+      const estadoBadge = r.lista_espera
+        ? `<span class="badge badge-warning">En espera${r.posicion_espera ? ` #${r.posicion_espera}` : ''}</span>`
+        : r.estado === 'confirmada'
         ? '<span class="badge badge-success">Confirmada</span>'
         : r.estado === 'asistida'
           ? '<span class="badge badge-accent">Asistida</span>'
@@ -104,7 +106,7 @@
 
       const { data, error } = await novaSupabase
         .from('reservas')
-        .select('id,estado,fecha_reserva,clase:clase_id(fecha_hora,titulo,duracion_min,disciplina:disciplina_id(nombre),sala:sala_id(nombre),instructora:instructora_id(nombre))')
+        .select('id,estado,lista_espera,posicion_espera,fecha_reserva,clase:clase_id(fecha_hora,titulo,duracion_min,disciplina:disciplina_id(nombre),sala:sala_id(nombre),instructora:instructora_id(nombre))')
         .eq('perfil_id', perfil.id)
         .order('fecha_reserva', { ascending: false })
         .limit(50);
