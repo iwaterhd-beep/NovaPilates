@@ -1,10 +1,8 @@
 # Branding NŌVA
 
-Archivos en uso:
+- **`logo-nova-main.PNG`** — Logo principal (cabecera web, pie, login, favicon).
+- **`logo-isotipo.svg`** / **`favicon.svg`** — Isotipo vectorial (reserva o usos secundarios).
 
-- **`logo-isotipo.svg`** — Isotipo (círculo + línea). Se usa en la cabecera de la web, favicon y pie.
-- **`favicon.svg`** — Misma marca que el isotipo (puedes mantenerlo sincronizado o enlazar solo `logo-isotipo.svg`).
+Rutas recomendadas: `/assets/branding/...` desde la raíz del sitio.
 
-Rutas en el proyecto: prefijo `/assets/branding/...` (válido en Vercel y rutas relativas).
-
-Nota: en Linux/Vercel los nombres de archivo distinguen mayúsculas y minúsculas.
+En Linux/Vercel los nombres de archivo distinguen mayúsculas/minúsculas (`logo-nova-main.PNG`).

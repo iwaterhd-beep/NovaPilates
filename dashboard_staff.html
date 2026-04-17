@@ -839,6 +839,43 @@
       fillClienteEditor(perfil || {});
     }
 
+    async function aplicarFichaTrasAlta(perfilId) {
+      const nombre = document.getElementById('modalNuevoNombre').value.trim();
+      const apellidos = document.getElementById('modalNuevoApellidos').value.trim();
+      const email = document.getElementById('modalNuevoEmail').value.trim().toLowerCase();
+      const telefono = document.getElementById('modalNuevoTelefono').value.trim() || null;
+      const fechaNacimiento = document.getElementById('modalNuevoFechaNacimiento').value || null;
+      const direccion = document.getElementById('modalNuevoDireccion').value.trim() || null;
+      const ciudad = document.getElementById('modalNuevoCiudad').value.trim() || null;
+      const cp = document.getElementById('modalNuevoCP').value.trim() || null;
+      const dni = document.getElementById('modalNuevoDni').value.trim() || null;
+      const telefonoEmergencia = document.getElementById('modalNuevoEmergencia').value.trim() || null;
+      const rol = document.getElementById('modalNuevoRol').value;
+      const updateBase = {
+        nombre,
+        apellidos: apellidos || null,
+        email,
+        telefono,
+        fecha_nacimiento: fechaNacimiento,
+        notas: buildClienteNotasDetalladas() || null,
+        rol,
+        updated_at: new Date().toISOString()
+      };
+      const updatePro = {
+        ...updateBase,
+        direccion,
+        ciudad,
+        cp,
+        dni,
+        telefono_emergencia: telefonoEmergencia
+      };
+      const { error: updProError } = await novaSupabase.from('perfiles').update(updatePro).eq('id', perfilId);
+      if (updProError) {
+        const { error: updBaseError } = await novaSupabase.from('perfiles').update(updateBase).eq('id', perfilId);
+        if (updBaseError) throw updBaseError;
+      }
+    }
+
     async function crearUsuarioDetallado() {
       if (staffProfile.rol !== 'admin') {
         toast('Solo admin puede crear usuarios.', 'error');
@@ -848,74 +885,80 @@
       const apellidos = document.getElementById('modalNuevoApellidos').value.trim();
       const email = document.getElementById('modalNuevoEmail').value.trim().toLowerCase();
       const password = document.getElementById('modalNuevoPassword').value;
-      const telefono = document.getElementById('modalNuevoTelefono').value.trim() || null;
-      const fechaNacimiento = document.getElementById('modalNuevoFechaNacimiento').value || null;
-      const direccion = document.getElementById('modalNuevoDireccion').value.trim() || null;
-      const ciudad = document.getElementById('modalNuevoCiudad').value.trim() || null;
-      const cp = document.getElementById('modalNuevoCP').value.trim() || null;
-      const dni = document.getElementById('modalNuevoDni').value.trim() || null;
-      const telefonoEmergencia = document.getElementById('modalNuevoEmergencia').value.trim() || null;
       const rol = document.getElementById('modalNuevoRol').value;
       if (!nombre || !email || !password) {
         toast('Completa nombre, email y contraseña.', 'error');
         return;
       }
 
-      const { data: perfilDup, error: dupErr } = await novaSupabase
-        .from('perfiles')
-        .select('id,email')
-        .eq('email', email)
-        .maybeSingle();
-      if (!dupErr && perfilDup) {
-        toast('Ese correo ya tiene ficha en el centro. Usa otro email o, si es la misma persona, edita su usuario desde la tabla.', 'error');
-        return;
-      }
-
-      const nombreCompleto = [nombre, apellidos].filter(Boolean).join(' ').trim();
-      const { error } = await novaSupabase.rpc('admin_crear_usuario', {
-        p_email: email,
-        p_password: password,
-        p_nombre: nombreCompleto,
-        p_rol: rol
-      });
-      if (error) {
-        const msg = error.message || '';
-        if (msg.includes('Ya existe un usuario con ese email') || msg.toLowerCase().includes('already registered')) {
-          toast('Ese correo ya está registrado para acceder (cuenta existente). Prueba con otro email o usa «Recuperar contraseña» en la página de acceso.', 'error');
-          return;
-        }
-        throw error;
-      }
-
-      const { data: perfil, error: perfilErr } = await novaSupabase
+      const { data: yaExiste, error: qErr } = await novaSupabase
         .from('perfiles')
         .select('id')
         .eq('email', email)
         .maybeSingle();
-      if (perfilErr) throw perfilErr;
 
-      if (perfil?.id) {
-        const updateBase = {
-          nombre,
-          apellidos: apellidos || null,
-          telefono,
-          fecha_nacimiento: fechaNacimiento,
-          notas: buildClienteNotasDetalladas() || null,
-          updated_at: new Date().toISOString()
-        };
-        const updatePro = {
-          ...updateBase,
-          direccion,
-          ciudad,
-          cp,
-          dni,
-          telefono_emergencia: telefonoEmergencia
-        };
-        const { error: updProError } = await novaSupabase.from('perfiles').update(updatePro).eq('id', perfil.id);
-        if (updProError) {
-          const { error: updBaseError } = await novaSupabase.from('perfiles').update(updateBase).eq('id', perfil.id);
-          if (updBaseError) throw updBaseError;
+      let perfilId = null;
+      let fueActualizacion = false;
+
+      async function actualizarPasswordRpc() {
+        const { error: pwErr } = await novaSupabase.rpc('admin_actualizar_password_usuario', {
+          p_email: email,
+          p_new_password: password
+        });
+        if (pwErr) {
+          const m = pwErr.message || '';
+          if (m.includes('Could not find') || m.includes('function') || m.includes('does not exist')) {
+            toast('Falta ejecutar en Supabase el SQL «admin_actualizar_password_usuario» (archivo supabase_patch_admin_actualizar_password.sql).', 'error');
+            return false;
+          }
+          if (m.includes('No existe cuenta de acceso')) {
+            toast('Ese correo está en fichas pero sin cuenta de acceso. Contacta con soporte o usa otro email.', 'error');
+            return false;
+          }
+          throw pwErr;
         }
+        return true;
+      }
+
+      if (!qErr && yaExiste?.id) {
+        if (!(await actualizarPasswordRpc())) return;
+        perfilId = yaExiste.id;
+        fueActualizacion = true;
+      } else {
+        const nombreCompleto = [nombre, apellidos].filter(Boolean).join(' ').trim();
+        const { error: creaErr } = await novaSupabase.rpc('admin_crear_usuario', {
+          p_email: email,
+          p_password: password,
+          p_nombre: nombreCompleto,
+          p_rol: rol
+        });
+        if (creaErr) {
+          const msg = creaErr.message || '';
+          if (msg.includes('Ya existe un usuario con ese email') || msg.toLowerCase().includes('already registered')) {
+            if (!(await actualizarPasswordRpc())) return;
+            const { data: p2 } = await novaSupabase.from('perfiles').select('id').eq('email', email).maybeSingle();
+            if (!p2?.id) {
+              toast('El correo existe en acceso pero no hay ficha enlazada. Revisa en Supabase Auth / perfiles.', 'error');
+              return;
+            }
+            perfilId = p2.id;
+            fueActualizacion = true;
+          } else {
+            throw creaErr;
+          }
+        } else {
+          const { data: perfilNuevo, error: perfilErr } = await novaSupabase
+            .from('perfiles')
+            .select('id')
+            .eq('email', email)
+            .maybeSingle();
+          if (perfilErr) throw perfilErr;
+          perfilId = perfilNuevo?.id;
+        }
+      }
+
+      if (perfilId) {
+        await aplicarFichaTrasAlta(perfilId);
       }
 
       await loadCatalogs();
@@ -924,7 +967,12 @@
         renderTpvSelectedClient();
       }
       closeNuevoClienteModal();
-      toast('Usuario creado correctamente', 'success');
+      toast(
+        fueActualizacion
+          ? 'Listo: contraseña y ficha actualizadas. El cliente puede entrar con este email y la contraseña indicada.'
+          : 'Usuario creado correctamente',
+        'success'
+      );
     }
 
     async function initAuth() {
