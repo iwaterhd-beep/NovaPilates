@@ -1,8 +1,8 @@
 # Branding NŌVA
 
-- **`logo-nova-main.PNG`** — Logo principal pensado para **fondo oscuro** (trazos claros). En la web se muestra dentro de un contenedor oscuro redondeado (`.brand-logo-darkbg`) en cabecera clara, login y pie. Sustituye este archivo por tu exportación final manteniendo el mismo nombre.
-- **`logo-isotipo.svg`** / **`favicon.svg`** — Isotipo vectorial; el **favicon** del sitio usa el SVG para verse bien en la pestaña del navegador.
+- **`logo-nova-main.PNG`** — Logo principal pensado para **fondo oscuro** (trazos claros). En la web se aplica **`filter: invert()`** dentro de un marco crema para que se vea bien en cabecera y login. Sustituye el archivo manteniendo el nombre.
+- **`logo-isotipo.svg`** / **`favicon.svg`** — Isotipo; el favicon usa el SVG.
 
-Rutas: `assets/branding/...` (o `/assets/branding/...` desde la raíz).
+Rutas: `assets/branding/...` o `/assets/branding/...`.
 
-En Linux/Vercel los nombres distinguen mayúsculas/minúsculas (`logo-nova-main.PNG`).
+En Vercel respeta mayúsculas en el nombre (`logo-nova-main.PNG`).
