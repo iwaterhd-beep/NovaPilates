@@ -388,8 +388,12 @@
               <input class="form-input" id="editClienteEmergencia" placeholder="Tel. emergencia" />
             </div>
             <textarea class="form-input" id="editClienteNotas" rows="3" placeholder="Notas internas..." style="resize:vertical;"></textarea>
-            <div style="display:flex;justify-content:flex-end;gap:.6rem;">
-              <button class="btn btn-primary" type="submit">Guardar ficha</button>
+            <div style="display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;align-items:center;">
+              <p style="margin:0;font-size:.72rem;color:var(--color-muted);max-width:28rem;">Eliminar quita la cuenta de acceso y los datos asociados (reservas, bonos, cobros). No aplica a empleados ni administradores.</p>
+              <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+                <button type="button" class="btn btn-danger" id="eliminarClienteBtn" style="display:none;">Eliminar cliente</button>
+                <button class="btn btn-primary" type="submit">Guardar ficha</button>
+              </div>
             </div>
           </form>
         </div>
@@ -1020,6 +1024,8 @@
       document.getElementById('userName').textContent = profile.nombre || profile.email;
       document.getElementById('userAvatar').textContent = (profile.nombre?.[0] || 'S').toUpperCase();
       document.getElementById('userRole').textContent = profile.rol;
+      const delCliente = document.getElementById('eliminarClienteBtn');
+      if (delCliente) delCliente.style.display = profile.rol === 'admin' ? '' : 'none';
       applyStaffSidebarUi();
       return true;
     }
@@ -2285,6 +2291,47 @@
         toast(err.message || 'No se pudo recargar la ficha', 'error');
       }
     });
+    document.getElementById('eliminarClienteBtn').addEventListener('click', async () => {
+      if (staffProfile.rol !== 'admin') {
+        toast('Solo admin puede eliminar clientes.', 'error');
+        return;
+      }
+      const clienteId = document.getElementById('editClienteSelect').value;
+      if (!clienteId) {
+        toast('Selecciona un cliente.', 'error');
+        return;
+      }
+      if (
+        !window.confirm(
+          '¿Eliminar definitivamente este cliente? Se borrarán su cuenta de acceso, reservas, bonos y cobros registrados. Esta acción no se puede deshacer.'
+        )
+      ) {
+        return;
+      }
+      try {
+        const { error } = await novaSupabase.rpc('admin_eliminar_cliente', { p_perfil_id: clienteId });
+        if (error) {
+          const m = error.message || '';
+          if (m.includes('function') && m.includes('does not exist')) {
+            toast('Falta ejecutar en Supabase el SQL del parche admin_eliminar_cliente.', 'error');
+            return;
+          }
+          throw error;
+        }
+        toast('Cliente eliminado', 'success');
+        if (appState.selectedCliente?.id === clienteId) {
+          appState.selectedCliente = null;
+          renderTpvSelectedClient();
+        }
+        appState.editingClienteId = null;
+        clearClienteEditor();
+        document.getElementById('editClienteSelect').value = '';
+        await loadCatalogs();
+      } catch (err) {
+        toast(err.message || 'No se pudo eliminar el cliente', 'error');
+      }
+    });
+
     document.getElementById('editClienteForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       try {
