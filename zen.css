@@ -322,9 +322,17 @@ a { text-decoration: none; color: inherit; }
   flex-shrink: 0;
   max-width: 100%;
 }
-.footer-logo-main {
-  height: 54px;
+.footer-logo-isotipo {
+  height: 44px;
   width: auto;
+}
+.footer-wordmark {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  margin: 0;
 }
 .footer-links { list-style: none; display: flex; flex-direction: column; gap: .4rem; }
 .footer-links a { color: var(--ink-soft); font-size: .86rem; }

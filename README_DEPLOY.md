@@ -1,10 +1,7 @@
 # NŌVA PILATES STUDIO - Deploy en Vercel
 
-## 1) Añadir logos al proyecto
-Coloca tus dos logos en:
-
-- `assets/branding/logo-nova-main.png`
-- `assets/branding/logo-nova-mark.png`
+## 1) Branding
+El isotipo vive en `assets/branding/logo-isotipo.svg` (cabecera, favicon, pie). Sustituye ese SVG si actualizas la marca.
 
 ## 2) Crear repo en GitHub (web)
 1. Ve a [https://github.com/new](https://github.com/new)

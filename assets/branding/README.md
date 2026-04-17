@@ -1,14 +1,10 @@
-Coloca aqui los logos oficiales (respetando mayusculas):
+# Branding NŌVA
 
-- `logo-nova-main.PNG` (logo horizontal)
-- `logo-nova-mark.PNG` (isotipo)
+Archivos en uso:
 
-Estas rutas se usan en:
+- **`logo-isotipo.svg`** — Isotipo (círculo + línea). Se usa en la cabecera de la web, favicon y pie.
+- **`favicon.svg`** — Misma marca que el isotipo (puedes mantenerlo sincronizado o enlazar solo `logo-isotipo.svg`).
 
-- `sections/home_zen.html`
-- `login.html`
-- `index.html` (favicon usa `favicon.svg`)
+Rutas en el proyecto: prefijo `/assets/branding/...` (válido en Vercel y rutas relativas).
 
-Nota:
-- En Vercel/Linux el nombre del archivo es sensible a mayusculas.
-- Si cambias a `.png` en minuscula, actualiza todas las referencias del proyecto.
+Nota: en Linux/Vercel los nombres de archivo distinguen mayúsculas y minúsculas.
