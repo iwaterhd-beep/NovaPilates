@@ -42,10 +42,10 @@ a { text-decoration: none; color: inherit; }
   color: var(--ink);
   line-height: 0;
 }
-/* PNG pensado para fondo oscuro: invertir para verlo en cabecera/pie claros (sin marco) */
+/* PNG para fondo oscuro → invert + alto contraste = trazo casi negro sobre blanco */
 .nav-logo .logo-main,
 .footer-brand .footer-logo-main {
-  filter: invert(1) contrast(1.08);
+  filter: invert(1) grayscale(1) contrast(2.75);
 }
 .logo-main {
   display: block;
