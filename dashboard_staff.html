@@ -1,10 +1,19 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
   <title>Panel Staff — NŌVA Pilates Studio</title>
+  <meta name="description" content="Panel de gestión del estudio: clientes, clases, TPV y asistencia." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta property="og:title" content="Panel Staff — NŌVA Pilates Studio" />
+  <meta property="og:description" content="Panel de gestión del estudio: clientes, clases, TPV y asistencia." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-nova-main.PNG" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
   <link rel="stylesheet" href="portal.css?v=2" />
 </head>
 <body data-panel-build="2026-04-18-disciplinas">
@@ -432,7 +441,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Editar disciplina</h2>
-        <button class="modal-close" id="closeDisciplinaModal">✕</button>
+        <button class="modal-close" id="closeDisciplinaModal">âœ•</button>
       </div>
       <form id="disciplinaForm" style="display:grid;gap:.9rem;">
         <input type="hidden" id="modalDisciplinaId" />
@@ -471,7 +480,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Editar tipo de bono</h2>
-        <button class="modal-close" id="closeTipoBonoModal">✕</button>
+        <button class="modal-close" id="closeTipoBonoModal">âœ•</button>
       </div>
       <form id="tipoBonoForm" style="display:grid;gap:.9rem;">
         <div class="form-group">
@@ -526,7 +535,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Duplicar sesión</h2>
-        <button class="modal-close" id="closeClaseDuplicateModal">✕</button>
+        <button class="modal-close" id="closeClaseDuplicateModal">âœ•</button>
       </div>
       <p id="claseDupResumen" style="font-size:.8rem;color:var(--color-muted);line-height:1.5;margin-bottom:.8rem;"></p>
       <form id="claseDuplicateForm" style="display:grid;gap:.9rem;">
@@ -558,7 +567,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Editar clase</h2>
-        <button class="modal-close" id="closeClaseEditModal">✕</button>
+        <button class="modal-close" id="closeClaseEditModal">âœ•</button>
       </div>
       <form id="claseEditForm" style="display:grid;gap:.9rem;">
         <div class="form-group">
@@ -585,7 +594,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Eliminar clase</h2>
-        <button class="modal-close" id="closeClaseDeleteModal">✕</button>
+        <button class="modal-close" id="closeClaseDeleteModal">âœ•</button>
       </div>
       <p style="font-size:.85rem;color:var(--color-cream-dim);line-height:1.6;">
         Esta acción eliminará la clase y sus reservas asociadas. No se puede deshacer.
@@ -601,7 +610,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Nuevo cliente / usuario</h2>
-        <button class="modal-close" id="closeNuevoClienteModal">✕</button>
+        <button class="modal-close" id="closeNuevoClienteModal">âœ•</button>
       </div>
       <form id="nuevoClienteForm" style="display:grid;gap:.9rem;">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
@@ -674,6 +683,8 @@
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
   <script src="/supabase.js?v=20260716b"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/cookies-consent.js"></script>
   <script>
     const sidebarEl = document.getElementById('sidebar');
     document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
@@ -1570,10 +1581,10 @@
           createdAt: new Date().toISOString()
         };
         renderLastTicket();
-        toast('Cobro registrado correctamente', 'success');
+        toast('Cobro registrado correctamente. Puedes imprimir el ticket si lo necesitas.', 'success');
         await Promise.all([loadBonos(), loadFinanzas()]);
       } catch (err) {
-        toast(err.message || 'No se pudo completar el cobro', 'error');
+        toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo completar el cobro')), 'error');
       }
     }
 
@@ -1669,7 +1680,16 @@
       const concepto = escHtml(t.concepto || t.bonoNombre || 'Venta');
       const etiquetaTipo = t.subtipo === 'producto' ? 'Producto' : t.subtipo === 'mixto' ? 'Ticket' : 'Bono';
       const html = `
-        <html><head><title>Ticket TPV NŌVA</title><style>
+        <html><head><title>Ticket TPV NŌVA</title>
+  <meta name="description" content="Panel de gestión del estudio: clientes, clases, TPV y asistencia." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta property="og:title" content="Panel Staff — NŌVA Pilates Studio" />
+  <meta property="og:description" content="Panel de gestión del estudio: clientes, clases, TPV y asistencia." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-nova-main.PNG" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" /><style>
           body { font-family: Arial, sans-serif; padding: 24px; color: #2b2b2b; }
           h1 { font-size: 18px; margin: 0 0 12px; }
           p { margin: 4px 0; font-size: 13px; }
@@ -1684,7 +1704,7 @@
           ${t.nota ? `<p><strong>Nota:</strong> ${escHtml(t.nota)}</p>` : ''}
           <div class="line"></div>
           <p>Gracias por confiar en NŌVA.</p>
-        </body></html>
+</body></html>
       `;
       const w = window.open('', '_blank', 'width=520,height=640');
       if (!w) {
@@ -2902,9 +2922,9 @@
           asignado_por: staffProfile.id
         });
         if (error) throw error;
-        toast('Bono asignado', 'success');
+        toast('Bono asignado correctamente. El cliente ya puede reservar clases.', 'success');
         loadBonos();
-      } catch (e) { toast(e.message || 'No se pudo asignar bono', 'error'); }
+      } catch (e) { toast((typeof friendlyError === 'function' ? friendlyError(e) : (e.message || 'No se pudo asignar bono')), 'error'); }
     });
 
     document.getElementById('guardarPoliticaBtn').addEventListener('click', async () => {

@@ -1,12 +1,21 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi espacio — NŌVA Pilates Studio</title>
+  <meta name="description" content="Tu panel de cliente: próximas clases, bono y reservas en NŌVA Pilates Studio." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta property="og:title" content="Mi espacio — NŌVA Pilates Studio" />
+  <meta property="og:description" content="Tu panel de cliente: próximas clases, bono y reservas en NŌVA Pilates Studio." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-nova-main.PNG" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
   <link rel="stylesheet" href="portal.css" />
   <style>
-    /* ── Dashboard grid ── */
+    /* Dashboard grid */
     .dash-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -19,7 +28,7 @@
       padding: 1.5rem;
     }
 
-    /* ── Bono card (destacado) ── */
+    /* Bono card (destacado) */
     .bono-card {
       background: var(--color-bg-card);
       border: 0.5px solid var(--color-border);
@@ -41,7 +50,7 @@
     .bono-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
     .bono-vence { font-size: 0.7rem; color: var(--color-muted); font-weight: 300; }
 
-    /* ── Progreso sesiones ── */
+    /* Progreso sesiones */
     .sesiones-bar-wrap { margin-top: 0.8rem; }
     .sesiones-bar-track {
       height: 3px; background: var(--color-surface);
@@ -57,7 +66,7 @@
       margin-top: 0.4rem;
     }
 
-    /* ── Próximas clases ── */
+    /* Próximas clases */
     .section-header {
       display: flex; align-items: center;
       justify-content: space-between; margin-bottom: 1.2rem;
@@ -93,7 +102,7 @@
     }
     .clase-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
-    /* ── Notificaciones recientes ── */
+    /* Notificaciones recientes */
     .notif-item {
       padding: 1rem 1.2rem;
       background: var(--color-bg-card);
@@ -108,7 +117,7 @@
     .notif-body { font-size: 0.77rem; color: var(--color-muted); font-weight: 300; margin-top: 0.2rem; line-height: 1.5; }
     .notif-time { font-size: 0.65rem; color: var(--color-muted); margin-top: 0.3rem; }
 
-    /* ── 2-col layout ── */
+    /* 2-col layout */
     .dash-cols {
       display: grid;
       grid-template-columns: 1fr 340px;
@@ -143,7 +152,7 @@
 </head>
 <body>
 
-<!-- ══════════ SIDEBAR ══════════ -->
+<!-- SIDEBAR -->
 <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú">
   <span></span><span></span>
 </button>
@@ -199,7 +208,7 @@
   </div>
 </aside>
 
-<!-- ══════════ MAIN ══════════ -->
+<!-- MAIN -->
 <main class="main">
   <header class="topbar">
     <span class="topbar-title">Dashboard</span>
@@ -219,7 +228,7 @@
       <p class="page-subtitle" id="greetSub">Cargando tu espacio…</p>
     </div>
 
-    <!-- ── BONO ACTIVO ── -->
+    <!-- BONO ACTIVO -->
     <div class="bono-card" id="bonoCard">
       <div class="bono-card-left">
         <!-- Ring SVG -->
@@ -256,7 +265,7 @@
       </div>
     </div>
 
-    <!-- ── STATS ── -->
+    <!-- STATS -->
     <div class="dash-grid">
       <div class="stat-card">
         <div class="card-label">Próxima clase</div>
@@ -273,7 +282,7 @@
       </div>
     </div>
 
-    <!-- ── 2 columnas ── -->
+    <!-- 2 columnas -->
     <div class="dash-cols">
 
       <!-- Próximas reservas -->
@@ -335,12 +344,12 @@
   </div><!-- /content -->
 </main>
 
-<!-- ══════════ MODAL CANCELAR ══════════ -->
+<!-- MODAL CANCELAR -->
 <div class="modal-overlay" id="cancelModal">
   <div class="modal">
     <div class="modal-header">
       <h2 class="modal-title">Cancelar reserva</h2>
-      <button class="modal-close" id="closeCancelModal">✕</button>
+      <button class="modal-close" id="closeCancelModal">âœ•</button>
     </div>
     <div class="cancel-clase-nombre" id="cancelClaseNombre"></div>
     <div id="cancelClaseMeta" style="font-size:0.8rem;color:var(--color-muted);"></div>
@@ -354,13 +363,15 @@
   </div>
 </div>
 
-<!-- ══════════ TOAST ══════════ -->
+<!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
+<script src="/js/ui.js"></script>
+<script src="/js/cookies-consent.js"></script>
 <script>
-// ── Helpers ────────────────────────────────────────────────
+// Helpers 
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const DIAS  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
@@ -382,7 +393,7 @@ function toast(msg, type = 'info') {
   setTimeout(() => el.remove(), 4000);
 }
 
-// ── Bono ring ──────────────────────────────────────────────
+// Bono ring 
 function renderBonoRing(restantes, totales, ilimitado) {
   const pct = ilimitado ? 1 : (totales > 0 ? restantes / totales : 0);
   const circ = 188.5;
@@ -392,7 +403,7 @@ function renderBonoRing(restantes, totales, ilimitado) {
   document.getElementById('bonoRestantes').textContent = ilimitado ? '∞' : restantes;
 }
 
-// ── Render próximas clases ──────────────────────────────────
+// Render próximas clases 
 function renderClase(reserva) {
   const clase = reserva.clase || reserva;
   const fecha = new Date(clase.fecha_hora || clase.fechaHora);
@@ -417,7 +428,7 @@ function renderClase(reserva) {
   return el;
 }
 
-// ── Render notificaciones ───────────────────────────────────
+// Render notificaciones 
 function renderNotif(n) {
   const el = document.createElement('div');
   el.className = `notif-item ${!n.leida ? 'unread' : ''}`;
@@ -433,20 +444,20 @@ function renderNotif(n) {
   return el;
 }
 
-// ── Render historial ────────────────────────────────────────
+// Render historial 
 function renderHist(reserva) {
   const clase = reserva.clase || reserva;
   const fecha = new Date(clase.fecha_hora || clase.fechaHora);
   const el = document.createElement('div');
   el.className = 'hist-row';
   el.innerHTML = `
-    <span class="badge badge-success" style="font-size:0.55rem;">✓</span>
+    <span class="badge badge-success" style="font-size:0.55rem;">âœ“</span>
     <span class="hist-row-name">${clase.disciplina?.nombre || 'Clase'}</span>
     <span class="hist-row-date">${fecha.getDate()} ${MESES[fecha.getMonth()]}</span>`;
   return el;
 }
 
-// ── DEMO DATA (mientras no hay Supabase) ───────────────────
+// DEMO DATA (mientras no hay Supabase) 
 const DEMO = {
   nombre: 'María',
   bono: { nombre: 'Bono 8 clases', restantes: 5, totales: 8, ilimitado: false, vence: '30 abr 2025' },
@@ -467,7 +478,7 @@ const DEMO = {
   ]
 };
 
-// ── Inicializar página ─────────────────────────────────────
+// Inicializar página 
 async function init() {
   // Intenta cargar de Supabase; si falla usa demo
   let perfil = null;
@@ -534,9 +545,9 @@ function renderDemo() {
 
 function saludo() {
   const h = new Date().getHours();
-  if (h < 13) return 'Buenos días 🌿 Lista para mover el cuerpo hoy?';
-  if (h < 20) return 'Buenas tardes 🌤 Tu próxima clase te espera.';
-  return 'Buenas noches 🌙 Descansa y vuelve con energía.';
+  if (h < 13) return 'Buenos días ðŸŒ¿ Lista para mover el cuerpo hoy?';
+  if (h < 20) return 'Buenas tardes ðŸŒ¤ Tu próxima clase te espera.';
+  return 'Buenas noches ðŸŒ™ Descansa y vuelve con energía.';
 }
 
 function renderAll(perfil, bono, reservas, notifs, historial) {
@@ -622,7 +633,7 @@ function renderHistorial(hist) {
   document.getElementById('statTotal').textContent = hist.length;
 }
 
-// ── Modal cancelar ─────────────────────────────────────────
+// Modal cancelar 
 let cancelReservaId = null;
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.cancelarBtn');
@@ -650,7 +661,7 @@ document.getElementById('cancelModalSi').addEventListener('click', async () => {
   }
 });
 
-// ── Sidebar mobile ─────────────────────────────────────────
+// Sidebar mobile 
 const sidebarEl = document.getElementById('sidebar');
 document.getElementById('sidebarToggle').addEventListener('click', () => {
   sidebarEl.classList.toggle('open');
@@ -661,7 +672,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ── Logout ─────────────────────────────────────────────────
+// Logout 
 document.getElementById('logoutBtn').addEventListener('click', () => signOut());
 
 function renderStats(stats) {
@@ -671,7 +682,7 @@ function renderStats(stats) {
   document.getElementById('statTotal').textContent = String(stats.total ?? 0);
 }
 
-// ── Arrancar ───────────────────────────────────────────────
+// Arrancar 
 init();
 </script>
 </body>

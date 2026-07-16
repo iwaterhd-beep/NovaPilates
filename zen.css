@@ -367,3 +367,21 @@ a { text-decoration: none; color: inherit; }
       );
   }
 }
+
+/* Cookie banner + shared UI */
+#nova-cookie-banner {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 9999;
+  background: rgba(255,253,250,.97); border-top: 1px solid #e8e2d8;
+  padding: 1rem 1.25rem; box-shadow: 0 -8px 24px rgba(74,69,61,.08);
+}
+.nova-cookie-inner {
+  max-width: 960px; margin: 0 auto; display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;
+}
+.nova-cookie-inner p { margin: 0; color: #6f695f; font-size: .88rem; line-height: 1.5; max-width: 640px; }
+.nova-cookie-inner a { color: #4a453d; text-decoration: underline; }
+.nova-cookie-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.nova-cookie-btn {
+  border: 0; background: #8a9a8c; color: #fff; padding: .65rem 1rem; font-size: .72rem;
+  text-transform: uppercase; letter-spacing: .12em; cursor: pointer;
+}
+.nova-cookie-btn--ghost { background: transparent; color: #4a453d; border: 1px solid #d9d0c3; }

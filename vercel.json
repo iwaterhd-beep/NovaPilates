@@ -10,7 +10,10 @@
     { "source": "/mis-clases", "destination": "/mis-clases.html" },
     { "source": "/bono", "destination": "/bono.html" },
     { "source": "/notificaciones", "destination": "/notificaciones.html" },
-    { "source": "/perfil", "destination": "/perfil.html" }
+    { "source": "/perfil", "destination": "/perfil.html" },
+    { "source": "/aviso-legal", "destination": "/aviso-legal.html" },
+    { "source": "/privacidad", "destination": "/privacidad.html" },
+    { "source": "/cookies", "destination": "/cookies.html" }
   ],
   "headers": [
     {

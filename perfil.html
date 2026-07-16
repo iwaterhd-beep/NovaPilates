@@ -1,9 +1,18 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi perfil — NŌVA Pilates Studio</title>
+  <meta name="description" content="Gestiona tus datos personales y preferencias de cuenta." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta property="og:title" content="Mi perfil — NŌVA Pilates Studio" />
+  <meta property="og:description" content="Gestiona tus datos personales y preferencias de cuenta." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-nova-main.PNG" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
   <link rel="stylesheet" href="portal.css" />
 </head>
 <body>
@@ -102,6 +111,8 @@
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/cookies-consent.js"></script>
   <script>
     let currentProfile = null;
     const sidebarEl = document.getElementById('sidebar');
@@ -182,7 +193,7 @@
         fillForm(currentProfile);
         toast('Perfil actualizado correctamente', 'success');
       } catch (err) {
-        toast(err.message || 'No se pudo guardar el perfil', 'error');
+        toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo guardar el perfil')), 'error');
       }
     });
 

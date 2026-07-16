@@ -3,44 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Acceder - NŌVA PILATES STUDIO</title>
+  <title>Acceder — NŌVA Pilates Studio</title>
   <meta name="description" content="Accede a tu espacio NŌVA para reservar clases, revisar tu bono y recibir notificaciones." />
-  <meta property="og:title" content="Acceso | NŌVA PILATES STUDIO" />
+  <meta property="og:title" content="Acceso | NŌVA Pilates Studio" />
   <meta property="og:description" content="Inicia sesión en tu espacio personal de NŌVA." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="/assets/branding/logo-nova-main.PNG" />
+  <meta property="og:url" content="https://nova-pilates.vercel.app/login.html" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-nova-main.PNG" />
+  <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
   <link rel="alternate icon" href="/assets/branding/logo-nova-main.PNG" type="image/png" />
   <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Cormorant+Garamond:wght@300;400;500&display=swap');
     :root {
-      --bg: #f6f4ef;
-      --panel: #fffdfa;
-      --ink: #4a453d;
-      --ink-soft: #6f695f;
-      --line: #e8e2d8;
-      --line-strong: #d9d0c3;
-      --accent: #8a9a8c;
+      --bg: #f6f4ef; --panel: #fffdfa; --ink: #4a453d; --ink-soft: #6f695f;
+      --line: #e8e2d8; --line-strong: #d9d0c3; --accent: #8a9a8c;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Inter, sans-serif; background: var(--bg); color: var(--ink); min-height: 100svh; }
     .wrap { min-height: 100svh; display: grid; place-items: center; padding: 2rem; }
-    .card {
-      width: 100%; max-width: 460px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      padding: 2rem;
-    }
+    .card { width: 100%; max-width: 460px; background: var(--panel); border: 1px solid var(--line); padding: 2rem; }
     .brand { display: flex; justify-content: center; margin-bottom: 1rem; }
-    .brand .brand-logo-img {
-      display: block;
-      max-height: 64px;
-      max-width: min(260px, 86vw);
-      width: auto;
-      height: auto;
-      object-fit: contain;
-    }
+    .brand .brand-logo-img { display: block; max-height: 64px; max-width: min(260px, 86vw); width: auto; height: auto; object-fit: contain; }
     h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 400; margin-bottom: .2rem; text-align: center; }
     .sub { text-align: center; color: var(--ink-soft); font-size: .88rem; margin-bottom: 1.5rem; }
     .tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); margin-bottom: 1rem; }
@@ -50,36 +35,31 @@
     .panel.active { display: block; }
     .group { margin-bottom: .9rem; }
     label { display: block; font-size: .62rem; letter-spacing: .16em; text-transform: uppercase; color: #8f887d; margin-bottom: .35rem; }
-    input {
-      width: 100%; min-height: 44px; border: 1px solid var(--line-strong); background: #fff;
-      padding: .72rem .85rem; color: var(--ink);
-    }
-    .btn {
-      width: 100%; min-height: 44px; border: 1px solid var(--accent); background: var(--accent);
-      color: #f7f5f0; text-transform: uppercase; letter-spacing: .16em; font-size: .64rem; cursor: pointer;
-    }
+    input { width: 100%; min-height: 44px; border: 1px solid var(--line-strong); background: #fff; padding: .72rem .85rem; color: var(--ink); }
+    .btn { width: 100%; min-height: 44px; border: 1px solid var(--accent); background: var(--accent); color: #f7f5f0; text-transform: uppercase; letter-spacing: .16em; font-size: .64rem; cursor: pointer; }
     .msg { display: none; margin-bottom: .8rem; padding: .7rem .8rem; border: 1px solid var(--line); font-size: .82rem; }
     .msg.show { display: block; }
     .msg.error { color: #8b4d4d; background: #fbf0ef; }
     .msg.success { color: #4a644f; background: #eef5ef; }
     .back { display: inline-block; margin-top: 1rem; font-size: .75rem; color: var(--ink-soft); }
+    .hint { font-size: .78rem; color: var(--ink-soft); margin-bottom: .9rem; line-height: 1.45; }
   </style>
 </head>
 <body>
   <main class="wrap">
     <section class="card">
-      <a href="index.html" class="brand" aria-label="NŌVA PILATES STUDIO">
-        <img src="/assets/branding/logo-nova-main.PNG" alt="" class="brand-logo-img" width="240" height="64" decoding="async" role="presentation" onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';this.classList.add('brand-logo-img--svg');" />
+      <a href="/index.html" class="brand" aria-label="NŌVA PILATES STUDIO">
+        <img src="/assets/branding/logo-nova-main.PNG" alt="" class="brand-logo-img" width="240" height="64" decoding="async" fetchpriority="high" role="presentation" onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';" />
       </a>
-      <h1>Bienvenida</h1>
-      <p class="sub">Accede a tu espacio personal</p>
+      <h1 id="cardTitle">Bienvenida</h1>
+      <p class="sub" id="cardSub">Accede a tu espacio personal</p>
 
-      <div class="tabs">
-        <button class="tab active" data-tab="login">Iniciar sesion</button>
-        <button class="tab" data-tab="recover">Recuperar</button>
+      <div class="tabs" id="authTabs">
+        <button class="tab active" type="button" data-tab="login">Iniciar sesion</button>
+        <button class="tab" type="button" data-tab="recover">Recuperar</button>
       </div>
 
-      <div id="msg" class="msg"></div>
+      <div id="msg" class="msg" role="status"></div>
 
       <div id="panel-login" class="panel active">
         <form id="loginForm" novalidate>
@@ -89,13 +69,14 @@
           </div>
           <div class="group">
             <label for="password">Contrasena</label>
-            <input id="password" type="password" required autocomplete="current-password" />
+            <input id="password" type="password" required autocomplete="current-password" minlength="6" />
           </div>
           <button class="btn" id="loginBtn" type="submit">Entrar</button>
         </form>
       </div>
 
       <div id="panel-recover" class="panel">
+        <p class="hint">Te enviaremos un enlace a tu correo para elegir una contraseña nueva.</p>
         <form id="recoverForm" novalidate>
           <div class="group">
             <label for="recoverEmail">Correo</label>
@@ -105,28 +86,67 @@
         </form>
       </div>
 
-      <a class="back" href="index.html">Volver al inicio</a>
+      <div id="panel-reset" class="panel">
+        <p class="hint">Elige una contraseña nueva (mínimo 6 caracteres).</p>
+        <form id="resetForm" novalidate>
+          <div class="group">
+            <label for="newPassword">Nueva contraseña</label>
+            <input id="newPassword" type="password" required autocomplete="new-password" minlength="6" />
+          </div>
+          <div class="group">
+            <label for="newPassword2">Repetir contraseña</label>
+            <input id="newPassword2" type="password" required autocomplete="new-password" minlength="6" />
+          </div>
+          <button class="btn" id="resetBtn" type="submit">Guardar contraseña</button>
+        </form>
+      </div>
+
+      <a class="back" href="/index.html">Volver al inicio</a>
     </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
-  <script src="/supabase.js?v=20260716b"></script>
+  <script src="/supabase.js?v=20260716c"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/cookies-consent.js"></script>
   <script>
     const tabs = document.querySelectorAll('.tab');
     const panels = document.querySelectorAll('.panel');
     const msg = document.getElementById('msg');
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     function showMsg(text, type) { msg.textContent = text; msg.className = `msg show ${type}`; }
     function hideMsg() { msg.className = 'msg'; msg.textContent = ''; }
 
+    function showPanel(name) {
+      panels.forEach((p) => p.classList.remove('active'));
+      const el = document.getElementById(`panel-${name}`);
+      if (el) el.classList.add('active');
+      tabs.forEach((t) => t.classList.toggle('active', t.dataset.tab === name));
+      const isReset = name === 'reset';
+      document.getElementById('authTabs').style.display = isReset ? 'none' : 'grid';
+      document.getElementById('cardTitle').textContent = isReset ? 'Nueva contraseña' : 'Bienvenida';
+      document.getElementById('cardSub').textContent = isReset
+        ? 'Restablece el acceso a tu cuenta'
+        : 'Accede a tu espacio personal';
+    }
+
     tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        tabs.forEach((t) => t.classList.remove('active'));
-        panels.forEach((p) => p.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
-        hideMsg();
-      });
+      tab.addEventListener('click', () => { showPanel(tab.dataset.tab); hideMsg(); });
     });
+
+    async function redirectAfterLogin(user) {
+      const { data: sessionData } = await novaSupabase.auth.getSession();
+      if (!sessionData?.session) throw new Error('La sesion no se guardo. Prueba otra vez.');
+      const { data: profile } = await novaSupabase.from('perfiles').select('rol').eq('id', user.id).maybeSingle();
+      const rol = profile?.rol || user.user_metadata?.rol || 'cliente';
+      const redirects = {
+        cliente: '/dashboard_cliente.html',
+        empleado: '/dashboard_staff.html',
+        admin: '/dashboard_staff.html'
+      };
+      window.location.assign(redirects[rol] || '/dashboard_cliente.html');
+    }
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -134,39 +154,18 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       if (!email || !password) return showMsg('Completa todos los campos.', 'error');
-      if (password.length < 6) {
-        return showMsg('La contraseña debe tener al menos 6 caracteres.', 'error');
-      }
+      if (!emailRe.test(email)) return showMsg('Introduce un correo válido.', 'error');
+      if (password.length < 6) return showMsg('La contraseña debe tener al menos 6 caracteres.', 'error');
       try {
+        showPageSpinner(true);
         const { data, error } = await novaSupabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         if (!data?.user) throw new Error('No se pudo obtener la sesion.');
-
-        // Esperar a que la sesion quede guardada (evita fallo en Vercel)
-        const { data: sessionData } = await novaSupabase.auth.getSession();
-        if (!sessionData?.session) throw new Error('La sesion no se guardo. Prueba otra vez.');
-
-        const { data: profile, error: profileError } = await novaSupabase
-          .from('perfiles')
-          .select('rol')
-          .eq('id', data.user.id)
-          .maybeSingle();
-        const rol = profile?.rol || data.user.user_metadata?.rol || 'cliente';
-        if (profileError) console.warn('perfil', profileError);
-
-        const redirects = {
-          cliente: '/dashboard_cliente.html',
-          empleado: '/dashboard_staff.html',
-          admin: '/dashboard_staff.html'
-        };
-        window.location.assign(redirects[rol] || '/dashboard_cliente.html');
+        await redirectAfterLogin(data.user);
       } catch (err) {
-        console.error(err);
-        const raw = err?.message || err?.error_description || err?.msg || String(err || '');
-        const m = raw === 'Invalid login credentials'
-          ? 'Correo o contrasena incorrectos. Prueba: 555555'
-          : (raw ? `Error al iniciar sesion: ${raw}` : 'Error al iniciar sesion.');
-        showMsg(m, 'error');
+        showMsg(friendlyError(err), 'error');
+      } finally {
+        showPageSpinner(false);
       }
     });
 
@@ -175,14 +174,55 @@
       hideMsg();
       const email = document.getElementById('recoverEmail').value.trim();
       if (!email) return showMsg('Introduce un correo.', 'error');
+      if (!emailRe.test(email)) return showMsg('Introduce un correo válido.', 'error');
       try {
-        const { error } = await novaSupabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/login.html?reset=true' });
+        showPageSpinner(true);
+        const { error } = await novaSupabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/login.html?reset=true`
+        });
         if (error) throw error;
-        showMsg('Revisa tu correo para restablecer la contrasena.', 'success');
-      } catch {
-        showMsg('No se pudo enviar el correo.', 'error');
+        showMsg('Si el correo existe, recibirás un enlace para restablecer la contraseña.', 'success');
+      } catch (err) {
+        showMsg(friendlyError(err), 'error');
+      } finally {
+        showPageSpinner(false);
       }
     });
+
+    document.getElementById('resetForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMsg();
+      const p1 = document.getElementById('newPassword').value;
+      const p2 = document.getElementById('newPassword2').value;
+      if (!p1 || !p2) return showMsg('Completa ambos campos.', 'error');
+      if (p1.length < 6) return showMsg('La contraseña debe tener al menos 6 caracteres.', 'error');
+      if (p1 !== p2) return showMsg('Las contraseñas no coinciden.', 'error');
+      try {
+        showPageSpinner(true);
+        const { error } = await novaSupabase.auth.updateUser({ password: p1 });
+        if (error) throw error;
+        showMsg('Contraseña actualizada. Entrando…', 'success');
+        const { data: { user } } = await novaSupabase.auth.getUser();
+        if (user) await redirectAfterLogin(user);
+        else showPanel('login');
+      } catch (err) {
+        showMsg(friendlyError(err), 'error');
+      } finally {
+        showPageSpinner(false);
+      }
+    });
+
+    novaSupabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        showPanel('reset');
+        hideMsg();
+      }
+    });
+
+    if (new URLSearchParams(location.search).get('reset') === 'true') {
+      showPanel('reset');
+      showMsg('Introduce tu nueva contraseña.', 'success');
+    }
   </script>
 </body>
 </html>

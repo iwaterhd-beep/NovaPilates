@@ -1,9 +1,18 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reservar clase — NŌVA Pilates Studio</title>
+  <meta name="description" content="Consulta el calendario y reserva tu clase de Pilates, yoga o barre." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta property="og:title" content="Reservar clase — NŌVA Pilates Studio" />
+  <meta property="og:description" content="Consulta el calendario y reserva tu clase de Pilates, yoga o barre." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-nova-main.PNG" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
   <link rel="stylesheet" href="portal.css" />
 </head>
 <body>
@@ -58,6 +67,8 @@
 <div class="toast-container" id="toastContainer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
+<script src="/js/ui.js"></script>
+<script src="/js/cookies-consent.js"></script>
 <script>
   const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -108,6 +119,8 @@
   }
 
   async function fetchData() {
+    if (typeof showPageSpinner === 'function') showPageSpinner(true);
+    try {
     const weekEnd = new Date(state.weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
     const fromIso = state.weekStart.toISOString();
@@ -140,6 +153,9 @@
     state.reservasMap = new Map((reservas || []).map(r => [r.clase_id, r]));
     state.margenReservaDias = ajustes?.margen_reserva_dias ?? 0;
     state.margenCancelacionDias = ajustes?.margen_cancelacion_dias ?? 0;
+    } finally {
+      if (typeof showPageSpinner === 'function') showPageSpinner(false);
+    }
   }
 
   function renderCalendar() {
@@ -220,21 +236,40 @@
       if (!canCancel && isReserved) btn.title = `Cancelación con ${state.margenCancelacionDias} días de margen.`;
       btn.onclick = async () => {
         try {
+          if (typeof showPageSpinner === 'function') showPageSpinner(true);
           if (isReserved) {
+            const ok = typeof showConfirm === 'function'
+              ? await showConfirm(isWaitlist ? '¿Salir de la lista de espera?' : '¿Cancelar esta reserva?')
+              : true;
+            if (!ok) return;
             await cancelarReservaSegura(reserva.id);
-            toast(isWaitlist ? 'Saliste de la lista de espera' : 'Clase cancelada', 'success');
+            const msg = isWaitlist ? 'Has salido de la lista de espera.' : 'Reserva cancelada correctamente.';
+            (typeof showToast === 'function' ? showToast : toast)(msg, 'success');
           } else {
             const result = await crearReservaSegura(c.id);
             if (result?.en_espera) {
-              toast(`Clase completa: quedaste en lista de espera (#${result.posicion_espera}).`, 'info');
+              (typeof showToast === 'function' ? showToast : toast)(
+                `Clase completa. Estás en lista de espera (#${result.posicion_espera}). Te avisaremos si se libera una plaza.`,
+                'info',
+                5000
+              );
             } else {
-              toast('Clase reservada', 'success');
+              (typeof showToast === 'function' ? showToast : toast)(
+                '¡Reserva confirmada! La verás en Mis clases.',
+                'success',
+                4500
+              );
             }
           }
           await fetchData();
           renderDayDetail(dayKey);
         } catch (e) {
-          toast(e.message || 'Operación no permitida', 'error');
+          (typeof showToast === 'function' ? showToast : toast)(
+            (typeof friendlyError === 'function' ? friendlyError(e) : (e.message || 'No se pudo completar la operación')),
+            'error'
+          );
+        } finally {
+          if (typeof showPageSpinner === 'function') showPageSpinner(false);
         }
       };
       actions.appendChild(btn);
@@ -275,7 +310,7 @@
   }
 
   init().catch((e) => {
-    document.getElementById('calendarGrid').innerHTML = `<p style="color:var(--color-danger)">Error: ${e.message}</p>`;
+    document.getElementById('calendarGrid').innerHTML = `<p style="color:var(--color-danger)">Error: ${(typeof friendlyError === 'function' ? friendlyError(e) : e.message)}</p>`;
   });
 </script>
 </body>
