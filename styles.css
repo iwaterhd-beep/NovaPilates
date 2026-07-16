@@ -1,0 +1,132 @@
+/* =============================================
+   NŌVA PILATES STUDIO — Global Design System
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap');
+
+:root {
+  --color-bg:        #0e0e0d;
+  --color-bg-soft:   #161614;
+  --color-bg-card:   #1a1a18;
+  --color-surface:   #222220;
+  --color-border:    rgba(255,255,255,0.08);
+  --color-border-md: rgba(255,255,255,0.14);
+
+  --color-cream:     #f0ebe2;
+  --color-cream-dim: #b8b2a8;
+  --color-accent:    #c9a96e;
+  --color-accent-lt: #e2c898;
+  --color-accent-dk: #9e7d48;
+  --color-muted:     #6a6860;
+
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Jost', sans-serif;
+
+  --max-w: 1200px;
+  --nav-h: 72px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-cream);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img, video { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+/* Typography */
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 300; line-height: 1.05; }
+
+.label {
+  font-family: var(--font-body);
+  font-size: 0.63rem;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* Layout */
+.container { width: 100%; max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+.section { padding: 7rem 0; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.67rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.9rem 2.2rem;
+  transition: all 0.3s var(--ease-out);
+  position: relative;
+}
+.btn-primary { background: var(--color-accent); color: var(--color-bg); }
+.btn-primary:hover { background: var(--color-accent-lt); transform: translateY(-1px); }
+.btn-outline {
+  background: transparent;
+  color: var(--color-cream);
+  border: 0.5px solid var(--color-border-md);
+}
+.btn-outline:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+/* Card */
+.card {
+  background: var(--color-bg-card);
+  border: 0.5px solid var(--color-border);
+  transition: border-color 0.3s ease, transform 0.3s var(--ease-out);
+}
+.card:hover { border-color: var(--color-border-md); transform: translateY(-4px); }
+
+/* Input */
+.input {
+  width: 100%;
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  color: var(--color-cream);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 300;
+  padding: 0.9rem 1.2rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+.input:focus { border-color: var(--color-accent); }
+.input::placeholder { color: var(--color-muted); }
+
+/* Divider */
+.divider { width: 100%; height: 0.5px; background: var(--color-border); }
+
+/* Fade-up animation */
+.fade-up {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* Marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-surface); }
+
+@media (max-width: 768px) {
+  .container { padding: 0 1.25rem; }
+  .section { padding: 4.5rem 0; }
+}

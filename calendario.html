@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reservar clase — NŌVA Pilates Studio</title>
+  <link rel="stylesheet" href="portal.css" />
+</head>
+<body>
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+  <div class="sidebar-user">
+    <div class="sidebar-avatar" id="userAvatar">C</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name" id="userName">Cargando...</div>
+      <div class="sidebar-user-role">Cliente</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">Mi espacio</div>
+    <a href="dashboard_cliente.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>Inicio</a>
+    <a href="calendario.html" class="sidebar-link active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Reservar clase</a>
+    <a href="mis-clases.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Mis clases</a>
+    <a href="bono.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Mi bono</a>
+    <a href="notificaciones.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
+    <div class="sidebar-section-label">Cuenta</div>
+    <a href="perfil.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Mi perfil</a>
+  </nav>
+  <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <span class="topbar-title">Reservar clase</span>
+    <div style="display:flex;gap:.5rem;">
+      <button class="btn btn-outline btn-sm" id="prevWeekBtn">Semana anterior</button>
+      <button class="btn btn-outline btn-sm" id="nextWeekBtn">Semana siguiente</button>
+    </div>
+  </header>
+  <div class="content">
+    <div class="page-header">
+      <h1 class="page-title">Calendario zen de clases</h1>
+      <p class="page-subtitle" id="weekLabel">Cargando semana...</p>
+    </div>
+
+    <div class="card calendar-shell">
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-label">Detalle del día</div>
+      <div id="dayDetail" class="day-detail">Selecciona un día del calendario para ver y gestionar tus clases.</div>
+    </div>
+  </div>
+</main>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script>
+  const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const sidebarEl = document.getElementById('sidebar');
+  document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
+  document.getElementById('logoutBtn').addEventListener('click', () => signOut());
+  document.addEventListener('click', (e) => {
+    if (!sidebarEl.contains(e.target) && !e.target.closest('#sidebarToggle')) sidebarEl.classList.remove('open');
+  });
+
+  const state = {
+    weekStart: startOfWeek(new Date()),
+    clases: [],
+    reservasMap: new Map(),
+    perfilId: null,
+    margenReservaDias: 0,
+    margenCancelacionDias: 0,
+    selectedDateKey: null
+  };
+
+  function toast(msg, type = 'info') {
+    const c = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = msg;
+    c.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+  function startOfWeek(d) {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    date.setHours(0,0,0,0);
+    date.setDate(date.getDate() + diff);
+    return date;
+  }
+  function fmtDateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  }
+  function fmtDateTime(iso) {
+    const d = new Date(iso);
+    return `${DIAS[d.getDay()]} ${d.getDate()} ${MESES[d.getMonth()]} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+  function weekRangeLabel() {
+    const a = state.weekStart;
+    const b = new Date(a); b.setDate(b.getDate()+6);
+    return `${a.getDate()} ${MESES[a.getMonth()]} → ${b.getDate()} ${MESES[b.getMonth()]}`;
+  }
+
+  async function fetchData() {
+    const weekEnd = new Date(state.weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    const fromIso = state.weekStart.toISOString();
+    const toIso = weekEnd.toISOString();
+
+    const [{ data: clases, error: e1 }, { data: reservas, error: e2 }, { data: ajustes, error: e3 }] = await Promise.all([
+      novaSupabase
+        .from('clases')
+        .select('id,titulo,fecha_hora,duracion_min,disciplina:disciplina_id(nombre,color_hex),sala:sala_id(nombre)')
+        .eq('cancelada', false)
+        .gte('fecha_hora', fromIso)
+        .lt('fecha_hora', toIso)
+        .order('fecha_hora', { ascending: true }),
+      novaSupabase
+        .from('reservas')
+        .select('id,clase_id,estado,lista_espera,posicion_espera')
+        .eq('perfil_id', state.perfilId)
+        .in('estado', ['confirmada', 'asistida']),
+      novaSupabase
+        .from('ajustes_centro')
+        .select('margen_reserva_dias,margen_cancelacion_dias')
+        .eq('id', 1)
+        .maybeSingle()
+    ]);
+    if (e1) throw e1;
+    if (e2) throw e2;
+    if (e3) throw e3;
+
+    state.clases = clases || [];
+    state.reservasMap = new Map((reservas || []).map(r => [r.clase_id, r]));
+    state.margenReservaDias = ajustes?.margen_reserva_dias ?? 0;
+    state.margenCancelacionDias = ajustes?.margen_cancelacion_dias ?? 0;
+  }
+
+  function renderCalendar() {
+    document.getElementById('weekLabel').textContent = `Semana ${weekRangeLabel()} · Ambiente zen`;
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(state.weekStart);
+      day.setDate(day.getDate() + i);
+      const key = fmtDateKey(day);
+      const dayClasses = state.clases.filter(c => fmtDateKey(new Date(c.fecha_hora)) === key);
+
+      const col = document.createElement('section');
+      col.className = `calendar-day ${state.selectedDateKey === key ? 'selected' : ''}`;
+      col.dataset.key = key;
+      col.innerHTML = `
+        <header class="calendar-day-head">
+          <div class="calendar-day-name">${DIAS[day.getDay()]}</div>
+          <div class="calendar-day-num">${day.getDate()}</div>
+        </header>
+        <div class="calendar-day-body"></div>
+      `;
+      const body = col.querySelector('.calendar-day-body');
+      if (!dayClasses.length) {
+        body.innerHTML = '<p class="calendar-empty">Sin clases</p>';
+      } else {
+        dayClasses.forEach((c) => {
+          const reserva = state.reservasMap.get(c.id);
+          const item = document.createElement('button');
+          item.className = `calendar-class ${reserva ? 'reserved' : ''}`;
+          item.dataset.classId = c.id;
+          item.dataset.dayKey = key;
+          item.innerHTML = `
+            <span class="calendar-class-time">${String(new Date(c.fecha_hora).getHours()).padStart(2, '0')}:${String(new Date(c.fecha_hora).getMinutes()).padStart(2, '0')}</span>
+            <span class="calendar-class-title">${c.titulo || c.disciplina?.nombre || 'Clase'}</span>
+            <span class="calendar-class-room">${c.sala?.nombre || 'Sala'}</span>
+          `;
+          body.appendChild(item);
+        });
+      }
+      grid.appendChild(col);
+    }
+  }
+
+  function renderDayDetail(dayKey) {
+    state.selectedDateKey = dayKey;
+    renderCalendar();
+    const list = state.clases.filter(c => fmtDateKey(new Date(c.fecha_hora)) === dayKey);
+    const panel = document.getElementById('dayDetail');
+    if (!list.length) {
+      panel.innerHTML = '<p class="calendar-empty">No hay clases este día.</p>';
+      return;
+    }
+    panel.innerHTML = '';
+    list.forEach((c) => {
+      const reserva = state.reservasMap.get(c.id);
+      const isReserved = reserva?.estado === 'confirmada';
+      const isWaitlist = isReserved && reserva?.lista_espera;
+      const canReserve = state.margenReservaDias === 0 || new Date(c.fecha_hora).getTime() >= Date.now() + state.margenReservaDias * 86400000;
+      const canCancel = state.margenCancelacionDias === 0 || new Date(c.fecha_hora).getTime() >= Date.now() + state.margenCancelacionDias * 86400000;
+      const card = document.createElement('article');
+      card.className = 'day-detail-card';
+      card.innerHTML = `
+        <div>
+          <h3>${c.titulo || c.disciplina?.nombre || 'Clase'}</h3>
+          <p>${fmtDateTime(c.fecha_hora)} · ${c.sala?.nombre || 'Sala'} · ${c.duracion_min} min</p>
+          ${isWaitlist ? `<p style="margin-top:.2rem;color:var(--color-warning);font-size:.72rem;">Lista de espera · posición ${reserva.posicion_espera ?? '-'}</p>` : ''}
+        </div>
+        <div class="day-detail-actions"></div>
+      `;
+      const actions = card.querySelector('.day-detail-actions');
+      const btn = document.createElement('button');
+      btn.className = isReserved ? 'btn btn-danger btn-sm' : 'btn btn-primary btn-sm';
+      btn.textContent = isReserved ? (isWaitlist ? 'Salir espera' : 'Cancelar') : 'Reservar';
+      btn.disabled = isReserved ? (isWaitlist ? false : !canCancel) : !canReserve;
+      if (!canReserve && !isReserved) btn.title = `Reserva con ${state.margenReservaDias} días de margen.`;
+      if (!canCancel && isReserved) btn.title = `Cancelación con ${state.margenCancelacionDias} días de margen.`;
+      btn.onclick = async () => {
+        try {
+          if (isReserved) {
+            await cancelarReservaSegura(reserva.id);
+            toast(isWaitlist ? 'Saliste de la lista de espera' : 'Clase cancelada', 'success');
+          } else {
+            const result = await crearReservaSegura(c.id);
+            if (result?.en_espera) {
+              toast(`Clase completa: quedaste en lista de espera (#${result.posicion_espera}).`, 'info');
+            } else {
+              toast('Clase reservada', 'success');
+            }
+          }
+          await fetchData();
+          renderDayDetail(dayKey);
+        } catch (e) {
+          toast(e.message || 'Operación no permitida', 'error');
+        }
+      };
+      actions.appendChild(btn);
+      panel.appendChild(card);
+    });
+  }
+
+  document.getElementById('prevWeekBtn').addEventListener('click', async () => {
+    state.weekStart.setDate(state.weekStart.getDate() - 7);
+    await fetchData();
+    state.selectedDateKey = null;
+    renderCalendar();
+    document.getElementById('dayDetail').innerHTML = '<p class="calendar-empty">Selecciona un día del calendario para ver y gestionar tus clases.</p>';
+  });
+  document.getElementById('nextWeekBtn').addEventListener('click', async () => {
+    state.weekStart.setDate(state.weekStart.getDate() + 7);
+    await fetchData();
+    state.selectedDateKey = null;
+    renderCalendar();
+    document.getElementById('dayDetail').innerHTML = '<p class="calendar-empty">Selecciona un día del calendario para ver y gestionar tus clases.</p>';
+  });
+  document.addEventListener('click', (e) => {
+    const dayCol = e.target.closest('.calendar-day');
+    if (dayCol) renderDayDetail(dayCol.dataset.key);
+    const classBtn = e.target.closest('.calendar-class');
+    if (classBtn) renderDayDetail(classBtn.dataset.dayKey);
+  });
+
+  async function init() {
+    const session = await getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+    const perfil = await getUserProfile(session.user.id);
+    state.perfilId = perfil.id;
+    document.getElementById('userName').textContent = perfil.nombre || perfil.email;
+    document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
+    await fetchData();
+    renderCalendar();
+  }
+
+  init().catch((e) => {
+    document.getElementById('calendarGrid').innerHTML = `<p style="color:var(--color-danger)">Error: ${e.message}</p>`;
+  });
+</script>
+</body>
+</html>

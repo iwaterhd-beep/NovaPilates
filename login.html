@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceder - NŌVA PILATES STUDIO</title>
+  <meta name="description" content="Accede a tu espacio NŌVA para reservar clases, revisar tu bono y recibir notificaciones." />
+  <meta property="og:title" content="Acceso | NŌVA PILATES STUDIO" />
+  <meta property="og:description" content="Inicia sesión en tu espacio personal de NŌVA." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/assets/branding/logo-nova-main.PNG" />
+  <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate icon" href="/assets/branding/logo-nova-main.PNG" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Cormorant+Garamond:wght@300;400;500&display=swap');
+    :root {
+      --bg: #f6f4ef;
+      --panel: #fffdfa;
+      --ink: #4a453d;
+      --ink-soft: #6f695f;
+      --line: #e8e2d8;
+      --line-strong: #d9d0c3;
+      --accent: #8a9a8c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, sans-serif; background: var(--bg); color: var(--ink); min-height: 100svh; }
+    .wrap { min-height: 100svh; display: grid; place-items: center; padding: 2rem; }
+    .card {
+      width: 100%; max-width: 460px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 2rem;
+    }
+    .brand { display: flex; justify-content: center; margin-bottom: 1rem; }
+    .brand .brand-logo-img {
+      display: block;
+      max-height: 64px;
+      max-width: min(260px, 86vw);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 400; margin-bottom: .2rem; text-align: center; }
+    .sub { text-align: center; color: var(--ink-soft); font-size: .88rem; margin-bottom: 1.5rem; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); margin-bottom: 1rem; }
+    .tab { border: 0; background: #f9f6f0; padding: .7rem; font-size: .64rem; text-transform: uppercase; letter-spacing: .16em; color: var(--ink-soft); cursor: pointer; }
+    .tab.active { background: #fffdfa; color: var(--ink); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .group { margin-bottom: .9rem; }
+    label { display: block; font-size: .62rem; letter-spacing: .16em; text-transform: uppercase; color: #8f887d; margin-bottom: .35rem; }
+    input {
+      width: 100%; min-height: 44px; border: 1px solid var(--line-strong); background: #fff;
+      padding: .72rem .85rem; color: var(--ink);
+    }
+    .btn {
+      width: 100%; min-height: 44px; border: 1px solid var(--accent); background: var(--accent);
+      color: #f7f5f0; text-transform: uppercase; letter-spacing: .16em; font-size: .64rem; cursor: pointer;
+    }
+    .msg { display: none; margin-bottom: .8rem; padding: .7rem .8rem; border: 1px solid var(--line); font-size: .82rem; }
+    .msg.show { display: block; }
+    .msg.error { color: #8b4d4d; background: #fbf0ef; }
+    .msg.success { color: #4a644f; background: #eef5ef; }
+    .back { display: inline-block; margin-top: 1rem; font-size: .75rem; color: var(--ink-soft); }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <a href="index.html" class="brand" aria-label="NŌVA PILATES STUDIO">
+        <img src="/assets/branding/logo-nova-main.PNG" alt="" class="brand-logo-img" width="240" height="64" decoding="async" role="presentation" onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';this.classList.add('brand-logo-img--svg');" />
+      </a>
+      <h1>Bienvenida</h1>
+      <p class="sub">Accede a tu espacio personal</p>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="login">Iniciar sesion</button>
+        <button class="tab" data-tab="recover">Recuperar</button>
+      </div>
+
+      <div id="msg" class="msg"></div>
+
+      <div id="panel-login" class="panel active">
+        <form id="loginForm" novalidate>
+          <div class="group">
+            <label for="email">Correo</label>
+            <input id="email" type="email" required autocomplete="email" />
+          </div>
+          <div class="group">
+            <label for="password">Contrasena</label>
+            <input id="password" type="password" required autocomplete="current-password" />
+          </div>
+          <button class="btn" id="loginBtn" type="submit">Entrar</button>
+        </form>
+      </div>
+
+      <div id="panel-recover" class="panel">
+        <form id="recoverForm" novalidate>
+          <div class="group">
+            <label for="recoverEmail">Correo</label>
+            <input id="recoverEmail" type="email" required autocomplete="email" />
+          </div>
+          <button class="btn" id="recoverBtn" type="submit">Enviar enlace</button>
+        </form>
+      </div>
+
+      <a class="back" href="index.html">Volver al inicio</a>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
+    const msg = document.getElementById('msg');
+    function showMsg(text, type) { msg.textContent = text; msg.className = `msg show ${type}`; }
+    function hideMsg() { msg.className = 'msg'; msg.textContent = ''; }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => t.classList.remove('active'));
+        panels.forEach((p) => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+        hideMsg();
+      });
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMsg();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) return showMsg('Completa todos los campos.', 'error');
+      try {
+        const { data, error } = await novaSupabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        const { data: profile } = await novaSupabase.from('perfiles').select('rol').eq('id', data.user.id).single();
+        const rol = profile?.rol || 'cliente';
+        const redirects = { cliente: 'dashboard_cliente.html', empleado: 'dashboard_staff.html', admin: 'dashboard_staff.html' };
+        window.location.href = redirects[rol] || 'dashboard_cliente.html';
+      } catch (err) {
+        const m = err?.message === 'Invalid login credentials' ? 'Correo o contrasena incorrectos.' : 'Error al iniciar sesion.';
+        showMsg(m, 'error');
+      }
+    });
+
+    document.getElementById('recoverForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMsg();
+      const email = document.getElementById('recoverEmail').value.trim();
+      if (!email) return showMsg('Introduce un correo.', 'error');
+      try {
+        const { error } = await novaSupabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/login.html?reset=true' });
+        if (error) throw error;
+        showMsg('Revisa tu correo para restablecer la contrasena.', 'success');
+      } catch {
+        showMsg('No se pudo enviar el correo.', 'error');
+      }
+    });
+  </script>
+</body>
+</html>

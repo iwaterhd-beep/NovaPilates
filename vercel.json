@@ -1,0 +1,15 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/dashboard", "destination": "/dashboard_cliente.html" },
+    { "source": "/staff", "destination": "/dashboard_staff.html" },
+    { "source": "/calendario", "destination": "/calendario.html" },
+    { "source": "/mis-clases", "destination": "/mis-clases.html" },
+    { "source": "/bono", "destination": "/bono.html" },
+    { "source": "/notificaciones", "destination": "/notificaciones.html" },
+    { "source": "/perfil", "destination": "/perfil.html" }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}
