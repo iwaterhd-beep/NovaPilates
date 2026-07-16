@@ -142,7 +142,10 @@
         const redirects = { cliente: 'dashboard_cliente.html', empleado: 'dashboard_staff.html', admin: 'dashboard_staff.html' };
         window.location.href = redirects[rol] || 'dashboard_cliente.html';
       } catch (err) {
-        const m = err?.message === 'Invalid login credentials' ? 'Correo o contrasena incorrectos.' : 'Error al iniciar sesion.';
+        const raw = err?.message || '';
+        const m = raw === 'Invalid login credentials'
+          ? 'Correo o contrasena incorrectos.'
+          : (raw ? `Error al iniciar sesion: ${raw}` : 'Error al iniciar sesion.');
         showMsg(m, 'error');
       }
     });
