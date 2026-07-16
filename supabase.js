@@ -1,7 +1,18 @@
 // NŌVA PILATES STUDIO - cliente Supabase
 const SUPABASE_URL = 'https://atdhljdogjhsoyraekwz.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0ZGhsamRvZ2poc295cmFla3d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMTg3MzcsImV4cCI6MjA5OTc5NDczN30.g7poBIKyTcMPvcGvRUDS169uktE-YWm9Y_F3Pc7evqs';
-const novaSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const novaSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage
+  }
+});
+
+function goLogin() {
+  window.location.replace('/login.html');
+}
 
 async function getSession() {
   const { data: { session } } = await novaSupabase.auth.getSession();
@@ -26,7 +37,7 @@ async function getUserProfile(userId) {
 async function requireAuth(rolesPermitidos = null) {
   const session = await getSession();
   if (!session) {
-    window.location.replace('login.html');
+    goLogin();
     return null;
   }
 
@@ -35,7 +46,7 @@ async function requireAuth(rolesPermitidos = null) {
   const profile = await getUserProfile(session.user.id);
   const roles = Array.isArray(rolesPermitidos) ? rolesPermitidos : [rolesPermitidos];
   if (!roles.includes(profile?.rol)) {
-    window.location.replace('login.html');
+    goLogin();
     return null;
   }
   return profile;
@@ -43,7 +54,7 @@ async function requireAuth(rolesPermitidos = null) {
 
 async function signOut() {
   await novaSupabase.auth.signOut();
-  window.location.replace('login.html');
+  goLogin();
 }
 
 async function getBonoActivo(perfilId) {

@@ -110,7 +110,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
-  <script src="supabase.js?v=20260716"></script>
+  <script src="/supabase.js?v=20260716b"></script>
   <script>
     const tabs = document.querySelectorAll('.tab');
     const panels = document.querySelectorAll('.panel');
@@ -142,21 +142,24 @@
         if (error) throw error;
         if (!data?.user) throw new Error('No se pudo obtener la sesion.');
 
+        // Esperar a que la sesion quede guardada (evita fallo en Vercel)
+        const { data: sessionData } = await novaSupabase.auth.getSession();
+        if (!sessionData?.session) throw new Error('La sesion no se guardo. Prueba otra vez.');
+
         const { data: profile, error: profileError } = await novaSupabase
           .from('perfiles')
           .select('rol')
           .eq('id', data.user.id)
           .maybeSingle();
-        // Si el perfil falla, igual entramos con el rol del metadata
         const rol = profile?.rol || data.user.user_metadata?.rol || 'cliente';
         if (profileError) console.warn('perfil', profileError);
 
         const redirects = {
-          cliente: 'dashboard_cliente.html',
-          empleado: 'dashboard_staff.html',
-          admin: 'dashboard_staff.html'
+          cliente: '/dashboard_cliente.html',
+          empleado: '/dashboard_staff.html',
+          admin: '/dashboard_staff.html'
         };
-        window.location.replace(redirects[rol] || 'dashboard_cliente.html');
+        window.location.assign(redirects[rol] || '/dashboard_cliente.html');
       } catch (err) {
         console.error(err);
         const raw = err?.message || err?.error_description || err?.msg || String(err || '');
