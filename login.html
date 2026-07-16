@@ -109,8 +109,8 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
+  <script src="supabase.js?v=20260716"></script>
   <script>
     const tabs = document.querySelectorAll('.tab');
     const panels = document.querySelectorAll('.panel');
@@ -147,19 +147,21 @@
           .select('rol')
           .eq('id', data.user.id)
           .maybeSingle();
-        if (profileError) throw profileError;
-
+        // Si el perfil falla, igual entramos con el rol del metadata
         const rol = profile?.rol || data.user.user_metadata?.rol || 'cliente';
+        if (profileError) console.warn('perfil', profileError);
+
         const redirects = {
-          cliente: '/dashboard',
-          empleado: '/staff',
-          admin: '/staff'
+          cliente: 'dashboard_cliente.html',
+          empleado: 'dashboard_staff.html',
+          admin: 'dashboard_staff.html'
         };
-        window.location.href = redirects[rol] || '/dashboard';
+        window.location.replace(redirects[rol] || 'dashboard_cliente.html');
       } catch (err) {
-        const raw = err?.message || err?.error_description || err?.msg || '';
+        console.error(err);
+        const raw = err?.message || err?.error_description || err?.msg || String(err || '');
         const m = raw === 'Invalid login credentials'
-          ? 'Correo o contrasena incorrectos. Usa la contraseña de 6 caracteres.'
+          ? 'Correo o contrasena incorrectos. Prueba: 555555'
           : (raw ? `Error al iniciar sesion: ${raw}` : 'Error al iniciar sesion.');
         showMsg(m, 'error');
       }

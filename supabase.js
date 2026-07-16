@@ -26,7 +26,7 @@ async function getUserProfile(userId) {
 async function requireAuth(rolesPermitidos = null) {
   const session = await getSession();
   if (!session) {
-    window.location.href = '/login.html';
+    window.location.replace('login.html');
     return null;
   }
 
@@ -35,7 +35,7 @@ async function requireAuth(rolesPermitidos = null) {
   const profile = await getUserProfile(session.user.id);
   const roles = Array.isArray(rolesPermitidos) ? rolesPermitidos : [rolesPermitidos];
   if (!roles.includes(profile?.rol)) {
-    window.location.href = '/login.html';
+    window.location.replace('login.html');
     return null;
   }
   return profile;
@@ -43,7 +43,7 @@ async function requireAuth(rolesPermitidos = null) {
 
 async function signOut() {
   await novaSupabase.auth.signOut();
-  window.location.href = '/login.html';
+  window.location.replace('login.html');
 }
 
 async function getBonoActivo(perfilId) {
