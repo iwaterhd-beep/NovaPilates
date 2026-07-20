@@ -237,6 +237,9 @@ a { text-decoration: none; color: inherit; }
 .pillar-icon-img {
   max-width: 6.5rem;
 }
+.pillar-icon-img--wide {
+  max-width: 7.5rem;
+}
 .pillar-icon--dual {
   display: flex;
   align-items: flex-end;
@@ -270,6 +273,16 @@ a { text-decoration: none; color: inherit; }
   margin: .5rem 0 .75rem;
   color: #2c2a28;
 }
+.donde-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(44, 42, 40, .35);
+  transition: border-color .2s ease, opacity .2s ease;
+}
+.donde-link:hover {
+  border-bottom-color: #2c2a28;
+  opacity: .85;
+}
 .donde-text { color: var(--ink-soft); margin-bottom: 1.25rem; font-size: .95rem; }
 
 .section-plans .plans-head {
@@ -291,6 +304,13 @@ a { text-decoration: none; color: inherit; }
   line-height: 1.65;
   margin: 0;
 }
+.section-plans .plans-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
 .section-plans .plan-tag {
   font-size: .62rem;
   letter-spacing: .2em;
@@ -303,8 +323,23 @@ a { text-decoration: none; color: inherit; }
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.65rem;
   font-weight: 400;
-  margin-bottom: .65rem;
+  margin-bottom: .45rem;
   line-height: 1.15;
+}
+.section-plans .plan-meta {
+  font-size: .78rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #8f887d;
+  margin: 0 0 .75rem;
+}
+.section-plans .plan-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: #2c2a28;
+  margin: 0 0 .85rem;
+  letter-spacing: .02em;
 }
 .section-plans .plan-card p:last-of-type { margin: 0; }
 .section-plans .plans-cta {
@@ -354,7 +389,7 @@ a { text-decoration: none; color: inherit; }
 
 @media (max-width: 980px) {
   .nav-links { display: none; }
-  .grid-3, .steps, .footer-grid { grid-template-columns: 1fr; }
+  .grid-3, .steps, .footer-grid, .section-plans .plans-grid { grid-template-columns: 1fr; }
   .section-process .steps-pillars .pillar-card { min-height: auto; }
   .empezar-head { flex-direction: column; align-items: flex-start; }
   .empezar-btn { align-self: flex-start; }
