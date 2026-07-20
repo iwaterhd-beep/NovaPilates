@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
-  <link rel="stylesheet" href="portal.css?v=2" />
+  <link rel="stylesheet" href="portal.css?v=4" />
 </head>
 <body data-panel-build="2026-04-18-disciplinas">
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -43,7 +43,7 @@
   <main class="main">
     <header class="topbar"><span class="topbar-title" id="pageTitle">Panel Staff</span></header>
     <div class="content">
-      <section class="panel-tab" id="tab-clases">
+      <section class="panel-tab" id="tab-clases" style="display:none;">
         <div class="card" style="margin-bottom:1rem;">
           <div class="card-label">Nueva sesión (clase)</div>
           <p style="margin:0 0 .8rem;font-size:.75rem;color:var(--color-muted);">Crea una sesión en el calendario: elige disciplina, sala, fecha y aforo. La fecha debe ser futura.</p>
@@ -142,7 +142,7 @@
             <table><thead><tr><th>Cliente</th><th>Bono</th><th>Uso</th><th>Vence</th></tr></thead><tbody id="rowsBonos"></tbody></table>
           </div>
         </div>
-        <div class="card" style="margin-top:1rem;">
+        <div class="card" id="cardBonosDesigner" style="margin-top:1rem;">
           <div class="card-label">Diseñador de bonos (admin)</div>
           <p style="margin:0 0 .6rem;font-size:.75rem;color:var(--color-muted);">Plantillas rápidas (luego ajusta precio o días si quieres):</p>
           <div style="display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:.8rem;">
@@ -181,14 +181,14 @@
       </section>
 
       <section class="panel-tab" id="tab-tpv" style="display:none;">
-        <p class="tpv-intro">Elige cliente, toca bonos o productos para añadir al ticket y cobra a la derecha (efectivo o tarjeta).</p>
+        <p class="tpv-intro">Busca un cliente, toca bonos o productos para el ticket y cobra a la derecha.</p>
 
         <div class="tpv-bar-layout">
           <div class="tpv-bar-main">
             <div class="card tpv-card-compact">
               <div class="card-label">Cliente</div>
               <div style="display:grid;grid-template-columns:1fr;gap:.65rem;">
-                <input class="form-input" id="tpvClientSearch" placeholder="Buscar: nombre, apellidos, email, teléfono o DNI…" autocomplete="off" />
+                <input class="form-input" id="tpvClientSearch" placeholder="Escribe al menos 2 caracteres: nombre, email, teléfono o DNI…" autocomplete="off" />
                 <input class="form-input" id="tpvNota" placeholder="Nota interna para todo el cobro (opcional)" />
               </div>
               <div id="tpvClientResults" class="tpv-client-chips"></div>
@@ -246,6 +246,7 @@
 
           <aside class="card tpv-cart-panel" aria-label="Ticket de venta">
             <div class="card-label">Ticket</div>
+            <p id="tpvCajaHint" class="tpv-caja-hint" hidden></p>
             <div id="tpvCartList" class="tpv-cart-list"></div>
             <div class="tpv-cart-total" id="tpvCartTotalWrap" style="display:none;">
               <span>Total</span>
@@ -255,7 +256,7 @@
               <button type="button" class="btn btn-primary tpv-pay-btn" id="tpvCobrarEfectivo" data-metodo="efectivo">Cobrar efectivo</button>
               <button type="button" class="btn btn-primary tpv-pay-btn tpv-pay-tarjeta" id="tpvCobrarTarjeta" data-metodo="tarjeta">Cobrar tarjeta</button>
               <button type="button" class="btn btn-outline tpv-pay-btn" id="tpvCobrarTransferencia" data-metodo="transferencia">Transferencia</button>
-              <button type="button" class="btn btn-ghost btn-sm" id="tpvVaciarCarrito" type="button">Vaciar ticket</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="tpvVaciarCarrito">Vaciar ticket</button>
             </div>
           </aside>
         </div>
@@ -307,7 +308,7 @@
           <div class="card-label">Enviar notificación</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
             <select class="form-input" id="notifDestino">
-              <option value="">Todos los clientes</option>
+              <option value="">Aviso general (tablero, no a cada cliente)</option>
             </select>
             <select class="form-input" id="notifTipo">
               <option value="info">Info</option>
@@ -352,7 +353,7 @@
       </section>
 
       <section class="panel-tab" id="tab-usuarios" style="display:none;">
-        <div class="card" style="margin-bottom:1rem;">
+        <div class="card" id="cardCrearUsuario" style="margin-bottom:1rem;">
           <div class="card-label">Crear usuario de acceso</div>
           <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
             <p style="margin:0;font-size:.78rem;color:var(--color-muted);">Abre el formulario completo para alta de cliente o empleado.</p>
@@ -441,7 +442,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Editar disciplina</h2>
-        <button class="modal-close" id="closeDisciplinaModal">âœ•</button>
+        <button class="modal-close" id="closeDisciplinaModal">×</button>
       </div>
       <form id="disciplinaForm" style="display:grid;gap:.9rem;">
         <input type="hidden" id="modalDisciplinaId" />
@@ -480,7 +481,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Editar tipo de bono</h2>
-        <button class="modal-close" id="closeTipoBonoModal">âœ•</button>
+        <button class="modal-close" id="closeTipoBonoModal">×</button>
       </div>
       <form id="tipoBonoForm" style="display:grid;gap:.9rem;">
         <div class="form-group">
@@ -535,7 +536,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Duplicar sesión</h2>
-        <button class="modal-close" id="closeClaseDuplicateModal">âœ•</button>
+        <button class="modal-close" id="closeClaseDuplicateModal">×</button>
       </div>
       <p id="claseDupResumen" style="font-size:.8rem;color:var(--color-muted);line-height:1.5;margin-bottom:.8rem;"></p>
       <form id="claseDuplicateForm" style="display:grid;gap:.9rem;">
@@ -567,7 +568,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Editar clase</h2>
-        <button class="modal-close" id="closeClaseEditModal">âœ•</button>
+        <button class="modal-close" id="closeClaseEditModal">×</button>
       </div>
       <form id="claseEditForm" style="display:grid;gap:.9rem;">
         <div class="form-group">
@@ -594,7 +595,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Eliminar clase</h2>
-        <button class="modal-close" id="closeClaseDeleteModal">âœ•</button>
+        <button class="modal-close" id="closeClaseDeleteModal">×</button>
       </div>
       <p style="font-size:.85rem;color:var(--color-cream-dim);line-height:1.6;">
         Esta acción eliminará la clase y sus reservas asociadas. No se puede deshacer.
@@ -610,7 +611,7 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title">Nuevo cliente / usuario</h2>
-        <button class="modal-close" id="closeNuevoClienteModal">âœ•</button>
+        <button class="modal-close" id="closeNuevoClienteModal">×</button>
       </div>
       <form id="nuevoClienteForm" style="display:grid;gap:.9rem;">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
@@ -712,20 +713,33 @@
       usuarios: 'Usuarios'
     };
 
-    function setTab(tab) {
+    function setTab(tab, opts = {}) {
+      const pushHash = opts.pushHash !== false;
       if (tab === 'ajustes' && staffProfile && staffProfile.rol !== 'admin') {
         toast('Solo administración puede abrir Ajustes.', 'error');
         tab = 'tpv';
       }
+      if (!TAB_LABELS[tab]) tab = 'tpv';
       document.querySelectorAll('.js-tab').forEach((a) => a.classList.toggle('active', a.dataset.tab === tab));
       document.querySelectorAll('.panel-tab').forEach((p) => p.style.display = 'none');
-      document.getElementById(`tab-${tab}`).style.display = 'block';
+      const panel = document.getElementById(`tab-${tab}`);
+      if (panel) panel.style.display = 'block';
       document.getElementById('pageTitle').textContent = `Panel Staff · ${TAB_LABELS[tab] || tab}`;
+      if (pushHash) {
+        const next = `#${tab}`;
+        if (location.hash !== next) history.replaceState(null, '', next);
+      }
+      if (tab === 'tpv') tpvRefreshCajaHint();
+      if (tab === 'finanzas') loadFinanzas();
     }
     document.querySelectorAll('.js-tab').forEach((a) => a.addEventListener('click', (e) => {
       e.preventDefault();
       setTab(a.dataset.tab);
     }));
+    window.addEventListener('hashchange', () => {
+      const t = (location.hash || '').replace(/^#/, '');
+      if (TAB_LABELS[t]) setTab(t, { pushHash: false });
+    });
 
     let staffProfile = null;
     const appState = {
@@ -745,7 +759,9 @@
       disciplinasAll: [],
       clasesLista: [],
       duplicandoClase: null,
-      tpvCart: []
+      tpvCart: [],
+      tpvCobrando: false,
+      cajaHoyAbierta: null
     };
 
     const BONO_PRESETS = {
@@ -1161,8 +1177,17 @@
 
     function applyStaffSidebarUi() {
       applyStaffTpvUi();
+      const isAdmin = staffProfile && staffProfile.rol === 'admin';
       const aj = document.getElementById('sidebarLinkAjustes');
-      if (aj) aj.style.display = staffProfile && staffProfile.rol === 'admin' ? '' : 'none';
+      if (aj) aj.style.display = isAdmin ? '' : 'none';
+      const bonosDesigner = document.getElementById('cardBonosDesigner');
+      if (bonosDesigner) bonosDesigner.style.display = isAdmin ? '' : 'none';
+      const crearUsuario = document.getElementById('cardCrearUsuario');
+      if (crearUsuario) crearUsuario.style.display = isAdmin ? '' : 'none';
+      const discAdmin = document.getElementById('cardDisciplinasAdmin');
+      if (discAdmin && !isAdmin) discAdmin.style.display = 'none';
+      const eliminarBtn = document.getElementById('eliminarClienteBtn');
+      if (eliminarBtn) eliminarBtn.style.display = isAdmin ? '' : 'none';
     }
 
     async function fetchPerfilesCatalogo() {
@@ -1329,7 +1354,7 @@
       const editSel = document.getElementById('editClienteSelect');
       editSel.innerHTML = '<option value="">Selecciona un cliente...</option>' + clientes.map(x => `<option value="${x.id}">${escHtml(nombreClienteDisplay(x))}</option>`).join('');
       const notifDestino = document.getElementById('notifDestino');
-      notifDestino.innerHTML = '<option value="">Todos los clientes</option>' + (c || [])
+      notifDestino.innerHTML = '<option value="">Aviso general (tablero, no a cada cliente)</option>' + (c || [])
         .filter(x => x.rol === 'cliente')
         .map(x => `<option value="${x.id}">${escHtml(nombreClienteDisplay(x))}</option>`)
         .join('');
@@ -1378,21 +1403,24 @@
       const qRaw = (query || '').trim();
       const q = qRaw.toLowerCase();
       const qTel = qRaw.replace(/[\s\-.]/g, '');
+      if (qRaw.length < 2) {
+        wrap.innerHTML = qRaw.length === 0
+          ? ''
+          : '<p class="tpv-search-hint">Escribe al menos 2 caracteres para buscar.</p>';
+        return;
+      }
       const matches = appState.clientes
-        .filter(c => {
-          if (!q && !qTel) return true;
-          return (
-            textoBusquedaCoincide(c.nombre, q) ||
-            textoBusquedaCoincide(c.apellidos, q) ||
-            textoBusquedaCoincide(c.email, q) ||
-            textoBusquedaCoincide(c.dni, q) ||
-            telefonoBusquedaCoincide(c.telefono, q, qTel) ||
-            telefonoBusquedaCoincide(c.telefono_emergencia, q, qTel)
-          );
-        })
+        .filter(c => (
+          textoBusquedaCoincide(c.nombre, q) ||
+          textoBusquedaCoincide(c.apellidos, q) ||
+          textoBusquedaCoincide(c.email, q) ||
+          textoBusquedaCoincide(c.dni, q) ||
+          telefonoBusquedaCoincide(c.telefono, q, qTel) ||
+          telefonoBusquedaCoincide(c.telefono_emergencia, q, qTel)
+        ))
         .slice(0, 8);
       if (!matches.length) {
-        wrap.innerHTML = '<p style="font-size:.78rem;color:var(--color-muted);">Sin resultados.</p>';
+        wrap.innerHTML = '<p class="tpv-search-hint">Sin resultados.</p>';
         return;
       }
       wrap.innerHTML = matches.map(c => `
@@ -1420,7 +1448,10 @@
             ${c.telefono ? `<div style="font-size:.75rem;color:var(--color-muted);margin-top:.25rem;">Tel. ${escHtml(c.telefono)}</div>` : ''}
             ${c.dni ? `<div style="font-size:.75rem;color:var(--color-muted);">DNI ${escHtml(c.dni)}</div>` : ''}
           </div>
-          <span class="badge badge-accent">Cliente seleccionado</span>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;">
+            <span class="badge badge-accent">Seleccionado</span>
+            <button type="button" class="btn btn-ghost btn-sm js-tpv-clear-client">Quitar</button>
+          </div>
         </div>
       `;
     }
@@ -1429,12 +1460,31 @@
       return `l${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     }
 
+    function tpvLineImporte(line) {
+      const qty = Math.max(1, Number(line.qty) || 1);
+      const unit = Number(line.unitPrice != null ? line.unitPrice : line.importe) || 0;
+      return unit * qty;
+    }
+
+    function tpvCartTotal() {
+      return (appState.tpvCart || []).reduce((s, l) => s + tpvLineImporte(l), 0);
+    }
+
     function tpvAddBonoToCart(b) {
+      const existingBono = (appState.tpvCart || []).find((l) => l.kind === 'bono');
+      if (existingBono) {
+        if (!window.confirm('El ticket ya tiene un bono. ¿Sustituirlo por este? (Solo puede quedar un bono activo por cliente.)')) {
+          return;
+        }
+        appState.tpvCart = (appState.tpvCart || []).filter((l) => l.kind !== 'bono');
+      }
       appState.tpvCart.push({
         uid: tpvNewCartUid(),
         kind: 'bono',
         tipoBonoId: b.id,
         nombre: b.nombre,
+        unitPrice: Number(b.precio) || 0,
+        qty: 1,
         importe: Number(b.precio) || 0,
         sesiones: b.sesiones,
         dias: b.duracion_dias
@@ -1443,18 +1493,34 @@
     }
 
     function tpvAddProductoToCart(p) {
-      appState.tpvCart.push({
-        uid: tpvNewCartUid(),
-        kind: 'producto',
-        productoId: p.id,
-        nombre: p.nombre,
-        importe: Number(p.precio_referencia) || 0
-      });
+      const unit = Number(p.precio_referencia) || 0;
+      const existing = (appState.tpvCart || []).find((l) => l.kind === 'producto' && l.productoId === p.id);
+      if (existing) {
+        existing.qty = Math.min(99, (Number(existing.qty) || 1) + 1);
+        existing.importe = tpvLineImporte(existing);
+      } else {
+        appState.tpvCart.push({
+          uid: tpvNewCartUid(),
+          kind: 'producto',
+          productoId: p.id,
+          nombre: p.nombre,
+          unitPrice: unit,
+          qty: 1,
+          importe: unit
+        });
+      }
       renderTpvCart();
     }
 
+    function tpvSetPayButtonsDisabled(disabled) {
+      ['tpvCobrarEfectivo', 'tpvCobrarTarjeta', 'tpvCobrarTransferencia', 'tpvVaciarCarrito'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = !!disabled;
+      });
+    }
+
     function tpvUpdateCartTotal() {
-      const total = (appState.tpvCart || []).reduce((s, l) => s + (Number(l.importe) || 0), 0);
+      const total = tpvCartTotal();
       const el = document.getElementById('tpvCartTotal');
       const wrap = document.getElementById('tpvCartTotalWrap');
       if (el) el.textContent = `${total.toFixed(2).replace('.', ',')} €`;
@@ -1466,11 +1532,22 @@
       if (!list) return;
       const cart = appState.tpvCart || [];
       if (!cart.length) {
-        list.innerHTML = '<p class="tpv-cart-empty">Toca los cuadrados de la izquierda para añadir líneas al ticket.</p>';
+        list.innerHTML = '<p class="tpv-cart-empty">Toca bonos o productos para añadir líneas al ticket.</p>';
         tpvUpdateCartTotal();
         return;
       }
-      list.innerHTML = cart.map((line) => `
+      list.innerHTML = cart.map((line) => {
+        const qty = Math.max(1, Number(line.qty) || 1);
+        const unit = Number(line.unitPrice != null ? line.unitPrice : line.importe) || 0;
+        const lineTotal = tpvLineImporte(line);
+        const qtyControls = line.kind === 'producto'
+          ? `<div class="tpv-qty">
+              <button type="button" class="tpv-qty-btn js-tpv-qty" data-uid="${line.uid}" data-delta="-1" aria-label="Quitar uno">−</button>
+              <span class="tpv-qty-val">${qty}</span>
+              <button type="button" class="tpv-qty-btn js-tpv-qty" data-uid="${line.uid}" data-delta="1" aria-label="Añadir uno">+</button>
+            </div>`
+          : '';
+        return `
         <div class="tpv-cart-line" data-uid="${line.uid}">
           <div class="tpv-cart-line-head">
             <span class="tpv-cart-kind">${line.kind === 'bono' ? 'Bono' : 'Tienda'}</span>
@@ -1478,14 +1555,48 @@
           </div>
           <div class="tpv-cart-line-title">${escHtml(line.nombre)}</div>
           <div class="tpv-cart-line-price">
-            <span class="tpv-cart-price-display">${Number(line.importe || 0).toFixed(2).replace('.', ',')} €</span>
+            ${qtyControls}
+            <span class="tpv-cart-price-display">${lineTotal.toFixed(2).replace('.', ',')} €${qty > 1 ? ` <small>(${unit.toFixed(2).replace('.', ',')} × ${qty})</small>` : ''}</span>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
       tpvUpdateCartTotal();
     }
 
+    async function tpvRefreshCajaHint() {
+      const hint = document.getElementById('tpvCajaHint');
+      if (!hint) return;
+      try {
+        const { data: caja, error } = await novaSupabase
+          .from('caja_diaria')
+          .select('estado')
+          .eq('fecha', new Date().toISOString().slice(0, 10))
+          .maybeSingle();
+        if (error) throw error;
+        appState.cajaHoyAbierta = !!(caja && caja.estado === 'abierta');
+        if (appState.cajaHoyAbierta) {
+          hint.hidden = true;
+          hint.textContent = '';
+        } else {
+          hint.hidden = false;
+          hint.textContent = caja ? 'Caja de hoy cerrada. Abre caja en Finanzas antes de cobrar (o confirma al cobrar).' : 'Caja de hoy no abierta. Ábrela en Finanzas antes de cobrar.';
+        }
+      } catch {
+        appState.cajaHoyAbierta = null;
+        hint.hidden = false;
+        hint.textContent = 'No se pudo comprobar el estado de caja.';
+      }
+    }
+
+    function tpvMetodoLabel(metodo) {
+      if (metodo === 'efectivo') return 'efectivo';
+      if (metodo === 'tarjeta') return 'tarjeta';
+      if (metodo === 'transferencia') return 'transferencia';
+      return metodo;
+    }
+
     async function tpvEjecutarCobro(metodoPago) {
+      if (appState.tpvCobrando) return;
       const cliente = appState.selectedCliente;
       if (!cliente) {
         toast('Selecciona un cliente antes de cobrar.', 'error');
@@ -1497,73 +1608,60 @@
         return;
       }
       for (const line of cart) {
-        if (!line.importe || Number(line.importe) <= 0) {
+        if (tpvLineImporte(line) <= 0) {
           toast('Revisa los importes: cada línea debe ser mayor que cero.', 'error');
           return;
         }
       }
+
+      await tpvRefreshCajaHint();
+      if (appState.cajaHoyAbierta === false) {
+        const okCaja = window.confirm('La caja de hoy no está abierta. ¿Cobrar de todas formas?\n\nRecomendado: abre caja en Finanzas primero.');
+        if (!okCaja) return;
+      }
+
+      const total = tpvCartTotal();
+      const totalFmt = `${total.toFixed(2).replace('.', ',')} €`;
+      const okPay = window.confirm(
+        `¿Cobrar ${totalFmt} en ${tpvMetodoLabel(metodoPago)} a ${nombreClienteDisplay(cliente)}?\n\n${cart.length} línea(s) en el ticket.`
+      );
+      if (!okPay) return;
+
       const notaGlobal = document.getElementById('tpvNota').value.trim() || null;
-      const resumen = [];
-      let total = 0;
-      try {
-        for (const line of cart) {
-          if (line.kind === 'producto') {
-            let nota = `Tienda · ${line.nombre}`;
-            if (notaGlobal) nota += ` · ${notaGlobal}`;
-            const { error } = await novaSupabase.from('transacciones').insert({
-              perfil_id: cliente.id,
-              bono_activo_id: null,
-              tipo_bono_id: null,
-              importe: Number(line.importe),
-              metodo_pago: metodoPago,
-              nota,
-              registrado_por: staffProfile.id
-            });
-            if (error) throw error;
-            resumen.push(`${line.nombre} (${Number(line.importe).toFixed(2)} €)`);
-            total += Number(line.importe);
-          } else {
-            const tipoBonoId = line.tipoBonoId;
-            const sesiones = line.sesiones != null && line.sesiones !== '' ? Number(line.sesiones) : null;
-            const dias = Number(line.dias || 30);
-            const fechaInicio = new Date().toISOString().slice(0, 10);
-            const fechaFin = new Date(Date.now() + dias * 86400000).toISOString().slice(0, 10);
-            const { error: disableErr } = await novaSupabase
-              .from('bonos_activos')
-              .update({ activo: false })
-              .eq('perfil_id', cliente.id)
-              .eq('activo', true);
-            if (disableErr) throw disableErr;
-            const { data: bonoData, error: bonoErr } = await novaSupabase
-              .from('bonos_activos')
-              .insert({
-                perfil_id: cliente.id,
-                tipo_bono_id: tipoBonoId,
-                sesiones_totales: sesiones,
-                sesiones_usadas: 0,
-                fecha_inicio: fechaInicio,
-                fecha_fin: fechaFin,
-                activo: true,
-                asignado_por: staffProfile.id,
-                notas: 'TPV'
-              })
-              .select('id')
-              .single();
-            if (bonoErr) throw bonoErr;
-            const { error: trxErr } = await novaSupabase.from('transacciones').insert({
-              perfil_id: cliente.id,
-              bono_activo_id: bonoData.id,
-              tipo_bono_id: tipoBonoId,
-              importe: Number(line.importe),
-              metodo_pago: metodoPago,
-              nota: notaGlobal,
-              registrado_por: staffProfile.id
-            });
-            if (trxErr) throw trxErr;
-            resumen.push(`${line.nombre} (${Number(line.importe).toFixed(2)} €)`);
-            total += Number(line.importe);
-          }
+      const cartSnapshot = cart.map((l) => ({ ...l }));
+      const lineasRpc = cartSnapshot.map((line) => {
+        if (line.kind === 'producto') {
+          return {
+            kind: 'producto',
+            producto_id: line.productoId,
+            qty: Math.max(1, Number(line.qty) || 1)
+          };
         }
+        return {
+          kind: 'bono',
+          tipo_bono_id: line.tipoBonoId
+        };
+      });
+
+      appState.tpvCobrando = true;
+      tpvSetPayButtonsDisabled(true);
+      try {
+        const { data, error } = await novaSupabase.rpc('tpv_cobrar_ticket', {
+          p_cliente_id: cliente.id,
+          p_metodo_pago: metodoPago,
+          p_nota: notaGlobal,
+          p_lineas: lineasRpc
+        });
+        if (error) {
+          const m = error.message || '';
+          if (/function.*tpv_cobrar_ticket|does not exist/i.test(m)) {
+            toast('Falta ejecutar en Supabase el SQL supabase_patch_tpv_cobrar_ticket.sql', 'error');
+            return;
+          }
+          throw error;
+        }
+        const totalDone = Number(data?.total || 0);
+        const resumen = Array.isArray(data?.lineas) ? data.lineas : [];
         document.getElementById('tpvNota').value = '';
         appState.tpvCart = [];
         renderTpvCart();
@@ -1571,20 +1669,23 @@
         renderTpvProductos();
         appState.lastTicket = {
           subtipo: 'mixto',
-          concepto: `Ticket (${cart.length} línea(s))`,
+          concepto: `Ticket (${cartSnapshot.length} línea(s))`,
           bonoNombre: 'Varias líneas',
           clienteNombre: nombreClienteDisplay(cliente),
           clienteEmail: cliente.email || '',
-          importe: total,
+          importe: totalDone,
           metodoPago,
           nota: resumen.join(' · '),
           createdAt: new Date().toISOString()
         };
         renderLastTicket();
         toast('Cobro registrado correctamente. Puedes imprimir el ticket si lo necesitas.', 'success');
-        await Promise.all([loadBonos(), loadFinanzas()]);
+        await Promise.all([loadBonos(), loadFinanzas(), tpvRefreshCajaHint()]);
       } catch (err) {
         toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo completar el cobro')), 'error');
+      } finally {
+        appState.tpvCobrando = false;
+        tpvSetPayButtonsDisabled(false);
       }
     }
 
@@ -1985,15 +2086,28 @@
     }
 
     async function loadFinanzas() {
-      const { data, error } = await novaSupabase
-        .from('transacciones')
-        .select('id,registrado_por,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,email)')
-        .order('created_at', { ascending: false })
-        .limit(80);
-      if (error) {
-        console.warn('Finanzas:', error.message);
-      }
-      const list = data || [];
+      const inicioDia = new Date();
+      inicioDia.setHours(0, 0, 0, 0);
+      const inicioIso = inicioDia.toISOString();
+
+      const [hoyRes, listRes] = await Promise.all([
+        novaSupabase
+          .from('transacciones')
+          .select('importe,metodo_pago,nota,bono_activo_id,tipo_bono_id')
+          .gte('created_at', inicioIso)
+          .limit(2000),
+        novaSupabase
+          .from('transacciones')
+          .select('id,registrado_por,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,email)')
+          .order('created_at', { ascending: false })
+          .limit(100)
+      ]);
+
+      if (hoyRes.error) console.warn('Finanzas hoy:', hoyRes.error.message);
+      if (listRes.error) console.warn('Finanzas lista:', listRes.error.message);
+
+      const hoy = hoyRes.data || [];
+      const list = listRes.data || [];
       const rows = document.getElementById('rowsFinanzas');
       rows.innerHTML = list.map((t) => {
         const cliente = nombreClienteDisplay(t.perfil) || t.perfil?.email || '-';
@@ -2021,9 +2135,6 @@
         </tr>`;
       }).join('') || '<tr><td colspan="7">Sin transacciones</td></tr>';
 
-      const inicioDia = new Date();
-      inicioDia.setHours(0, 0, 0, 0);
-      const hoy = list.filter((t) => new Date(t.created_at) >= inicioDia);
       const suma = (arr) => arr.reduce((acc, x) => acc + Number(x.importe || 0), 0);
       const total = suma(hoy);
       const bonosHoy = suma(hoy.filter((t) => !finanzasEsTienda(t)));
@@ -2055,16 +2166,20 @@
           estadoEl.textContent = 'Caja de hoy no abierta.';
           abrirBtn.disabled = false;
           cerrarBtn.disabled = true;
+          appState.cajaHoyAbierta = false;
         } else if (caja.estado === 'abierta') {
           estadoEl.textContent = `Caja abierta desde ${new Date(caja.abierta_at).toLocaleString('es-ES')} · Fondo inicial ${Number(caja.fondo_inicial || 0).toFixed(2)} €`;
           abrirBtn.disabled = true;
           cerrarBtn.disabled = false;
+          appState.cajaHoyAbierta = true;
         } else {
           estadoEl.textContent = `Caja cerrada · Declarado ${Number(caja.cierre_efectivo_declarado || 0).toFixed(2)} € · Sistema ${Number(caja.cierre_efectivo_sistema || 0).toFixed(2)} € · Diferencia ${Number(caja.diferencia_efectivo || 0).toFixed(2)} €`;
           abrirBtn.disabled = true;
           cerrarBtn.disabled = true;
+          appState.cajaHoyAbierta = false;
         }
       } catch (err) {
+        appState.cajaHoyAbierta = null;
         document.getElementById('cajaEstado').textContent = 'No se pudo cargar caja diaria (ejecuta el parche de caja).';
         document.getElementById('abrirCajaBtn').disabled = true;
         document.getElementById('cerrarCajaBtn').disabled = true;
@@ -2079,7 +2194,7 @@
         .limit(40);
       const rows = document.getElementById('rowsNotifs');
       rows.innerHTML = (data || [])
-        .map(n => `<tr><td>${n.titulo}</td><td>${n.perfil?.nombre || n.perfil?.email || 'Todos'}</td><td>${n.tipo || 'info'}</td><td>${new Date(n.created_at).toLocaleString('es-ES')}</td></tr>`)
+        .map(n => `<tr><td>${n.titulo}</td><td>${n.perfil?.nombre || n.perfil?.email || 'Aviso general'}</td><td>${n.tipo || 'info'}</td><td>${new Date(n.created_at).toLocaleString('es-ES')}</td></tr>`)
         .join('') || '<tr><td colspan="4">Sin notificaciones</td></tr>';
     }
 
@@ -2378,6 +2493,15 @@
       if (btnSelectClient) {
         appState.selectedCliente = appState.clientes.find(c => c.id === btnSelectClient.dataset.id) || null;
         renderTpvSelectedClient();
+        const search = document.getElementById('tpvClientSearch');
+        if (search) search.value = '';
+        renderTpvClientResults('');
+        return;
+      }
+
+      if (e.target.closest('.js-tpv-clear-client')) {
+        appState.selectedCliente = null;
+        renderTpvSelectedClient();
         return;
       }
 
@@ -2458,6 +2582,23 @@
         return;
       }
 
+      const btnQty = e.target.closest('.js-tpv-qty');
+      if (btnQty) {
+        const uid = btnQty.dataset.uid;
+        const delta = Number(btnQty.dataset.delta) || 0;
+        const line = (appState.tpvCart || []).find((l) => l.uid === uid);
+        if (!line || line.kind !== 'producto') return;
+        const next = Math.max(0, (Number(line.qty) || 1) + delta);
+        if (next === 0) {
+          appState.tpvCart = (appState.tpvCart || []).filter((l) => l.uid !== uid);
+        } else {
+          line.qty = Math.min(99, next);
+          line.importe = tpvLineImporte(line);
+        }
+        renderTpvCart();
+        return;
+      }
+
       const btnEditarTipoBono = e.target.closest('.js-editar-tipo-bono');
       if (btnEditarTipoBono) {
         if (staffProfile.rol !== 'admin') {
@@ -2483,8 +2624,21 @@
     document.getElementById('tpvCobrarTarjeta').addEventListener('click', () => tpvEjecutarCobro('tarjeta'));
     document.getElementById('tpvCobrarTransferencia').addEventListener('click', () => tpvEjecutarCobro('transferencia'));
     document.getElementById('tpvVaciarCarrito').addEventListener('click', () => {
+      if (!(appState.tpvCart || []).length) return;
+      if (!window.confirm('¿Vaciar el ticket?')) return;
       appState.tpvCart = [];
       renderTpvCart();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      const open = document.querySelector('.modal-overlay.open');
+      if (!open) return;
+      if (open.id === 'disciplinaModal') closeDisciplinaModal();
+      else if (open.id === 'tipoBonoModal') closeTipoBonoModal();
+      else if (open.id === 'claseDuplicateModal') closeClaseDuplicateModal();
+      else if (open.id === 'claseEditModal') closeClaseEditModal();
+      else if (open.id === 'claseDeleteModal') closeClaseDeleteModal();
+      else if (open.id === 'nuevoClienteModal') closeNuevoClienteModal();
     });
     document.getElementById('closeTipoBonoModal').addEventListener('click', closeTipoBonoModal);
     document.getElementById('cancelTipoBonoBtn').addEventListener('click', closeTipoBonoModal);
@@ -2971,7 +3125,7 @@
             enviada_por: staffProfile.id
           });
         if (error) throw error;
-        toast('Notificación enviada', 'success');
+        toast(perfilId ? 'Notificación enviada al cliente' : 'Aviso general publicado en el tablero', 'success');
         document.getElementById('notifTitulo').value = '';
         document.getElementById('notifMensaje').value = '';
         document.getElementById('notifTipo').value = 'info';
@@ -3014,7 +3168,10 @@
       if (!ok) return;
       await loadCatalogs();
       await Promise.all([loadClases(), loadBonos(), loadFinanzas(), loadNotifs()]);
-      setTab('tpv');
+      const hashTab = (location.hash || '').replace(/^#/, '');
+      setTab(TAB_LABELS[hashTab] ? hashTab : 'tpv', { pushHash: true });
+      renderTpvCart();
+      await tpvRefreshCajaHint();
     }
     bootstrap().catch((e) => toast(e.message || 'Error de carga', 'error'));
   </script>
