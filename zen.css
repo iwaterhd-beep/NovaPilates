@@ -227,11 +227,15 @@ a { text-decoration: none; color: inherit; }
   padding-top: .5rem;
   color: var(--ink-soft);
 }
-.pillar-icon svg {
+.pillar-icon svg,
+.pillar-icon-img {
   width: 100%;
   max-width: 5.5rem;
   height: auto;
   display: block;
+}
+.pillar-icon-img {
+  max-width: 6.5rem;
 }
 .pillar-icon--dual {
   display: flex;
