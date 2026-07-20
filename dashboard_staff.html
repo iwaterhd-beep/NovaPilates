@@ -170,12 +170,26 @@
             <button class="btn btn-primary" id="crearTipoBonoBtn" type="button">Crear tipo de bono</button>
           </div>
           <div style="margin-top:.8rem;">
-            <label class="form-label" for="nuevoTipoDescripcion">Descripción (visible en fichas / TPV)</label>
+            <label class="form-label" for="nuevoTipoDescripcion">Descripción (visible en fichas / TPV / web)</label>
             <textarea class="form-input" id="nuevoTipoDescripcion" rows="2" placeholder="Ej. válido en festivos, condiciones especiales..." style="resize:vertical;"></textarea>
           </div>
-          <p style="margin-top:.6rem;font-size:.75rem;color:var(--color-muted);">Combina días de validez, sesiones y precio para bonos cortos, largos o campañas. Edita siempre con el botón "Editar". Solo admin.</p>
+          <div style="margin-top:.8rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem;align-items:end;">
+            <div>
+              <label class="form-label" for="nuevoTipoWebTag">Etiqueta web (opc.)</label>
+              <input class="form-input" id="nuevoTipoWebTag" placeholder="Ej. Flow 01" />
+            </div>
+            <div>
+              <label class="form-label" for="nuevoTipoWebMeta">Meta web (opc.)</label>
+              <input class="form-input" id="nuevoTipoWebMeta" placeholder="Ej. 2 días / semana" />
+            </div>
+            <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--color-cream);padding-bottom:.35rem;cursor:pointer;">
+              <input type="checkbox" id="nuevoTipoVisibleWeb" />
+              Mostrar en la página principal
+            </label>
+          </div>
+          <p style="margin-top:.6rem;font-size:.75rem;color:var(--color-muted);">Combina días de validez, sesiones y precio para bonos cortos, largos o campañas. Marca la casilla para que salga en Planes NŌVA de la web. Solo admin.</p>
           <div class="table-wrap" style="margin-top:.8rem;">
-            <table><thead><tr><th>Nombre</th><th>Sesiones</th><th>Días</th><th>Periodo</th><th>Precio</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="rowsTiposBono"></tbody></table>
+            <table><thead><tr><th>Nombre</th><th>Sesiones</th><th>Días</th><th>Periodo</th><th>Precio</th><th>Activo</th><th>Web</th><th>Acciones</th></tr></thead><tbody id="rowsTiposBono"></tbody></table>
           </div>
         </div>
       </section>
@@ -518,12 +532,24 @@
           <textarea class="form-input" id="modalTipoDescripcion" rows="2" style="resize:vertical;"></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label" for="modalTipoActivo">Activo</label>
+          <label class="form-label" for="modalTipoWebTag">Etiqueta web</label>
+          <input class="form-input" id="modalTipoWebTag" type="text" placeholder="Ej. Flow 01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modalTipoWebMeta">Meta web</label>
+          <input class="form-input" id="modalTipoWebMeta" type="text" placeholder="Ej. 2 días / semana" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modalTipoActivo">Activo (TPV)</label>
           <select class="form-input" id="modalTipoActivo">
             <option value="true">Sí</option>
             <option value="false">No</option>
           </select>
         </div>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.86rem;color:var(--color-cream);cursor:pointer;">
+          <input type="checkbox" id="modalTipoVisibleWeb" />
+          Mostrar en la página principal (Planes NŌVA)
+        </label>
         <div style="display:flex;justify-content:flex-end;gap:.6rem;">
           <button class="btn btn-outline" type="button" id="cancelTipoBonoBtn">Cancelar</button>
           <button class="btn btn-primary" type="submit">Guardar cambios</button>
@@ -816,7 +842,10 @@
       document.getElementById('modalTipoPeriodicidad').value = tipo.periodicidad || 'mensual';
       document.getElementById('modalTipoColor').value = tipo.color_hex || '#c9a96e';
       document.getElementById('modalTipoDescripcion').value = tipo.descripcion || '';
+      document.getElementById('modalTipoWebTag').value = tipo.web_tag || '';
+      document.getElementById('modalTipoWebMeta').value = tipo.web_meta || '';
       document.getElementById('modalTipoActivo').value = tipo.activo ? 'true' : 'false';
+      document.getElementById('modalTipoVisibleWeb').checked = !!tipo.visible_web;
       document.getElementById('tipoBonoModal').classList.add('open');
     }
 
@@ -1322,7 +1351,7 @@
       const [{ data: d, error: dErr }, { data: s }, { data: tb }, { data: ajustes }] = await Promise.all([
         novaSupabase.from('disciplinas').select('id,nombre,descripcion,color_hex,activa,orden').order('orden'),
         novaSupabase.from('salas').select('id,nombre').eq('activa', true).order('nombre'),
-        novaSupabase.from('tipos_bono').select('id,nombre,sesiones,duracion_dias,precio,activo,orden,descripcion,periodicidad,color_hex').order('orden'),
+        novaSupabase.from('tipos_bono').select('id,nombre,sesiones,duracion_dias,precio,activo,orden,descripcion,periodicidad,color_hex,visible_web,web_tag,web_meta').order('orden'),
         novaSupabase.from('ajustes_centro').select('margen_reserva_dias,margen_cancelacion_dias').eq('id', 1).maybeSingle()
       ]);
 
@@ -1385,17 +1414,18 @@
       const list = appState.tiposBonoAll || [];
       rows.innerHTML = list.map(b => `
         <tr>
-          <td>${b.nombre}</td>
+          <td>${escHtml(b.nombre)}</td>
           <td>${b.sesiones ?? 'Ilimitado'}</td>
           <td>${b.duracion_dias}</td>
-          <td>${b.periodicidad || 'mensual'}</td>
+          <td>${escHtml(b.periodicidad || 'mensual')}</td>
           <td>${Number(b.precio || 0).toFixed(2)} €</td>
           <td>${b.activo ? 'Sí' : 'No'}</td>
+          <td>${b.visible_web ? 'Sí' : 'No'}</td>
           <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm js-editar-tipo-bono" data-id="${b.id}">Editar</button>
           </td>
         </tr>
-      `).join('') || '<tr><td colspan="7">Sin tipos de bono.</td></tr>';
+      `).join('') || '<tr><td colspan="8">Sin tipos de bono.</td></tr>';
     }
 
     function renderTpvClientResults(query) {
@@ -2806,6 +2836,9 @@
         const periodicidad = document.getElementById('nuevoTipoPeriodicidad').value || 'mensual';
         const color_hex = document.getElementById('nuevoTipoColor').value || '#c9a96e';
         const descripcion = document.getElementById('nuevoTipoDescripcion').value.trim() || null;
+        const web_tag = document.getElementById('nuevoTipoWebTag').value.trim() || null;
+        const web_meta = document.getElementById('nuevoTipoWebMeta').value.trim() || null;
+        const visible_web = document.getElementById('nuevoTipoVisibleWeb').checked;
         if (!nombre || Number.isNaN(duracion) || duracion < 1 || Number.isNaN(precio) || precio < 0) {
           toast('Completa bien nombre, validez (días) y precio.', 'error');
           return;
@@ -2828,7 +2861,10 @@
             precio,
             color_hex,
             activo: true,
-            orden
+            orden,
+            visible_web,
+            web_tag,
+            web_meta
           });
         if (error) throw error;
         document.getElementById('nuevoTipoNombre').value = '';
@@ -2838,6 +2874,9 @@
         document.getElementById('nuevoTipoPeriodicidad').value = 'mensual';
         document.getElementById('nuevoTipoColor').value = '#c9a96e';
         document.getElementById('nuevoTipoDescripcion').value = '';
+        document.getElementById('nuevoTipoWebTag').value = '';
+        document.getElementById('nuevoTipoWebMeta').value = '';
+        document.getElementById('nuevoTipoVisibleWeb').checked = false;
         await loadCatalogs();
         toast('Tipo de bono creado', 'success');
       } catch (err) {
@@ -2866,6 +2905,9 @@
         const periodicidad = document.getElementById('modalTipoPeriodicidad').value || 'mensual';
         const color_hex = document.getElementById('modalTipoColor').value || '#c9a96e';
         const descripcion = document.getElementById('modalTipoDescripcion').value.trim() || null;
+        const web_tag = document.getElementById('modalTipoWebTag').value.trim() || null;
+        const web_meta = document.getElementById('modalTipoWebMeta').value.trim() || null;
+        const visible_web = document.getElementById('modalTipoVisibleWeb').checked;
         if (!nombre || Number.isNaN(duracion) || duracion < 1 || Number.isNaN(precio) || precio < 0 || (sesiones !== null && (Number.isNaN(sesiones) || sesiones < 1))) {
           toast('Valores de bono inválidos.', 'error');
           return;
@@ -2881,7 +2923,10 @@
             color_hex,
             duracion_dias: duracion,
             precio,
-            activo
+            activo,
+            visible_web,
+            web_tag,
+            web_meta
           })
           .eq('id', id);
         if (error) throw error;

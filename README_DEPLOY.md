@@ -47,6 +47,7 @@ Proyecto vacío:
    - `supabase_patch_caja_apertura_cierre.sql`
    - `supabase_patch_anular_transaccion_tpv.sql`
    - `supabase_patch_tpv_cobrar_ticket.sql` (cobro TPV atómico)
+   - `supabase_patch_tipos_bono_web.sql` (planes en web + casilla visible_web)
    - `supabase_patch_eliminar_cliente.sql`
    - `supabase_patch_perfiles_*.sql` (si faltan columnas)
 
