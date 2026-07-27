@@ -221,7 +221,9 @@ a { text-decoration: none; color: inherit; }
   padding: 1.65rem 1.35rem;
   transition: background .3s ease;
 }
-.pillar-card.reveal.is-in:hover,
+.pillar-card.reveal.is-in:hover {
+  background: #fffcf8;
+}
 .plan-card.reveal.is-in:hover {
   background: #fffcf8;
 }
@@ -402,6 +404,11 @@ a { text-decoration: none; color: inherit; }
 .section-plans .plans-grid .plan-card {
   background: var(--panel, #f7f4ee);
   border: 1px solid var(--line, #e4dfd5);
+  transition:
+    transform .35s var(--ease-out, cubic-bezier(.22, 1, .36, 1)),
+    border-color .35s ease,
+    box-shadow .35s ease,
+    background .35s ease;
 }
 .section-plans .plan-tag {
   font-size: .62rem;
@@ -417,6 +424,7 @@ a { text-decoration: none; color: inherit; }
   font-weight: 400;
   margin-bottom: .45rem;
   line-height: 1.15;
+  transition: color .3s ease;
 }
 .section-plans .plan-meta {
   font-size: .78rem;
@@ -459,9 +467,19 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--accent, #5e6f58);
+  transition: letter-spacing .35s ease, color .3s ease;
 }
-.section-plans .plan-card--clickable:hover {
-  border-color: var(--line-strong, #d5cfc3);
+.section-plans .plan-card--clickable:hover,
+.section-plans .plan-card--clickable:focus-within {
+  transform: translateY(-6px);
+  border-color: var(--line-strong, #cfc7ba);
+  background: #fffcf8;
+  box-shadow: 0 14px 36px rgba(44, 42, 40, 0.08);
+}
+.section-plans .plan-card--clickable:hover .plan-card-more,
+.section-plans .plan-card--clickable:focus-within .plan-card-more {
+  letter-spacing: .2em;
+  color: #2c2a28;
 }
 .plan-modal-layout {
   grid-template-columns: 0.9fr 1.1fr;
@@ -1304,6 +1322,15 @@ body.cart-open { overflow: hidden; }
     transition: none;
   }
   .btn:hover { transform: none; }
+  .section-plans .plans-grid .plan-card,
+  .section-plans .plan-card-more {
+    transition: none;
+  }
+  .section-plans .plan-card--clickable:hover,
+  .section-plans .plan-card--clickable:focus-within {
+    transform: none;
+    box-shadow: none;
+  }
   .cart-backdrop,
   .cart-drawer {
     transition: none;
