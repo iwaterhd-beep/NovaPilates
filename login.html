@@ -43,6 +43,7 @@
     .msg.success { color: #4a644f; background: #eef5ef; }
     .back { display: inline-block; margin-top: 1rem; font-size: .75rem; color: var(--ink-soft); }
     .hint { font-size: .78rem; color: var(--ink-soft); margin-bottom: .9rem; line-height: 1.45; }
+    .optional { font-weight: 400; letter-spacing: .08em; text-transform: none; color: #a39c92; }
   </style>
 </head>
 <body>
@@ -62,14 +63,15 @@
       <div id="msg" class="msg" role="status"></div>
 
       <div id="panel-login" class="panel active">
+        <p class="hint">Si es tu primera vez (ficha creada en el estudio), introduce solo tu correo e inicia sesión para elegir tu contraseña.</p>
         <form id="loginForm" novalidate>
           <div class="group">
             <label for="email">Correo</label>
             <input id="email" type="email" required autocomplete="email" />
           </div>
           <div class="group">
-            <label for="password">Contrasena</label>
-            <input id="password" type="password" required autocomplete="current-password" minlength="6" />
+            <label for="password">Contraseña <span class="optional">(si ya la tienes)</span></label>
+            <input id="password" type="password" autocomplete="current-password" minlength="6" />
           </div>
           <button class="btn" id="loginBtn" type="submit">Entrar</button>
         </form>
@@ -87,7 +89,7 @@
       </div>
 
       <div id="panel-reset" class="panel">
-        <p class="hint">Elige una contraseña nueva (mínimo 6 caracteres).</p>
+        <p class="hint" id="resetHint">Elige una contraseña nueva (mínimo 6 caracteres).</p>
         <form id="resetForm" novalidate>
           <div class="group">
             <label for="newPassword">Nueva contraseña</label>
@@ -114,6 +116,7 @@
     const panels = document.querySelectorAll('.panel');
     const msg = document.getElementById('msg');
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    let firstActivationMode = false;
 
     function showMsg(text, type) { msg.textContent = text; msg.className = `msg show ${type}`; }
     function hideMsg() { msg.className = 'msg'; msg.textContent = ''; }
@@ -125,20 +128,44 @@
       tabs.forEach((t) => t.classList.toggle('active', t.dataset.tab === name));
       const isReset = name === 'reset';
       document.getElementById('authTabs').style.display = isReset ? 'none' : 'grid';
-      document.getElementById('cardTitle').textContent = isReset ? 'Nueva contraseña' : 'Bienvenida';
-      document.getElementById('cardSub').textContent = isReset
-        ? 'Restablece el acceso a tu cuenta'
-        : 'Accede a tu espacio personal';
+      if (isReset && firstActivationMode) {
+        document.getElementById('cardTitle').textContent = 'Crea tu contraseña';
+        document.getElementById('cardSub').textContent = 'Es tu primer acceso a NŌVA';
+        document.getElementById('resetHint').textContent =
+          'Elige la contraseña que quieras usar a partir de ahora (mínimo 6 caracteres).';
+      } else if (isReset) {
+        document.getElementById('cardTitle').textContent = 'Nueva contraseña';
+        document.getElementById('cardSub').textContent = 'Restablece el acceso a tu cuenta';
+        document.getElementById('resetHint').textContent =
+          'Elige una contraseña nueva (mínimo 6 caracteres).';
+      } else {
+        document.getElementById('cardTitle').textContent = 'Bienvenida';
+        document.getElementById('cardSub').textContent = 'Accede a tu espacio personal';
+      }
     }
 
     tabs.forEach((tab) => {
-      tab.addEventListener('click', () => { showPanel(tab.dataset.tab); hideMsg(); });
+      tab.addEventListener('click', () => {
+        firstActivationMode = false;
+        showPanel(tab.dataset.tab);
+        hideMsg();
+      });
     });
 
     async function redirectAfterLogin(user) {
       const { data: sessionData } = await novaSupabase.auth.getSession();
       if (!sessionData?.session) throw new Error('La sesion no se guardo. Prueba otra vez.');
-      const { data: profile } = await novaSupabase.from('perfiles').select('rol').eq('id', user.id).maybeSingle();
+      const { data: profile } = await novaSupabase
+        .from('perfiles')
+        .select('rol,debe_definir_password')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profile?.debe_definir_password) {
+        firstActivationMode = true;
+        showPanel('reset');
+        showMsg('Elige tu contraseña para continuar.', 'success');
+        return;
+      }
       const rol = profile?.rol || user.user_metadata?.rol || 'cliente';
       const redirects = {
         cliente: '/dashboard_cliente.html',
@@ -148,16 +175,43 @@
       window.location.assign(redirects[rol] || '/dashboard_cliente.html');
     }
 
+    async function loginPrimeraVez(email) {
+      const { data: tempPassword, error } = await novaSupabase.rpc('cliente_iniciar_primera_vez', {
+        p_email: email
+      });
+      if (error) {
+        const m = error.message || '';
+        if (m.includes('Could not find') || m.includes('schema cache')) {
+          throw new Error('Falta el parche de primera activación en Supabase (supabase_patch_primera_activacion.sql).');
+        }
+        throw error;
+      }
+      if (!tempPassword) throw new Error('No se pudo iniciar la primera activación.');
+      const { data, error: signErr } = await novaSupabase.auth.signInWithPassword({
+        email,
+        password: tempPassword
+      });
+      if (signErr) throw signErr;
+      if (!data?.user) throw new Error('No se pudo obtener la sesión.');
+      firstActivationMode = true;
+      showPanel('reset');
+      showMsg('Bienvenida. Elige tu contraseña.', 'success');
+    }
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       hideMsg();
-      const email = document.getElementById('email').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
-      if (!email || !password) return showMsg('Completa todos los campos.', 'error');
+      if (!email) return showMsg('Introduce tu correo.', 'error');
       if (!emailRe.test(email)) return showMsg('Introduce un correo válido.', 'error');
-      if (password.length < 6) return showMsg('La contraseña debe tener al menos 6 caracteres.', 'error');
       try {
         showPageSpinner(true);
+        if (!password) {
+          await loginPrimeraVez(email);
+          return;
+        }
+        if (password.length < 6) return showMsg('La contraseña debe tener al menos 6 caracteres.', 'error');
         const { data, error } = await novaSupabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         if (!data?.user) throw new Error('No se pudo obtener la sesion.');
@@ -201,7 +255,12 @@
         showPageSpinner(true);
         const { error } = await novaSupabase.auth.updateUser({ password: p1 });
         if (error) throw error;
-        showMsg('Contraseña actualizada. Entrando…', 'success');
+        if (firstActivationMode) {
+          const { error: flagErr } = await novaSupabase.rpc('cliente_marcar_password_definida');
+          if (flagErr) console.warn('marcar password:', flagErr);
+          firstActivationMode = false;
+        }
+        showMsg('Contraseña guardada. Entrando…', 'success');
         const { data: { user } } = await novaSupabase.auth.getUser();
         if (user) await redirectAfterLogin(user);
         else showPanel('login');
@@ -214,12 +273,14 @@
 
     novaSupabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
+        firstActivationMode = false;
         showPanel('reset');
         hideMsg();
       }
     });
 
     if (new URLSearchParams(location.search).get('reset') === 'true') {
+      firstActivationMode = false;
       showPanel('reset');
       showMsg('Introduce tu nueva contraseña.', 'success');
     }

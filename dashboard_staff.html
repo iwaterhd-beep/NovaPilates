@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
-  <link rel="stylesheet" href="portal.css?v=4" />
+  <link rel="stylesheet" href="portal.css?v=6" />
 </head>
 <body data-panel-build="2026-04-18-disciplinas">
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -200,21 +200,16 @@
         <div class="tpv-bar-layout">
           <div class="tpv-bar-main">
             <div class="card tpv-card-compact">
-              <div class="card-label">Cliente</div>
+              <div class="tpv-client-head">
+                <div class="card-label" style="margin-bottom:0;">Cliente</div>
+                <button class="btn btn-outline btn-sm" type="button" id="tpvAbrirNuevoClienteBtn">Nuevo cliente</button>
+              </div>
               <div style="display:grid;grid-template-columns:1fr;gap:.65rem;">
                 <input class="form-input" id="tpvClientSearch" placeholder="Escribe al menos 2 caracteres: nombre, email, teléfono o DNI…" autocomplete="off" />
                 <input class="form-input" id="tpvNota" placeholder="Nota interna para todo el cobro (opcional)" />
               </div>
               <div id="tpvClientResults" class="tpv-client-chips"></div>
               <div id="tpvSelectedClient" class="tpv-selected-strip empty-state"><p>Selecciona un cliente para cobrar.</p></div>
-            </div>
-
-            <div class="card tpv-card-compact" id="tpvCardAltaCliente">
-              <div class="card-label">Alta rápida</div>
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
-                <p style="margin:0;font-size:.72rem;color:var(--color-muted);">Nuevo cliente con email y contraseña (solo administración).</p>
-                <button class="btn btn-outline btn-sm" type="button" id="tpvAbrirNuevoClienteBtn">Nuevo cliente</button>
-              </div>
             </div>
 
             <div class="tpv-catalog-split">
@@ -425,7 +420,14 @@
               <input class="form-input" id="editClienteApellidos" placeholder="Apellidos" />
               <input class="form-input" id="editClienteEmail" type="email" placeholder="Email" />
               <input class="form-input" id="editClienteTelefono" placeholder="Teléfono" />
-              <input class="form-input" id="editClienteNacimiento" type="date" />
+              <div class="form-group" style="margin:0;">
+                <span class="form-label">Fecha de nacimiento</span>
+                <div class="dob-row" role="group" aria-label="Fecha de nacimiento">
+                  <select class="form-input" id="editClienteNacDia" aria-label="Día"><option value="">Día</option></select>
+                  <select class="form-input" id="editClienteNacMes" aria-label="Mes"><option value="">Mes</option></select>
+                  <select class="form-input" id="editClienteNacAnio" aria-label="Año"><option value="">Año</option></select>
+                </div>
+              </div>
             </div>
             <div style="display:flex;align-items:center;gap:.5rem;">
               <input id="editClienteActivo" type="checkbox" checked />
@@ -634,13 +636,13 @@
   </div>
 
   <div class="modal-overlay" id="nuevoClienteModal">
-    <div class="modal">
+    <div class="modal modal--wide">
       <div class="modal-header">
         <h2 class="modal-title">Nuevo cliente / usuario</h2>
-        <button class="modal-close" id="closeNuevoClienteModal">×</button>
+        <button class="modal-close" id="closeNuevoClienteModal" type="button">×</button>
       </div>
-      <form id="nuevoClienteForm" style="display:grid;gap:.9rem;">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
+      <form id="nuevoClienteForm" class="modal-form-nuevo">
+        <div class="modal-form-nuevo-grid">
           <div class="form-group">
             <label class="form-label" for="modalNuevoNombre">Nombre</label>
             <input class="form-input" id="modalNuevoNombre" type="text" placeholder="Nombre" required />
@@ -650,31 +652,48 @@
             <input class="form-input" id="modalNuevoApellidos" type="text" placeholder="Apellidos" />
           </div>
           <div class="form-group">
-            <label class="form-label" for="modalNuevoEmail">Email</label>
-            <input class="form-input" id="modalNuevoEmail" type="email" placeholder="persona@correo.com" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="modalNuevoPassword">Contraseña</label>
-            <input class="form-input" id="modalNuevoPassword" type="password" placeholder="Mínimo 6 caracteres" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="modalNuevoTelefono">Teléfono</label>
-            <input class="form-input" id="modalNuevoTelefono" type="text" placeholder="+34..." />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="modalNuevoFechaNacimiento">Fecha de nacimiento</label>
-            <input class="form-input" id="modalNuevoFechaNacimiento" type="date" />
-          </div>
-          <div class="form-group">
             <label class="form-label" for="modalNuevoRol">Rol</label>
             <select class="form-input" id="modalNuevoRol">
               <option value="cliente">Cliente</option>
               <option value="empleado">Empleado</option>
             </select>
           </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
           <div class="form-group">
+            <label class="form-label" for="modalNuevoEmail">Email</label>
+            <input class="form-input" id="modalNuevoEmail" type="email" placeholder="persona@correo.com" required />
+          </div>
+          <div class="form-group form-group--hint">
+            <label class="form-label" for="modalNuevoPassword">Contraseña</label>
+            <input class="form-input" id="modalNuevoPassword" type="password" placeholder="Opcional en clientes" minlength="6" />
+            <p id="modalNuevoPasswordHint" class="form-hint">Vacía = el cliente la elige en el primer acceso (solo correo).</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalNuevoTelefono">Teléfono</label>
+            <input class="form-input" id="modalNuevoTelefono" type="text" placeholder="+34..." />
+          </div>
+          <div class="form-group">
+            <span class="form-label" id="modalNuevoNacLabel">Fecha de nacimiento</span>
+            <div class="dob-row" role="group" aria-labelledby="modalNuevoNacLabel">
+              <select class="form-input" id="modalNuevoNacDia" aria-label="Día">
+                <option value="">Día</option>
+              </select>
+              <select class="form-input" id="modalNuevoNacMes" aria-label="Mes">
+                <option value="">Mes</option>
+              </select>
+              <select class="form-input" id="modalNuevoNacAnio" aria-label="Año">
+                <option value="">Año</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalNuevoDni">DNI/NIE</label>
+            <input class="form-input" id="modalNuevoDni" type="text" placeholder="Documento" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalNuevoEmergencia">Tel. emergencia</label>
+            <input class="form-input" id="modalNuevoEmergencia" type="text" placeholder="Contacto de emergencia" />
+          </div>
+          <div class="form-group form-group--span-2">
             <label class="form-label" for="modalNuevoDireccion">Dirección</label>
             <input class="form-input" id="modalNuevoDireccion" type="text" placeholder="Calle, número, piso..." />
           </div>
@@ -686,20 +705,12 @@
             <label class="form-label" for="modalNuevoCP">Código postal</label>
             <input class="form-input" id="modalNuevoCP" type="text" placeholder="CP" />
           </div>
-          <div class="form-group">
-            <label class="form-label" for="modalNuevoDni">DNI/NIE</label>
-            <input class="form-input" id="modalNuevoDni" type="text" placeholder="Documento" />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="modalNuevoEmergencia">Tel. emergencia</label>
-            <input class="form-input" id="modalNuevoEmergencia" type="text" placeholder="Contacto de emergencia" />
+          <div class="form-group form-group--span-all">
+            <label class="form-label" for="modalNuevoNotas">Notas internas</label>
+            <textarea class="form-input" id="modalNuevoNotas" rows="2" placeholder="Alergias, lesiones, preferencias…"></textarea>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="modalNuevoNotas">Notas internas</label>
-          <textarea class="form-input" id="modalNuevoNotas" rows="3" placeholder="Alergias, lesiones, preferencias, observaciones..." style="resize:vertical;"></textarea>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:.6rem;">
+        <div class="modal-form-actions">
           <button class="btn btn-outline" type="button" id="cancelNuevoClienteBtn">Cancelar</button>
           <button class="btn btn-primary" type="submit">Crear usuario</button>
         </div>
@@ -727,6 +738,84 @@
       el.textContent = msg;
       c.appendChild(el);
       setTimeout(() => el.remove(), 3500);
+    }
+
+    const DOB_MESES = [
+      ['01', 'Enero'], ['02', 'Febrero'], ['03', 'Marzo'], ['04', 'Abril'],
+      ['05', 'Mayo'], ['06', 'Junio'], ['07', 'Julio'], ['08', 'Agosto'],
+      ['09', 'Septiembre'], ['10', 'Octubre'], ['11', 'Noviembre'], ['12', 'Diciembre']
+    ];
+
+    function daysInMonth(year, month) {
+      const y = Number(year);
+      const m = Number(month);
+      if (!y || !m) return 31;
+      return new Date(y, m, 0).getDate();
+    }
+
+    function initDobSelects(prefix) {
+      const dia = document.getElementById(`${prefix}Dia`);
+      const mes = document.getElementById(`${prefix}Mes`);
+      const anio = document.getElementById(`${prefix}Anio`);
+      if (!dia || !mes || !anio || dia.dataset.dobReady === '1') return;
+
+      const yearNow = new Date().getFullYear();
+      mes.innerHTML = '<option value="">Mes</option>' + DOB_MESES.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+      anio.innerHTML = '<option value="">Año</option>';
+      for (let y = yearNow - 10; y >= yearNow - 100; y -= 1) {
+        anio.insertAdjacentHTML('beforeend', `<option value="${y}">${y}</option>`);
+      }
+
+      const syncDays = () => {
+        const prev = dia.value;
+        const max = daysInMonth(anio.value, mes.value);
+        dia.innerHTML = '<option value="">Día</option>';
+        for (let d = 1; d <= max; d += 1) {
+          const v = String(d).padStart(2, '0');
+          dia.insertAdjacentHTML('beforeend', `<option value="${v}">${d}</option>`);
+        }
+        if (prev && Number(prev) <= max) dia.value = prev;
+      };
+
+      mes.addEventListener('change', syncDays);
+      anio.addEventListener('change', syncDays);
+      syncDays();
+      dia.dataset.dobReady = '1';
+    }
+
+    function getDobIso(prefix) {
+      const dia = document.getElementById(`${prefix}Dia`)?.value;
+      const mes = document.getElementById(`${prefix}Mes`)?.value;
+      const anio = document.getElementById(`${prefix}Anio`)?.value;
+      if (!dia && !mes && !anio) return null;
+      if (!dia || !mes || !anio) return '__incomplete__';
+      const max = daysInMonth(anio, mes);
+      if (Number(dia) > max) return '__invalid__';
+      return `${anio}-${mes}-${dia}`;
+    }
+
+    function setDobIso(prefix, iso) {
+      initDobSelects(prefix);
+      const dia = document.getElementById(`${prefix}Dia`);
+      const mes = document.getElementById(`${prefix}Mes`);
+      const anio = document.getElementById(`${prefix}Anio`);
+      if (!dia || !mes || !anio) return;
+      if (!iso || !/^\d{4}-\d{2}-\d{2}/.test(iso)) {
+        dia.value = '';
+        mes.value = '';
+        anio.value = '';
+        mes.dispatchEvent(new Event('change'));
+        return;
+      }
+      const [y, m, d] = iso.slice(0, 10).split('-');
+      anio.value = y;
+      mes.value = m;
+      mes.dispatchEvent(new Event('change'));
+      dia.value = d;
+    }
+
+    function clearDob(prefix) {
+      setDobIso(prefix, '');
     }
 
     const TAB_LABELS = {
@@ -884,6 +973,8 @@
       const rol = source === 'tpv' ? 'cliente' : 'cliente';
       document.getElementById('modalNuevoRol').value = rol;
       document.getElementById('modalNuevoRol').disabled = source === 'tpv';
+      initDobSelects('modalNuevoNac');
+      clearDob('modalNuevoNac');
       document.getElementById('nuevoClienteModal').classList.add('open');
     }
 
@@ -892,6 +983,7 @@
       document.getElementById('modalNuevoRol').disabled = false;
       document.getElementById('nuevoClienteModal').classList.remove('open');
       document.getElementById('nuevoClienteForm').reset();
+      clearDob('modalNuevoNac');
     }
 
     function buildClienteNotasDetalladas() {
@@ -916,7 +1008,7 @@
       document.getElementById('editClienteApellidos').value = '';
       document.getElementById('editClienteEmail').value = '';
       document.getElementById('editClienteTelefono').value = '';
-      document.getElementById('editClienteNacimiento').value = '';
+      clearDob('editClienteNac');
       document.getElementById('editClienteActivo').checked = true;
       document.getElementById('editClienteDireccion').value = '';
       document.getElementById('editClienteCiudad').value = '';
@@ -931,7 +1023,7 @@
       document.getElementById('editClienteApellidos').value = perfil?.apellidos || '';
       document.getElementById('editClienteEmail').value = perfil?.email || '';
       document.getElementById('editClienteTelefono').value = perfil?.telefono || '';
-      document.getElementById('editClienteNacimiento').value = perfil?.fecha_nacimiento || '';
+      setDobIso('editClienteNac', perfil?.fecha_nacimiento || '');
       document.getElementById('editClienteActivo').checked = perfil?.activo !== false;
       document.getElementById('editClienteDireccion').value = perfil?.direccion || '';
       document.getElementById('editClienteCiudad').value = perfil?.ciudad || '';
@@ -1008,7 +1100,10 @@
       const apellidos = document.getElementById('modalNuevoApellidos').value.trim();
       const email = document.getElementById('modalNuevoEmail').value.trim().toLowerCase();
       const telefono = document.getElementById('modalNuevoTelefono').value.trim() || null;
-      const fechaNacimiento = document.getElementById('modalNuevoFechaNacimiento').value || null;
+      const fechaNacimiento = getDobIso('modalNuevoNac');
+      if (fechaNacimiento === '__incomplete__' || fechaNacimiento === '__invalid__') {
+        throw new Error('Completa bien la fecha de nacimiento (día, mes y año) o déjala vacía.');
+      }
       const direccion = document.getElementById('modalNuevoDireccion').value.trim() || null;
       const ciudad = document.getElementById('modalNuevoCiudad').value.trim() || null;
       const cp = document.getElementById('modalNuevoCP').value.trim() || null;
@@ -1046,8 +1141,21 @@
       const email = document.getElementById('modalNuevoEmail').value.trim().toLowerCase();
       const password = document.getElementById('modalNuevoPassword').value;
       const rol = document.getElementById('modalNuevoRol').value;
-      if (!nombre || !email || !password) {
-        toast('Completa nombre, email y contraseña.', 'error');
+      if (!nombre || !email) {
+        toast('Completa nombre y email.', 'error');
+        return;
+      }
+      if (rol !== 'cliente' && (!password || password.length < 6)) {
+        toast('Empleado necesita contraseña (mínimo 6 caracteres).', 'error');
+        return;
+      }
+      if (password && password.length < 6) {
+        toast('La contraseña debe tener al menos 6 caracteres.', 'error');
+        return;
+      }
+      const fechaCheck = getDobIso('modalNuevoNac');
+      if (fechaCheck === '__incomplete__' || fechaCheck === '__invalid__') {
+        toast('Completa bien la fecha de nacimiento (día, mes y año) o déjala vacía.', 'error');
         return;
       }
 
@@ -1061,6 +1169,10 @@
       let fueActualizacion = false;
 
       async function actualizarPasswordRpc() {
+        if (!password) {
+          toast('Para actualizar un usuario existente indica una contraseña nueva, o deja el alta nueva sin contraseña.', 'error');
+          return false;
+        }
         const { error: pwErr } = await novaSupabase.rpc('admin_actualizar_password_usuario', {
           p_email: email,
           p_new_password: password
@@ -1088,7 +1200,7 @@
         const nombreCompleto = [nombre, apellidos].filter(Boolean).join(' ').trim();
         const { error: creaErr } = await novaSupabase.rpc('admin_crear_usuario', {
           p_email: email,
-          p_password: password,
+          p_password: password || '',
           p_nombre: nombreCompleto,
           p_rol: rol
         });
@@ -1130,7 +1242,9 @@
       toast(
         fueActualizacion
           ? 'Listo: contraseña y ficha actualizadas. El cliente puede entrar con este email y la contraseña indicada.'
-          : 'Usuario creado correctamente',
+          : password
+            ? 'Usuario creado. Puede entrar con email y contraseña.'
+            : 'Cliente creado. En el primer acceso solo necesita el correo para elegir su contraseña.',
         'success'
       );
     }
@@ -1195,11 +1309,9 @@
     }
 
     function applyStaffTpvUi() {
-      const alta = document.getElementById('tpvCardAltaCliente');
       const btnNuevo = document.getElementById('tpvAbrirNuevoClienteBtn');
       const adminCat = document.getElementById('tpvAdminCatalogoCard');
       const isAdmin = staffProfile && staffProfile.rol === 'admin';
-      if (alta) alta.style.display = isAdmin ? '' : 'none';
       if (btnNuevo) btnNuevo.style.display = isAdmin ? '' : 'none';
       if (adminCat) adminCat.style.display = isAdmin ? '' : 'none';
     }
@@ -2772,7 +2884,12 @@
         const apellidos = document.getElementById('editClienteApellidos').value.trim() || null;
         const email = document.getElementById('editClienteEmail').value.trim().toLowerCase();
         const telefono = document.getElementById('editClienteTelefono').value.trim() || null;
-        const fechaNacimiento = document.getElementById('editClienteNacimiento').value || null;
+        const fechaNacimientoRaw = getDobIso('editClienteNac');
+        if (fechaNacimientoRaw === '__incomplete__' || fechaNacimientoRaw === '__invalid__') {
+          toast('Completa bien la fecha de nacimiento (día, mes y año) o déjala vacía.', 'error');
+          return;
+        }
+        const fechaNacimiento = fechaNacimientoRaw;
         const activo = document.getElementById('editClienteActivo').checked;
         const direccion = document.getElementById('editClienteDireccion').value.trim() || null;
         const ciudad = document.getElementById('editClienteCiudad').value.trim() || null;
@@ -3211,6 +3328,8 @@
     async function bootstrap() {
       const ok = await initAuth();
       if (!ok) return;
+      initDobSelects('modalNuevoNac');
+      initDobSelects('editClienteNac');
       await loadCatalogs();
       await Promise.all([loadClases(), loadBonos(), loadFinanzas(), loadNotifs()]);
       const hashTab = (location.hash || '').replace(/^#/, '');

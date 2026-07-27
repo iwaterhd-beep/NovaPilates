@@ -1,0 +1,108 @@
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="NŌVA PILATES STUDIO">
+      <img
+        class="logo-main"
+        src="/assets/branding/logo-nova-main.PNG"
+        width="220"
+        height="52"
+        alt=""
+        role="presentation"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';this.classList.add('logo-main--svg');"
+      />
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#empezar">Empezar</a></li>
+      <li><a href="/bonos">Bonos</a></li>
+      <li><a href="/tienda" aria-current="page">Tienda</a></li>
+      <li><a href="index.html#donde">Dónde encontrarnos</a></li>
+      <li><a href="index.html#contacto">Contacto</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button type="button" class="cart-trigger" id="cartOpenBtn" aria-haspopup="dialog" aria-controls="cartDrawer" aria-expanded="false">
+        <span class="cart-trigger-label">Carrito</span>
+        <span class="cart-badge" id="cartBadge" hidden>0</span>
+      </button>
+      <a href="login.html" class="btn btn-outline">Acceder</a>
+    </div>
+  </div>
+</nav>
+
+<section class="shop-hero" id="tienda">
+  <div class="shop-hero-bg" aria-hidden="true"></div>
+  <div class="container shop-hero-inner">
+    <p class="label shop-hero-label">NŌVA Merch</p>
+    <h1 class="shop-hero-title">Tienda</h1>
+    <p class="shop-hero-sub">Piezas pensadas para el estudio y el día a día. Añade al carrito; el pago llegará con Medusa.</p>
+  </div>
+</section>
+
+<section class="section section-shop" aria-labelledby="shop-catalog-title">
+  <div class="container">
+    <div class="shop-head reveal">
+      <div>
+        <p class="label">Catálogo</p>
+        <h2 id="shop-catalog-title" class="shop-catalog-title">Merchand NŌVA</h2>
+        <p class="shop-catalog-lead">Ropa, botellas y accesorios. Independiente del TPV del estudio.</p>
+      </div>
+      <p id="shopStatus" class="shop-status" role="status"></p>
+    </div>
+    <div id="shopGrid" class="shop-grid" aria-live="polite"></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <img
+        class="footer-logo-main"
+        src="/assets/branding/logo-nova-main.PNG"
+        width="200"
+        height="46"
+        alt="NŌVA PILATES STUDIO"
+        loading="lazy"
+        decoding="async"
+        onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';this.classList.add('logo-main--svg');"
+      />
+    </div>
+    <div><ul class="footer-links"><li><a href="index.html#empezar">Prácticas</a></li><li><a href="/bonos">Bonos</a></li></ul></div>
+    <div><ul class="footer-links"><li><a href="/tienda">Tienda</a></li><li><a href="index.html#donde">Ubicación</a></li></ul></div>
+    <div>
+      <ul class="footer-links">
+        <li><a href="index.html#contacto">Contacto</a></li>
+        <li><a href="/login.html">Iniciar sesión</a></li>
+        <li><a href="/aviso-legal.html">Aviso legal</a></li>
+        <li><a href="/privacidad.html">Privacidad</a></li>
+        <li><a href="/cookies.html">Cookies</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<div class="cart-backdrop" id="cartBackdrop" hidden></div>
+<aside
+  class="cart-drawer"
+  id="cartDrawer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cartDrawerTitle"
+  hidden
+>
+  <div class="cart-drawer-head">
+    <h2 id="cartDrawerTitle" class="cart-drawer-title">Tu carrito</h2>
+    <button type="button" class="cart-close" id="cartCloseBtn" aria-label="Cerrar carrito">×</button>
+  </div>
+  <div class="cart-drawer-body" id="cartLines"></div>
+  <div class="cart-drawer-foot">
+    <div class="cart-total-row">
+      <span>Total</span>
+      <strong id="cartTotal">0 €</strong>
+    </div>
+    <p class="cart-checkout-note" id="cartCheckoutNote">El pago online se activará al conectar Medusa.</p>
+    <button type="button" class="btn btn-primary cart-checkout" id="cartCheckoutBtn" disabled>Finalizar compra</button>
+    <button type="button" class="btn btn-outline cart-clear" id="cartClearBtn">Vaciar</button>
+  </div>
+</aside>

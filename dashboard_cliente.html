@@ -117,23 +117,13 @@
     .notif-body { font-size: 0.77rem; color: var(--color-muted); font-weight: 300; margin-top: 0.2rem; line-height: 1.5; }
     .notif-time { font-size: 0.65rem; color: var(--color-muted); margin-top: 0.3rem; }
 
-    /* 2-col layout */
+    /* Layout próximas clases */
     .dash-cols {
       display: grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: 1fr;
       gap: 2rem;
+      max-width: 720px;
     }
-
-    /* Historial mini */
-    .hist-row {
-      display: flex; align-items: center; gap: 0.8rem;
-      padding: 0.75rem 0;
-      border-bottom: 0.5px solid var(--color-border);
-      font-size: 0.8rem; font-weight: 300; color: var(--color-cream-dim);
-    }
-    .hist-row:last-child { border-bottom: none; }
-    .hist-row-name { flex: 1; }
-    .hist-row-date { font-size: 0.7rem; color: var(--color-muted); }
 
     /* Modal cancelar */
     .cancel-clase-nombre { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem; }
@@ -187,6 +177,10 @@
     <a href="bono.html" class="sidebar-link">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
       Mi bono
+    </a>
+    <a href="tienda-cliente.html" class="sidebar-link">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 5h10l-1 8H4L3 5z"/><path d="M6 5V3.5a2 2 0 014 0V5"/></svg>
+      Tienda
     </a>
     <a href="notificaciones.html" class="sidebar-link">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>
@@ -309,36 +303,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Notificaciones + historial -->
-      <div style="display:flex;flex-direction:column;gap:2rem;">
-
-        <!-- Notificaciones recientes -->
-        <div>
-          <div class="section-header">
-            <span class="section-title">Notificaciones</span>
-            <a href="notificaciones.html" class="btn btn-ghost">Ver todas →</a>
-          </div>
-          <div id="notifList">
-            <div class="skeleton" style="height:64px;margin-bottom:1px;"></div>
-            <div class="skeleton" style="height:64px;"></div>
-          </div>
-        </div>
-
-        <!-- Historial reciente -->
-        <div>
-          <div class="section-header">
-            <span class="section-title">Historial reciente</span>
-            <a href="mis-clases.html" class="btn btn-ghost">Ver todo →</a>
-          </div>
-          <div id="historialList">
-            <div class="skeleton" style="height:40px;margin-bottom:1px;"></div>
-            <div class="skeleton" style="height:40px;margin-bottom:1px;"></div>
-            <div class="skeleton" style="height:40px;"></div>
-          </div>
-        </div>
-
-      </div>
     </div>
 
   </div><!-- /content -->
@@ -349,7 +313,7 @@
   <div class="modal">
     <div class="modal-header">
       <h2 class="modal-title">Cancelar reserva</h2>
-      <button class="modal-close" id="closeCancelModal">âœ•</button>
+      <button class="modal-close" id="closeCancelModal" type="button" aria-label="Cerrar">×</button>
     </div>
     <div class="cancel-clase-nombre" id="cancelClaseNombre"></div>
     <div id="cancelClaseMeta" style="font-size:0.8rem;color:var(--color-muted);"></div>
@@ -428,33 +392,17 @@ function renderClase(reserva) {
   return el;
 }
 
-// Render notificaciones 
-function renderNotif(n) {
-  const el = document.createElement('div');
-  el.className = `notif-item ${!n.leida ? 'unread' : ''}`;
-  const hace = Math.floor((Date.now() - new Date(n.created_at)) / 60000);
-  const tiempo = hace < 60 ? `Hace ${hace} min` : hace < 1440 ? `Hace ${Math.floor(hace/60)} h` : `Hace ${Math.floor(hace/1440)} d`;
-  el.innerHTML = `
-    <div class="notif-dot-wrap">${!n.leida ? '<div class="notif-dot"></div>' : ''}</div>
-    <div>
-      <div class="notif-title">${n.titulo}</div>
-      <div class="notif-body">${n.mensaje}</div>
-      <div class="notif-time">${tiempo}</div>
-    </div>`;
-  return el;
-}
-
-// Render historial 
-function renderHist(reserva) {
-  const clase = reserva.clase || reserva;
-  const fecha = new Date(clase.fecha_hora || clase.fechaHora);
-  const el = document.createElement('div');
-  el.className = 'hist-row';
-  el.innerHTML = `
-    <span class="badge badge-success" style="font-size:0.55rem;">âœ“</span>
-    <span class="hist-row-name">${clase.disciplina?.nombre || 'Clase'}</span>
-    <span class="hist-row-date">${fecha.getDate()} ${MESES[fecha.getMonth()]}</span>`;
-  return el;
+// Badge de notificaciones no leídas (menú / topbar)
+function updateNotifBadge(notifs) {
+  const badge = document.getElementById('notifBadge');
+  const dot = document.getElementById('topbarDot');
+  const list = Array.isArray(notifs) ? notifs : [];
+  const unread = list.filter((n) => !n.leida).length;
+  if (badge) {
+    badge.textContent = String(unread);
+    badge.style.display = unread > 0 ? 'inline-block' : 'none';
+  }
+  if (dot) dot.style.display = unread > 0 ? 'block' : 'none';
 }
 
 // DEMO DATA (mientras no hay Supabase) 
@@ -470,11 +418,6 @@ const DEMO = {
   notifs: [
     { id: 'n1', titulo: '¡Recuerda tu clase de mañana!', mensaje: 'Reformer Pilates · Miércoles 10:00 · Sala Reformer', leida: false, created_at: new Date(Date.now() - 3600000*2).toISOString() },
     { id: 'n2', titulo: 'Cambio de horario', mensaje: 'La clase del viernes 18 abr pasa de 19:00 a 19:30.', leida: true, created_at: new Date(Date.now() - 3600000*26).toISOString() },
-  ],
-  historial: [
-    { clase: { fecha_hora: new Date(Date.now() - 86400000*2).toISOString(), disciplina: { nombre: 'Pilates Suelo' } } },
-    { clase: { fecha_hora: new Date(Date.now() - 86400000*5).toISOString(), disciplina: { nombre: 'Reformer Pilates' } } },
-    { clase: { fecha_hora: new Date(Date.now() - 86400000*7).toISOString(), disciplina: { nombre: 'Yoga' } } },
   ]
 };
 
@@ -485,7 +428,6 @@ async function init() {
   let bonoActivo = null;
   let reservas = [];
   let notifs = [];
-  let historial = [];
 
   try {
     const session = await getSession();
@@ -507,29 +449,28 @@ async function init() {
       .order('clase(fecha_hora)')
       .limit(5);
     reservas = res || [];
-    // Notificaciones
+    // Notificaciones (solo para badge del menú)
     const { data: nots } = await novaSupabase
       .from('notificaciones')
-      .select('*')
+      .select('id,leida')
       .or(`perfil_id.eq.${perfil.id},perfil_id.is.null`)
       .order('created_at', { ascending: false })
-      .limit(4);
+      .limit(20);
     notifs = nots || [];
-    // Historial
-    const { data: hist } = await novaSupabase
+
+    const { count: totalAsistidas } = await novaSupabase
       .from('reservas')
-      .select('clase:clase_id(fecha_hora, disciplina:disciplina_id(nombre))')
+      .select('id', { count: 'exact', head: true })
       .eq('perfil_id', perfil.id)
-      .eq('estado', 'asistida')
-      .order('clase(fecha_hora)', { ascending: false })
-      .limit(5);
-    historial = hist || [];
+      .eq('estado', 'asistida');
+    const totalEl = document.getElementById('statTotal');
+    if (totalEl) totalEl.textContent = String(totalAsistidas ?? 0);
   } catch(e) {
     // Usa datos de demo si no hay Supabase configurado
     console.warn('Supabase no disponible, usando datos de demo.', e);
     renderDemo(); return;
   }
-  renderAll(perfil, bonoActivo, reservas, notifs, historial);
+  renderAll(perfil, bonoActivo, reservas, notifs);
 }
 
 function renderDemo() {
@@ -539,18 +480,19 @@ function renderDemo() {
   renderBonoSection({ nombre: d.bono.nombre, sesiones_totales: d.bono.totales, sesiones_usadas: d.bono.totales - d.bono.restantes, tipo_bono: { ilimitado: false }, fecha_fin: '2025-04-30', activo: true });
   renderStats(d.stats);
   renderProximas(d.reservas);
-  renderNotifs(d.notifs);
-  renderHistorial(d.historial);
+  updateNotifBadge(d.notifs);
+  const totalEl = document.getElementById('statTotal');
+  if (totalEl) totalEl.textContent = String(d.stats.total ?? 0);
 }
 
 function saludo() {
   const h = new Date().getHours();
-  if (h < 13) return 'Buenos días ðŸŒ¿ Lista para mover el cuerpo hoy?';
-  if (h < 20) return 'Buenas tardes ðŸŒ¤ Tu próxima clase te espera.';
-  return 'Buenas noches ðŸŒ™ Descansa y vuelve con energía.';
+  if (h < 13) return 'Buenos días. Lista para mover el cuerpo hoy?';
+  if (h < 20) return 'Buenas tardes. Tu próxima clase te espera.';
+  return 'Buenas noches. Descansa y vuelve con energía.';
 }
 
-function renderAll(perfil, bono, reservas, notifs, historial) {
+function renderAll(perfil, bono, reservas, notifs) {
   const nombre = perfil.nombre?.split(' ')[0] || 'Hola';
   document.getElementById('greetName').textContent = nombre;
   document.getElementById('greetSub').textContent = saludo();
@@ -564,8 +506,7 @@ function renderAll(perfil, bono, reservas, notifs, historial) {
   document.getElementById('statProximaFecha').textContent = proxima ? formatFecha(proxima.fecha_hora) : 'Sin reservas próximas';
 
   renderProximas(reservas);
-  renderNotifs(notifs);
-  renderHistorial(historial);
+  updateNotifBadge(notifs);
 }
 
 function renderBonoSection(bono) {
@@ -603,34 +544,6 @@ function renderProximas(reservas) {
     const d = new Date(r.clase?.fecha_hora || r.fechaHora);
     return d.getMonth() === new Date().getMonth();
   }).length;
-}
-
-function renderNotifs(notifs) {
-  const cont = document.getElementById('notifList');
-  const badge = document.getElementById('notifBadge');
-  const dot = document.getElementById('topbarDot');
-  cont.innerHTML = '';
-  if (!notifs.length) {
-    cont.innerHTML = '<p style="font-size:0.78rem;color:var(--color-muted);padding:0.5rem 0;">Sin notificaciones recientes.</p>';
-    return;
-  }
-  const unread = notifs.filter(n => !n.leida).length;
-  if (unread > 0) {
-    badge.textContent = unread; badge.style.display = 'inline-block';
-    dot.style.display = 'block';
-  }
-  notifs.slice(0, 3).forEach(n => cont.appendChild(renderNotif(n)));
-}
-
-function renderHistorial(hist) {
-  const cont = document.getElementById('historialList');
-  cont.innerHTML = '';
-  if (!hist.length) {
-    cont.innerHTML = '<p style="font-size:0.78rem;color:var(--color-muted);">Sin historial aún.</p>';
-    return;
-  }
-  hist.forEach(r => cont.appendChild(renderHist(r)));
-  document.getElementById('statTotal').textContent = hist.length;
 }
 
 // Modal cancelar 

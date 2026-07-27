@@ -13,7 +13,10 @@
     { "source": "/perfil", "destination": "/perfil.html" },
     { "source": "/aviso-legal", "destination": "/aviso-legal.html" },
     { "source": "/privacidad", "destination": "/privacidad.html" },
-    { "source": "/cookies", "destination": "/cookies.html" }
+    { "source": "/cookies", "destination": "/cookies.html" },
+    { "source": "/tienda", "destination": "/tienda.html" },
+    { "source": "/bonos", "destination": "/bonos.html" },
+    { "source": "/tienda-cliente", "destination": "/tienda-cliente.html" }
   ],
   "headers": [
     {

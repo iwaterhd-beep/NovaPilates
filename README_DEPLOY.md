@@ -19,6 +19,17 @@ Este proyecto **no usa build step**: la URL y la clave **anon (pública)** viven
 
 En Vercel puedes documentar las mismas claves como Environment Variables por rotación, pero el sitio las lee del JS hasta que añadas un build que las inyecte.
 
+## 2b) Tienda online (Medusa) — separado del TPV
+
+Página pública: `/tienda` (`tienda.html`). El catálogo del **TPV en staff** (`productos_tienda`) no cambia.
+
+Cuando tengas Medusa Cloud / backend, rellena en `js/medusa.js`:
+
+- `MEDUSA_BACKEND_URL` → URL del backend (sin slash final)
+- `MEDUSA_PUBLISHABLE_KEY` → publishable key del Store API (**nunca** la admin)
+
+Hasta entonces la tienda muestra productos de vista previa. El **carrito** (`js/cart.js`) guarda líneas en `localStorage`; el botón de pago permanece desactivado hasta conectar Medusa Checkout.
+
 ## 3) Auth (imprescindible en producción)
 
 En Supabase → **Authentication → URL Configuration**:
@@ -49,6 +60,7 @@ Proyecto vacío:
    - `supabase_patch_tpv_cobrar_ticket.sql` (cobro TPV atómico)
    - `supabase_patch_tipos_bono_web.sql` (planes en web + casilla visible_web)
    - `supabase_patch_eliminar_cliente.sql`
+   - `supabase_patch_primera_activacion.sql` (primer login solo con email → elegir contraseña)
    - `supabase_patch_perfiles_*.sql` (si faltan columnas)
 
 Opcional demo: `supabase_seed_demo.sql` (requiere usuarios Auth previos).

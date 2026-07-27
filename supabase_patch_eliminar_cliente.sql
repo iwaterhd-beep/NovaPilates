@@ -41,6 +41,11 @@ BEGIN
   UPDATE public.clases SET created_by = NULL WHERE created_by = p_perfil_id;
   UPDATE public.ajustes_centro SET updated_by = NULL WHERE updated_by = p_perfil_id;
 
+  IF to_regclass('public.caja_diaria') IS NOT NULL THEN
+    UPDATE public.caja_diaria SET abierta_por = NULL WHERE abierta_por = p_perfil_id;
+    UPDATE public.caja_diaria SET cerrada_por = NULL WHERE cerrada_por = p_perfil_id;
+  END IF;
+
   DELETE FROM auth.identities WHERE user_id = p_perfil_id;
   DELETE FROM auth.users WHERE id = p_perfil_id;
 END;

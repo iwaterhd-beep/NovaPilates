@@ -3,6 +3,8 @@
 function friendlyError(err) {
   const raw = (err && (err.message || err.error_description || err.msg)) || String(err || '');
   const map = [
+    [/database error querying schema/i, 'Error de acceso Auth. Si acabas de crear la cuenta, vuelve a intentarlo; si sigue, avisa a administración.'],
+    [/no hay una primera activaci[oó]n/i, 'No hay una primera activación pendiente para este correo. Si ya tienes contraseña, introdúcela.'],
     [/invalid login credentials/i, 'Correo o contraseña incorrectos.'],
     [/email not confirmed/i, 'Debes confirmar tu correo antes de entrar.'],
     [/user already registered/i, 'Ya existe una cuenta con ese correo.'],
