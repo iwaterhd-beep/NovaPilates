@@ -111,10 +111,42 @@ Banner de cookies: `js/cookies-consent.js`.
 - `sitemap.xml`, `robots.txt`  
 - `LocalBusiness` JSON-LD en `index.html` (completa teléfono/dirección)
 
-## 9) Prueba rápida post-deploy
+## 9) Email de bienvenida (Resend + Edge Function)
+
+Al crear un **cliente** en el dashboard staff se invoca la Edge Function `enviar-bienvenida`, que envía HTML vía [Resend](https://resend.com).
+
+Plantilla local (previsualización): `emails/bienvenida-cliente.html`  
+Código de la función: `supabase/functions/enviar-bienvenida/index.ts`
+
+### Secrets en Supabase
+
+Dashboard → **Project Settings → Edge Functions → Secrets** (o CLI `supabase secrets set`):
+
+| Secret | Ejemplo | Obligatorio |
+|--------|---------|-------------|
+| `RESEND_API_KEY` | `re_…` (API key de Resend) | Sí |
+| `RESEND_FROM` | `NŌVA Pilates <hola@tudominio.com>` | Recomendado |
+| `EMAIL_INSTAGRAM_URL` | URL del perfil IG | Opcional |
+| `EMAIL_WHATSAPP_URL` | `https://wa.me/34XXXXXXXXX` | Opcional |
+| `EMAIL_MAPS_URL` | Enlace a Google Maps | Opcional |
+| `EMAIL_STUDIO_IMAGE_URL` | URL pública de foto del estudio | Opcional |
+
+Sin `RESEND_FROM`, la función usa `NŌVA Pilates <onboarding@resend.dev>` (solo pruebas; Resend solo entrega a la cuenta del propietario de la API key).
+
+Para producción: verifica el dominio en Resend y usa un `from` de ese dominio.
+
+### Prueba
+
+1. Configura `RESEND_API_KEY` (y `RESEND_FROM` si tienes dominio).  
+2. En staff → crear cliente nuevo (rol cliente) con un email que puedas abrir.  
+3. Debe llegar el correo «Bienvenido/a a NŌVA».  
+4. Si el mail falla, el alta del cliente **no se revierte**; verás un toast de aviso.
+
+## 10) Prueba rápida post-deploy
 
 1. Abrir `/login.html` → login admin  
 2. Reservar / cancelar en calendario  
 3. Lista de espera + notificación al liberar plaza  
 4. Recuperar contraseña (email + pantalla nueva contraseña)  
-5. Banner de cookies y enlaces legales en el footer
+5. Banner de cookies y enlaces legales en el footer  
+6. Crear cliente nuevo → email de bienvenida (si Resend está configurado)

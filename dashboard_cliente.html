@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -15,6 +15,65 @@
   <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
   <link rel="stylesheet" href="portal.css" />
   <style>
+    .page-header--dash {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem 2rem;
+      flex-wrap: wrap;
+    }
+    .page-header--dash .page-header-copy {
+      flex: 1 1 14rem;
+      min-width: 0;
+    }
+    .clase-countdown {
+      flex: 0 1 auto;
+      max-width: 28rem;
+      padding: 0;
+      background: none;
+      border: none;
+      text-align: right;
+    }
+    .clase-countdown[hidden] { display: none !important; }
+    .clase-countdown-kicker {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.45rem;
+      font-weight: 300;
+    }
+    .clase-countdown-main {
+      font-family: var(--font-display);
+      font-weight: 300;
+      font-size: clamp(1.35rem, 2.4vw, 2rem);
+      line-height: 1.2;
+      color: var(--color-muted);
+      margin: 0;
+    }
+    .clase-countdown-accent {
+      font-style: italic;
+      color: var(--color-accent);
+      font-size: clamp(1.85rem, 3.2vw, 2.75rem);
+      font-weight: 400;
+    }
+    .clase-countdown-sub {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--color-muted);
+      font-weight: 300;
+      letter-spacing: 0.01em;
+    }
+    @media (max-width: 720px) {
+      .clase-countdown {
+        text-align: left;
+        max-width: none;
+        width: 100%;
+      }
+    }
+
     /* Dashboard grid */
     .dash-grid {
       display: grid;
@@ -138,6 +197,104 @@
       .bono-card { flex-direction: column; align-items: flex-start; }
       .bono-card-right { align-items: flex-start; }
     }
+
+    /* Popover campana (notificaciones no leídas) */
+    .topbar-notif-wrap { position: relative; }
+    button.topbar-notif {
+      padding: 0;
+      background: var(--color-bg-card);
+      color: inherit;
+      font: inherit;
+    }
+    .topbar-notif-wrap.is-open .topbar-notif { border-color: var(--color-accent); }
+    .notif-popover {
+      position: absolute;
+      top: calc(100% + 0.55rem);
+      right: 0;
+      width: min(22rem, calc(100vw - 2rem));
+      background: var(--color-bg-card);
+      border: 0.5px solid var(--color-border);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      z-index: 120;
+      display: none;
+    }
+    .notif-popover.open { display: flex; flex-direction: column; }
+    .notif-popover-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-bottom: 0.5px solid var(--color-border);
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+    }
+    .notif-popover-count {
+      font-size: 0.62rem;
+      color: var(--color-accent);
+      letter-spacing: 0.08em;
+    }
+    .notif-popover-list {
+      max-height: 18rem;
+      overflow-y: auto;
+    }
+    .notif-popover-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.85rem 1rem;
+      border: 0;
+      border-bottom: 0.5px solid var(--color-border);
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .notif-popover-item:last-child { border-bottom: 0; }
+    .notif-popover-item:hover { background: rgba(138, 154, 140, 0.06); }
+    .notif-popover-item-title {
+      font-size: 0.84rem;
+      font-weight: 400;
+      color: var(--color-cream);
+      line-height: 1.35;
+    }
+    .notif-popover-item-body {
+      margin-top: 0.25rem;
+      font-size: 0.76rem;
+      color: var(--color-muted);
+      font-weight: 300;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .notif-popover-item-time {
+      margin-top: 0.35rem;
+      font-size: 0.64rem;
+      color: var(--color-muted);
+    }
+    .notif-popover-empty {
+      padding: 1.25rem 1rem;
+      font-size: 0.78rem;
+      color: var(--color-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .notif-popover-footer {
+      display: block;
+      padding: 0.75rem 1rem;
+      border-top: 0.5px solid var(--color-border);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .notif-popover-footer:hover { background: rgba(138, 154, 140, 0.06); }
   </style>
 </head>
 <body>
@@ -207,19 +364,36 @@
   <header class="topbar">
     <span class="topbar-title">Dashboard</span>
     <div class="topbar-right">
-      <a href="notificaciones.html" class="topbar-notif" id="topbarNotif">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>
-        <span class="notif-dot" id="topbarDot" style="display:none"></span>
-      </a>
+      <div class="topbar-notif-wrap" id="topbarNotifWrap">
+        <button type="button" class="topbar-notif" id="topbarNotifBtn" aria-label="Notificaciones" aria-expanded="false" aria-controls="notifPopover">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>
+          <span class="notif-dot" id="topbarDot" style="display:none"></span>
+        </button>
+        <div class="notif-popover" id="notifPopover" role="dialog" aria-label="Notificaciones no leídas" hidden>
+          <div class="notif-popover-head">
+            <span>No leídas</span>
+            <span class="notif-popover-count" id="notifPopoverCount"></span>
+          </div>
+          <div class="notif-popover-list" id="notifPopoverList"></div>
+          <a href="notificaciones.html" class="notif-popover-footer">Ver todas →</a>
+        </div>
+      </div>
     </div>
   </header>
 
   <div class="content">
 
-    <!-- Saludo -->
-    <div class="page-header">
-      <h1 class="page-title">Hola, <em id="greetName" style="font-style:italic;color:var(--color-accent)">…</em></h1>
-      <p class="page-subtitle" id="greetSub">Cargando tu espacio…</p>
+    <!-- Saludo + countdown próxima clase -->
+    <div class="page-header page-header--dash">
+      <div class="page-header-copy">
+        <h1 class="page-title">Hola, <em id="greetName" style="font-style:italic;color:var(--color-accent)">…</em></h1>
+        <p class="page-subtitle" id="greetSub">Cargando tu espacio…</p>
+      </div>
+      <aside class="clase-countdown" id="claseCountdown" hidden aria-live="polite">
+        <span class="clase-countdown-kicker">Próxima clase</span>
+        <p class="clase-countdown-main" id="claseCountdownMain"></p>
+        <span class="clase-countdown-sub" id="claseCountdownSub"></span>
+      </aside>
     </div>
 
     <!-- BONO ACTIVO -->
@@ -344,8 +518,45 @@ function formatFecha(iso) {
   return `${DIAS[d.getDay()]} ${d.getDate()} ${MESES[d.getMonth()]} · ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
 }
 function daysUntil(iso) {
-  const diff = new Date(iso) - new Date();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  const target = new Date(iso);
+  if (Number.isNaN(target.getTime())) return null;
+  const startToday = new Date();
+  startToday.setHours(0, 0, 0, 0);
+  const startTarget = new Date(target);
+  startTarget.setHours(0, 0, 0, 0);
+  return Math.round((startTarget - startToday) / (1000 * 60 * 60 * 24));
+}
+
+function renderClaseCountdown(proximaFechaIso, nombreClase) {
+  const box = document.getElementById('claseCountdown');
+  const main = document.getElementById('claseCountdownMain');
+  const sub = document.getElementById('claseCountdownSub');
+  if (!box || !main || !sub) return;
+
+  if (!proximaFechaIso) {
+    box.hidden = true;
+    return;
+  }
+
+  const dias = daysUntil(proximaFechaIso);
+  if (dias == null || dias < 0) {
+    box.hidden = true;
+    return;
+  }
+
+  box.hidden = false;
+  box.classList.toggle('clase-countdown--hoy', dias === 0);
+
+  if (dias === 0) {
+    main.innerHTML = '¡Tu clase es <span class="clase-countdown-accent">hoy</span>!';
+  } else if (dias === 1) {
+    main.innerHTML = 'Te falta <span class="clase-countdown-accent">1 día</span> para tu clase';
+  } else {
+    main.innerHTML = `Te faltan <span class="clase-countdown-accent">${dias} días</span> para tu clase`;
+  }
+
+  const fechaTxt = formatFecha(proximaFechaIso);
+  sub.textContent = nombreClase ? `${nombreClase} · ${fechaTxt}` : fechaTxt;
 }
 
 function toast(msg, type = 'info') {
@@ -393,10 +604,96 @@ function renderClase(reserva) {
 }
 
 // Badge de notificaciones no leídas (menú / topbar)
+let clientNotifs = [];
+
+function formatNotifTime(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Ahora';
+  if (mins < 60) return `Hace ${mins} min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Hace ${hours} h`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Ayer';
+  if (days < 7) return `Hace ${days} días`;
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+}
+
+function escNotif(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function getUnreadNotifs() {
+  return clientNotifs.filter((n) => !n.leida);
+}
+
+function renderNotifPopover() {
+  const listEl = document.getElementById('notifPopoverList');
+  const countEl = document.getElementById('notifPopoverCount');
+  if (!listEl) return;
+
+  const unread = getUnreadNotifs();
+  if (countEl) countEl.textContent = unread.length ? `${unread.length} nueva${unread.length === 1 ? '' : 's'}` : '';
+
+  if (!unread.length) {
+    listEl.innerHTML = '<p class="notif-popover-empty">No tienes notificaciones nuevas.</p>';
+    return;
+  }
+
+  listEl.innerHTML = unread.slice(0, 8).map((n) => `
+    <button type="button" class="notif-popover-item" data-notif-id="${escNotif(n.id)}">
+      <div class="notif-popover-item-title">${escNotif(n.titulo || 'Aviso')}</div>
+      <div class="notif-popover-item-body">${escNotif(n.mensaje || '')}</div>
+      <div class="notif-popover-item-time">${escNotif(formatNotifTime(n.created_at))}</div>
+    </button>
+  `).join('');
+}
+
+function openNotifPopover() {
+  const wrap = document.getElementById('topbarNotifWrap');
+  const popover = document.getElementById('notifPopover');
+  const btn = document.getElementById('topbarNotifBtn');
+  if (!wrap || !popover || !btn) return;
+  renderNotifPopover();
+  wrap.classList.add('is-open');
+  popover.classList.add('open');
+  popover.hidden = false;
+  btn.setAttribute('aria-expanded', 'true');
+}
+
+function closeNotifPopover() {
+  const wrap = document.getElementById('topbarNotifWrap');
+  const popover = document.getElementById('notifPopover');
+  const btn = document.getElementById('topbarNotifBtn');
+  if (!wrap || !popover || !btn) return;
+  wrap.classList.remove('is-open');
+  popover.classList.remove('open');
+  popover.hidden = true;
+  btn.setAttribute('aria-expanded', 'false');
+}
+
+function toggleNotifPopover() {
+  const popover = document.getElementById('notifPopover');
+  if (popover?.classList.contains('open')) closeNotifPopover();
+  else openNotifPopover();
+}
+
+function setClientNotifs(notifs) {
+  clientNotifs = Array.isArray(notifs) ? notifs : [];
+  updateNotifBadge(clientNotifs);
+  if (document.getElementById('notifPopover')?.classList.contains('open')) renderNotifPopover();
+}
+
 function updateNotifBadge(notifs) {
   const badge = document.getElementById('notifBadge');
   const dot = document.getElementById('topbarDot');
-  const list = Array.isArray(notifs) ? notifs : [];
+  const list = Array.isArray(notifs) ? notifs : clientNotifs;
   const unread = list.filter((n) => !n.leida).length;
   if (badge) {
     badge.textContent = String(unread);
@@ -449,10 +746,10 @@ async function init() {
       .order('clase(fecha_hora)')
       .limit(5);
     reservas = res || [];
-    // Notificaciones (solo para badge del menú)
+    // Notificaciones (badge + popover campana)
     const { data: nots } = await novaSupabase
       .from('notificaciones')
-      .select('id,leida')
+      .select('id,titulo,mensaje,leida,created_at,tipo,perfil_id')
       .or(`perfil_id.eq.${perfil.id},perfil_id.is.null`)
       .order('created_at', { ascending: false })
       .limit(20);
@@ -480,7 +777,9 @@ function renderDemo() {
   renderBonoSection({ nombre: d.bono.nombre, sesiones_totales: d.bono.totales, sesiones_usadas: d.bono.totales - d.bono.restantes, tipo_bono: { ilimitado: false }, fecha_fin: '2025-04-30', activo: true });
   renderStats(d.stats);
   renderProximas(d.reservas);
-  updateNotifBadge(d.notifs);
+  const proxDemo = d.reservas[0]?.clase;
+  renderClaseCountdown(proxDemo?.fecha_hora, proxDemo?.disciplina?.nombre);
+  setClientNotifs(d.notifs);
   const totalEl = document.getElementById('statTotal');
   if (totalEl) totalEl.textContent = String(d.stats.total ?? 0);
 }
@@ -504,9 +803,10 @@ function renderAll(perfil, bono, reservas, notifs) {
   const proxima = reservas[0]?.clase;
   document.getElementById('statProxima').textContent = proxima?.disciplina?.nombre || '—';
   document.getElementById('statProximaFecha').textContent = proxima ? formatFecha(proxima.fecha_hora) : 'Sin reservas próximas';
+  renderClaseCountdown(proxima?.fecha_hora, proxima?.disciplina?.nombre);
 
   renderProximas(reservas);
-  updateNotifBadge(notifs);
+  setClientNotifs(notifs);
 }
 
 function renderBonoSection(bono) {
@@ -583,6 +883,23 @@ document.addEventListener('click', (e) => {
   if (!sidebarEl.contains(e.target) && !e.target.closest('#sidebarToggle')) {
     sidebarEl.classList.remove('open');
   }
+  const wrap = document.getElementById('topbarNotifWrap');
+  if (wrap && !wrap.contains(e.target)) closeNotifPopover();
+});
+
+document.getElementById('topbarNotifBtn')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleNotifPopover();
+});
+
+document.getElementById('notifPopoverList')?.addEventListener('click', (e) => {
+  const item = e.target.closest('.notif-popover-item');
+  if (!item) return;
+  window.location.href = 'notificaciones.html';
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeNotifPopover();
 });
 
 // Logout 

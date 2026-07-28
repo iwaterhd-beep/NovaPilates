@@ -7,6 +7,7 @@ DECLARE
   v_user_id UUID := auth.uid();
   v_clase RECORD;
   v_bono RECORD;
+  v_reserva RECORD;
   v_reserva_id UUID;
   v_ocupacion INTEGER;
   v_margen_reserva_dias INTEGER := 0;
@@ -43,13 +44,24 @@ BEGIN
     RAISE EXCEPTION 'Debes reservar con al menos % días de antelación.', v_margen_reserva_dias;
   END IF;
 
-  IF EXISTS (
-    SELECT 1 FROM public.reservas
-    WHERE perfil_id = v_user_id
-      AND clase_id = p_clase_id
-      AND estado IN ('confirmada', 'asistida')
-  ) THEN
-    RAISE EXCEPTION 'Ya tienes una reserva activa para esta clase.';
+  SELECT id, estado, lista_espera, bono_activo_id
+  INTO v_reserva
+  FROM public.reservas
+  WHERE perfil_id = v_user_id
+    AND clase_id = p_clase_id
+  FOR UPDATE;
+
+  IF FOUND THEN
+    IF v_reserva.estado IN ('confirmada', 'asistida') THEN
+      IF COALESCE(v_reserva.lista_espera, FALSE) THEN
+        RAISE EXCEPTION 'Ya estás en lista de espera para esta clase.';
+      END IF;
+      RAISE EXCEPTION 'Ya tienes una reserva activa para esta clase.';
+    END IF;
+
+    IF v_reserva.estado <> 'cancelada' THEN
+      RAISE EXCEPTION 'Ya existe una reserva para esta clase.';
+    END IF;
   END IF;
 
   SELECT COUNT(*)::INTEGER
@@ -67,9 +79,22 @@ BEGIN
       AND estado = 'confirmada'
       AND COALESCE(lista_espera, FALSE) = TRUE;
 
-    INSERT INTO public.reservas (perfil_id, clase_id, estado, lista_espera, posicion_espera)
-    VALUES (v_user_id, p_clase_id, 'confirmada', TRUE, v_pos_espera)
-    RETURNING id INTO v_reserva_id;
+    IF FOUND AND v_reserva.id IS NOT NULL THEN
+      UPDATE public.reservas
+      SET estado = 'confirmada',
+          fecha_reserva = NOW(),
+          fecha_cancelacion = NULL,
+          motivo_cancelacion = NULL,
+          lista_espera = TRUE,
+          posicion_espera = v_pos_espera,
+          bono_activo_id = NULL
+      WHERE id = v_reserva.id
+      RETURNING id INTO v_reserva_id;
+    ELSE
+      INSERT INTO public.reservas (perfil_id, clase_id, estado, lista_espera, posicion_espera)
+      VALUES (v_user_id, p_clase_id, 'confirmada', TRUE, v_pos_espera)
+      RETURNING id INTO v_reserva_id;
+    END IF;
 
     v_en_espera := TRUE;
   ELSE
@@ -90,9 +115,22 @@ BEGIN
       RAISE EXCEPTION 'No tienes sesiones disponibles en tu bono.';
     END IF;
 
-    INSERT INTO public.reservas (perfil_id, clase_id, bono_activo_id, estado, lista_espera, posicion_espera)
-    VALUES (v_user_id, p_clase_id, v_bono.id, 'confirmada', FALSE, NULL)
-    RETURNING id INTO v_reserva_id;
+    IF FOUND AND v_reserva.id IS NOT NULL THEN
+      UPDATE public.reservas
+      SET estado = 'confirmada',
+          fecha_reserva = NOW(),
+          fecha_cancelacion = NULL,
+          motivo_cancelacion = NULL,
+          lista_espera = FALSE,
+          posicion_espera = NULL,
+          bono_activo_id = v_bono.id
+      WHERE id = v_reserva.id
+      RETURNING id INTO v_reserva_id;
+    ELSE
+      INSERT INTO public.reservas (perfil_id, clase_id, bono_activo_id, estado, lista_espera, posicion_espera)
+      VALUES (v_user_id, p_clase_id, v_bono.id, 'confirmada', FALSE, NULL)
+      RETURNING id INTO v_reserva_id;
+    END IF;
 
     UPDATE public.bonos_activos
     SET sesiones_usadas = sesiones_usadas + 1

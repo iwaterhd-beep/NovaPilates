@@ -114,3 +114,78 @@ BEGIN
   WHERE id = v_caja.id;
 END;
 $$;
+
+-- Fondo que se deja para la siguiente apertura (opcional en cierres antiguos).
+ALTER TABLE public.caja_diaria
+  ADD COLUMN IF NOT EXISTS fondo_siguiente DECIMAL(10,2);
+
+CREATE OR REPLACE FUNCTION public.cerrar_caja_diaria(
+  p_efectivo_declarado DECIMAL,
+  p_notas TEXT DEFAULT NULL,
+  p_fondo_siguiente DECIMAL DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user UUID := auth.uid();
+  v_hoy DATE := CURRENT_DATE;
+  v_caja RECORD;
+  v_efectivo_sistema DECIMAL(10,2);
+  v_fondo_sig DECIMAL(10,2);
+BEGIN
+  IF v_user IS NULL THEN
+    RAISE EXCEPTION 'Debes iniciar sesión.';
+  END IF;
+  IF public.mi_rol() NOT IN ('empleado', 'admin') THEN
+    RAISE EXCEPTION 'No autorizado.';
+  END IF;
+
+  SELECT * INTO v_caja
+  FROM public.caja_diaria
+  WHERE fecha = v_hoy
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'No hay caja abierta para hoy.';
+  END IF;
+  IF v_caja.estado = 'cerrada' THEN
+    RAISE EXCEPTION 'La caja de hoy ya está cerrada.';
+  END IF;
+
+  IF p_efectivo_declarado IS NULL OR p_efectivo_declarado < 0 THEN
+    RAISE EXCEPTION 'Efectivo contado no válido.';
+  END IF;
+
+  v_fondo_sig := COALESCE(p_fondo_siguiente, p_efectivo_declarado);
+  IF v_fondo_sig < 0 THEN
+    RAISE EXCEPTION 'El fondo para mañana no puede ser negativo.';
+  END IF;
+  IF v_fondo_sig > p_efectivo_declarado THEN
+    RAISE EXCEPTION 'No puedes dejar para mañana más efectivo del que hay contado.';
+  END IF;
+
+  SELECT COALESCE(SUM(importe), 0)
+  INTO v_efectivo_sistema
+  FROM public.transacciones
+  WHERE created_at >= date_trunc('day', NOW())
+    AND metodo_pago = 'efectivo';
+
+  v_efectivo_sistema := v_efectivo_sistema + COALESCE(v_caja.fondo_inicial, 0);
+
+  UPDATE public.caja_diaria
+  SET estado = 'cerrada',
+      cerrada_por = v_user,
+      cerrada_at = NOW(),
+      cierre_efectivo_declarado = p_efectivo_declarado,
+      cierre_efectivo_sistema = v_efectivo_sistema,
+      diferencia_efectivo = COALESCE(p_efectivo_declarado, 0) - COALESCE(v_efectivo_sistema, 0),
+      fondo_siguiente = v_fondo_sig,
+      notas_cierre = p_notas
+  WHERE id = v_caja.id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.cerrar_caja_diaria(DECIMAL, TEXT, DECIMAL) TO authenticated;

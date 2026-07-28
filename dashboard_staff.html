@@ -14,9 +14,9 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
-  <link rel="stylesheet" href="portal.css?v=6" />
+  <link rel="stylesheet" href="portal.css?v=38" />
 </head>
-<body data-panel-build="2026-04-18-disciplinas">
+<body data-panel-build="2026-04-18-clases-modal">
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
@@ -30,6 +30,7 @@
     <nav class="sidebar-nav">
       <div class="sidebar-section-label">Gestión</div>
       <a href="#tpv" class="sidebar-link active js-tab" data-tab="tpv"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 6h6M5 9h3M5 12h6"/></svg>TPV</a>
+      <a href="#productos" class="sidebar-link js-tab" data-tab="productos" id="sidebarLinkProductos" style="display:none;"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12v9H2z"/><path d="M5 4V3h6v1"/><path d="M6 8h4"/></svg>Productos</a>
       <a href="#bonos" class="sidebar-link js-tab" data-tab="bonos"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Bonos</a>
       <a href="#clases" class="sidebar-link js-tab" data-tab="clases"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Clases</a>
       <a href="#finanzas" class="sidebar-link js-tab" data-tab="finanzas"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 12h12M4 12V7m4 5V4m4 8V9"/></svg>Finanzas</a>
@@ -44,152 +45,82 @@
     <header class="topbar"><span class="topbar-title" id="pageTitle">Panel Staff</span></header>
     <div class="content">
       <section class="panel-tab" id="tab-clases" style="display:none;">
-        <div class="card" style="margin-bottom:1rem;">
-          <div class="card-label">Nueva sesión (clase)</div>
-          <p style="margin:0 0 .8rem;font-size:.75rem;color:var(--color-muted);">Crea una sesión en el calendario: elige disciplina, sala, fecha y aforo. La fecha debe ser futura.</p>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
-            <div>
-              <label class="form-label" for="disciplinaSelect">Disciplina</label>
-              <select class="form-input" id="disciplinaSelect"></select>
+        <div class="card clases-shell">
+          <div class="clases-toolbar">
+            <div class="clases-toolbar-copy">
+              <div class="card-label">Calendario de clases</div>
+              <p class="clases-hint">Programa sesiones y gestiona reservas. Pulsa <strong>Nueva clase</strong> para añadir una al calendario.</p>
             </div>
-            <div>
-              <label class="form-label" for="salaSelect">Sala</label>
-              <select class="form-input" id="salaSelect"></select>
-            </div>
-            <div>
-              <label class="form-label" for="tituloClase">Título</label>
-              <input class="form-input" id="tituloClase" placeholder="Opcional (ej. Reformer nivel 2)" />
-            </div>
-            <div>
-              <label class="form-label" for="fechaHoraClase">Fecha y hora</label>
-              <input class="form-input" id="fechaHoraClase" type="datetime-local" required />
-            </div>
-            <div>
-              <label class="form-label" for="duracionMinClase">Duración (min)</label>
-              <input class="form-input" id="duracionMinClase" type="number" min="15" max="180" value="55" />
-            </div>
-            <div>
-              <label class="form-label" for="aforoClase">Aforo</label>
-              <input class="form-input" id="aforoClase" type="number" min="1" value="12" />
-            </div>
-            <div style="display:flex;align-items:flex-end;">
-              <button class="btn btn-primary" id="crearClaseBtn" type="button">Crear sesión</button>
+            <div class="clases-toolbar-actions">
+              <button type="button" class="btn btn-primary" id="abrirNuevaClaseBtn">Nueva clase</button>
+              <button type="button" class="btn btn-outline" id="abrirNuevaDisciplinaBtn" style="display:none;">Nueva disciplina</button>
             </div>
           </div>
-        </div>
-        <div class="card" id="cardDisciplinasAdmin" style="display:none;margin-bottom:1rem;">
-          <div class="card-label">Disciplinas (catálogo)</div>
-          <p style="margin:0 0 .6rem;font-size:.75rem;color:var(--color-muted);">Crea disciplinas nuevas para el calendario. Solo las <strong>activas</strong> salen en el desplegable de arriba; puedes desactivar las que dejen de impartirse.</p>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;align-items:end;margin-bottom:.9rem;">
-            <div>
-              <label class="form-label" for="nuevaDisciplinaNombre">Nombre</label>
-              <input class="form-input" id="nuevaDisciplinaNombre" placeholder="Ej. Barre" autocomplete="off" />
-            </div>
-            <div>
-              <label class="form-label" for="nuevaDisciplinaDesc">Descripción (opc.)</label>
-              <input class="form-input" id="nuevaDisciplinaDesc" placeholder="Texto breve" autocomplete="off" />
-            </div>
-            <div>
-              <label class="form-label" for="nuevaDisciplinaColor">Color</label>
-              <input class="form-input" id="nuevaDisciplinaColor" type="color" value="#c9a96e" style="min-height:42px;padding:.2rem;" />
-            </div>
-            <div>
-              <button type="button" class="btn btn-primary" id="crearDisciplinaBtn">Añadir disciplina</button>
+
+          <div class="clases-zone">
+            <div class="card-label">Próximas clases</div>
+            <div class="table-wrap">
+              <table><thead><tr><th>Clase</th><th>Fecha</th><th>Aforo</th><th>Acciones</th></tr></thead><tbody id="rowsClases"></tbody></table>
             </div>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Nombre</th><th>Orden</th><th>Estado</th><th>Acciones</th></tr></thead>
-              <tbody id="rowsDisciplinas"></tbody>
-            </table>
+
+          <div class="clases-zone clases-detail-split" id="clasesDetailZone">
+            <div class="clases-detail-col">
+              <div class="card-label">Asistencia</div>
+              <p id="asistenciaInfo" class="clases-detail-hint">Elige una clase en la tabla y pulsa «Asistencia».</p>
+              <div class="table-wrap">
+                <table><thead><tr><th>Cliente</th><th>Email</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="rowsAsistencia"><tr><td colspan="4">Sin clase seleccionada</td></tr></tbody></table>
+              </div>
+            </div>
+            <div class="clases-detail-col">
+              <div class="card-label">Lista de espera</div>
+              <p id="waitlistInfo" class="clases-detail-hint">Misma clase que arriba.</p>
+              <div class="table-wrap">
+                <table><thead><tr><th>Orden</th><th>Cliente</th><th>Email</th><th>Acciones</th></tr></thead><tbody id="rowsWaitlist"><tr><td colspan="4">Sin clase seleccionada</td></tr></tbody></table>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="card">
-          <div class="card-label">Próximas clases</div>
-          <div class="table-wrap">
-            <table><thead><tr><th>Clase</th><th>Fecha</th><th>Aforo</th><th>Acciones</th></tr></thead><tbody id="rowsClases"></tbody></table>
-          </div>
-        </div>
-        <div class="card" style="margin-top:1rem;">
-          <div class="card-label">Asistencia de clase</div>
-          <div id="asistenciaInfo" style="font-size:.78rem;color:var(--color-muted);margin-bottom:.8rem;">Selecciona una clase para gestionar asistencia.</div>
-          <div class="table-wrap">
-            <table><thead><tr><th>Cliente</th><th>Email</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="rowsAsistencia"><tr><td colspan="4">Sin clase seleccionada</td></tr></tbody></table>
-          </div>
-        </div>
-        <div class="card" style="margin-top:1rem;">
-          <div class="card-label">Lista de espera</div>
-          <div id="waitlistInfo" style="font-size:.78rem;color:var(--color-muted);margin-bottom:.8rem;">Selecciona una clase para ver lista de espera.</div>
-          <div class="table-wrap">
-            <table><thead><tr><th>Orden</th><th>Cliente</th><th>Email</th><th>Acciones</th></tr></thead><tbody id="rowsWaitlist"><tr><td colspan="4">Sin clase seleccionada</td></tr></tbody></table>
+
+          <div class="clases-zone clases-zone-admin" id="cardDisciplinasAdmin" style="display:none;">
+            <div class="card-label">Disciplinas del calendario</div>
+            <p class="clases-hint">Solo las activas aparecen al crear una clase. Desactiva las que ya no impartáis.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Nombre</th><th>Orden</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody id="rowsDisciplinas"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="panel-tab" id="tab-bonos" style="display:none;">
-        <div class="card" style="margin-bottom:1rem;">
-          <div class="card-label">Asignar bono manual</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
-            <select class="form-input" id="clienteSelect"></select>
-            <select class="form-input" id="tipoBonoSelect"></select>
-            <input class="form-input" id="fechaFinBono" type="date" />
-            <button class="btn btn-primary" id="asignarBonoBtn">Asignar bono</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-label">Bonos activos</div>
-          <div class="table-wrap">
-            <table><thead><tr><th>Cliente</th><th>Bono</th><th>Uso</th><th>Vence</th></tr></thead><tbody id="rowsBonos"></tbody></table>
-          </div>
-        </div>
-        <div class="card" id="cardBonosDesigner" style="margin-top:1rem;">
-          <div class="card-label">Diseñador de bonos (admin)</div>
-          <p style="margin:0 0 .6rem;font-size:.75rem;color:var(--color-muted);">Plantillas rápidas (luego ajusta precio o días si quieres):</p>
-          <div style="display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:.8rem;">
-            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="navidad">Navidad</button>
-            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="sanvalentin">San Valentín</button>
-            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="reyes">Reyes</button>
-            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="verano">Verano</button>
-            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="blackfriday">Black Friday</button>
-            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="express7">7 días · intenso</button>
-            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="premium90">90 días · premium</button>
-            <button type="button" class="btn btn-ghost btn-sm js-bono-preset" data-preset="mini14">14 días · mini</button>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem;align-items:end;">
-            <input class="form-input" id="nuevoTipoNombre" placeholder="Nombre del bono" />
-            <input class="form-input" id="nuevoTipoSesiones" type="number" min="1" placeholder="Sesiones (vacío = ilimitado)" />
-            <input class="form-input" id="nuevoTipoDuracion" type="number" min="1" value="30" placeholder="Validez (días)" />
-            <input class="form-input" id="nuevoTipoPrecio" type="number" min="0" step="0.01" placeholder="Precio €" />
-            <select class="form-input" id="nuevoTipoPeriodicidad">
-              <option value="mensual">Periodicidad · mensual</option>
-              <option value="semanal">Semanal</option>
-              <option value="trimestral">Trimestral</option>
-              <option value="ilimitado">Ilimitado (uso del bono)</option>
-            </select>
-            <input class="form-input" id="nuevoTipoColor" type="color" value="#c9a96e" title="Color en app" style="min-height:42px;padding:.2rem;" />
-            <button class="btn btn-primary" id="crearTipoBonoBtn" type="button">Crear tipo de bono</button>
-          </div>
-          <div style="margin-top:.8rem;">
-            <label class="form-label" for="nuevoTipoDescripcion">Descripción (visible en fichas / TPV / web)</label>
-            <textarea class="form-input" id="nuevoTipoDescripcion" rows="2" placeholder="Ej. válido en festivos, condiciones especiales..." style="resize:vertical;"></textarea>
-          </div>
-          <div style="margin-top:.8rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem;align-items:end;">
-            <div>
-              <label class="form-label" for="nuevoTipoWebTag">Etiqueta web (opc.)</label>
-              <input class="form-input" id="nuevoTipoWebTag" placeholder="Ej. Flow 01" />
+        <div class="card clases-shell">
+          <div class="clases-toolbar">
+            <div class="clases-toolbar-copy">
+              <div class="card-label">Bonos</div>
+              <p class="clases-hint">Asigna un bono a un cliente o crea tipos nuevos para el TPV y la web.</p>
             </div>
-            <div>
-              <label class="form-label" for="nuevoTipoWebMeta">Meta web (opc.)</label>
-              <input class="form-input" id="nuevoTipoWebMeta" placeholder="Ej. 2 días / semana" />
+            <div class="clases-toolbar-actions">
+              <button type="button" class="btn btn-primary" id="abrirAsignarBonoBtn">Asignar bono</button>
+              <button type="button" class="btn btn-outline" id="abrirNuevoTipoBonoBtn" style="display:none;">Nuevo bono</button>
             </div>
-            <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--color-cream);padding-bottom:.35rem;cursor:pointer;">
-              <input type="checkbox" id="nuevoTipoVisibleWeb" />
-              Mostrar en la página principal
-            </label>
           </div>
-          <p style="margin-top:.6rem;font-size:.75rem;color:var(--color-muted);">Combina días de validez, sesiones y precio para bonos cortos, largos o campañas. Marca la casilla para que salga en Planes NŌVA de la web. Solo admin.</p>
-          <div class="table-wrap" style="margin-top:.8rem;">
-            <table><thead><tr><th>Nombre</th><th>Sesiones</th><th>Días</th><th>Periodo</th><th>Precio</th><th>Activo</th><th>Web</th><th>Acciones</th></tr></thead><tbody id="rowsTiposBono"></tbody></table>
+
+          <div class="clases-zone">
+            <div class="card-label">Bonos activos</div>
+            <p class="clases-hint" style="margin-bottom:.75rem;">Clientes con bono vigente. Al asignar uno nuevo se desactiva el anterior.</p>
+            <div class="table-wrap">
+              <table><thead><tr><th>Cliente</th><th>Bono</th><th>Uso</th><th>Vence</th></tr></thead><tbody id="rowsBonos"></tbody></table>
+            </div>
+          </div>
+
+          <div class="clases-zone clases-zone-admin" id="cardBonosDesigner" style="display:none;">
+            <div class="card-label">Tipos de bono</div>
+            <p class="clases-hint" style="margin-bottom:.75rem;">Catálogo del TPV y de Planes NŌVA. Edita o crea con «Nuevo bono».</p>
+            <div class="table-wrap">
+              <table><thead><tr><th>Nombre</th><th>Sesiones</th><th>Días</th><th>Periodo</th><th>Precio</th><th>Activo</th><th>Web</th><th>Acciones</th></tr></thead><tbody id="rowsTiposBono"></tbody></table>
+            </div>
           </div>
         </div>
       </section>
@@ -198,62 +129,45 @@
         <p class="tpv-intro">Busca un cliente, toca bonos o productos para el ticket y cobra a la derecha.</p>
 
         <div class="tpv-bar-layout">
-          <div class="tpv-bar-main">
-            <div class="card tpv-card-compact">
+          <div class="tpv-workspace">
+            <div class="tpv-zone tpv-zone-client">
               <div class="tpv-client-head">
                 <div class="card-label" style="margin-bottom:0;">Cliente</div>
                 <button class="btn btn-outline btn-sm" type="button" id="tpvAbrirNuevoClienteBtn">Nuevo cliente</button>
               </div>
-              <div style="display:grid;grid-template-columns:1fr;gap:.65rem;">
+              <div class="tpv-client-fields">
                 <input class="form-input" id="tpvClientSearch" placeholder="Escribe al menos 2 caracteres: nombre, email, teléfono o DNI…" autocomplete="off" />
-                <input class="form-input" id="tpvNota" placeholder="Nota interna para todo el cobro (opcional)" />
               </div>
               <div id="tpvClientResults" class="tpv-client-chips"></div>
               <div id="tpvSelectedClient" class="tpv-selected-strip empty-state"><p>Selecciona un cliente para cobrar.</p></div>
             </div>
 
-            <div class="tpv-catalog-split">
-              <div class="card tpv-card-compact">
-                <div class="card-label">Bonos</div>
-                <p class="tpv-hint">Toca un cuadrado para añadirlo al ticket. El precio es el del catálogo (no editable en el ticket).</p>
-                <div id="tpvBonosGrid" class="tpv-tile-grid"></div>
-              </div>
-              <div class="card tpv-card-compact">
-                <div class="card-label">Tienda · bar · accesorios</div>
-                <p class="tpv-hint">Productos del catálogo.</p>
-                <div id="tpvProductosGrid" class="tpv-tile-grid"></div>
-              </div>
-            </div>
-
-            <div class="card" id="tpvAdminCatalogoCard" style="display:none;">
-              <div class="card-label">Catálogo tienda (admin)</div>
-              <p class="tpv-hint">Añade productos que verán empleados y administración en el TPV.</p>
-              <div class="tpv-admin-cat">
-                <input class="form-input" id="tpvNuevoProdNombre" placeholder="Nombre del producto" />
-                <input class="form-input" id="tpvNuevoProdPrecio" type="number" min="0" step="0.01" placeholder="Precio €" />
-                <select class="form-input" id="tpvNuevoProdCat">
-                  <option value="bebida">Bebida</option>
-                  <option value="accesorio">Accesorio</option>
-                  <option value="consumo">Consumo</option>
-                  <option value="otro">Otro</option>
-                </select>
-                <button class="btn btn-primary" type="button" id="tpvAddProductoBtn">Añadir</button>
-              </div>
-              <div class="table-wrap">
-                <table class="tpv-table-mini"><thead><tr><th>Producto</th><th>Categoría</th><th>Precio ref.</th><th></th></tr></thead><tbody id="tpvProductosAdminRows"></tbody></table>
+            <div class="tpv-zone tpv-zone-catalog">
+              <div class="tpv-catalog-split">
+                <div class="tpv-catalog-col">
+                  <div class="card-label">Bonos</div>
+                  <p class="tpv-hint">Toca para añadir al ticket. Precio del catálogo.</p>
+                  <div id="tpvBonosGrid" class="tpv-tile-grid"></div>
+                </div>
+                <div class="tpv-catalog-col">
+                  <div class="card-label">Tienda · bar · accesorios</div>
+                  <p class="tpv-hint">Toca para añadir al ticket. Venta física en el local.</p>
+                  <div id="tpvProductosGrid" class="tpv-tile-grid"></div>
+                </div>
               </div>
             </div>
 
-            <div class="card">
+            <div class="tpv-zone tpv-zone-last">
               <div class="card-label">Último cobro</div>
               <div id="tpvLastTicket" class="empty-state"><p>Aún no hay cobros en esta sesión.</p></div>
-              <div style="margin-top:.85rem;display:flex;justify-content:flex-end;">
-                <button class="btn btn-outline btn-sm" type="button" id="tpvPrintTicketBtn">Imprimir ticket</button>
+              <div class="tpv-last-actions">
+                <button class="btn btn-ghost btn-sm" type="button" id="tpvAnularUltimoBtn" disabled>Anular cobro</button>
+                <button class="btn btn-outline btn-sm" type="button" id="tpvPrintTicketBtn" disabled>Imprimir ticket</button>
               </div>
             </div>
           </div>
 
-          <aside class="card tpv-cart-panel" aria-label="Ticket de venta">
+          <aside class="tpv-cart-panel" aria-label="Ticket de venta">
             <div class="card-label">Ticket</div>
             <p id="tpvCajaHint" class="tpv-caja-hint" hidden></p>
             <div id="tpvCartList" class="tpv-cart-list"></div>
@@ -267,48 +181,125 @@
               <button type="button" class="btn btn-outline tpv-pay-btn" id="tpvCobrarTransferencia" data-metodo="transferencia">Transferencia</button>
               <button type="button" class="btn btn-ghost btn-sm" id="tpvVaciarCarrito">Vaciar ticket</button>
             </div>
+            <div class="tpv-cart-footer">
+              <label class="form-label" for="tpvNota">Nota interna (opcional)</label>
+              <input class="form-input" id="tpvNota" placeholder="Nota para todo el cobro…" autocomplete="off" />
+              <button type="button" class="btn btn-outline tpv-print-after-sale" id="tpvPrintTicketCartBtn" hidden>Imprimir ticket</button>
+            </div>
           </aside>
         </div>
       </section>
 
-      <section class="panel-tab" id="tab-finanzas" style="display:none;">
-        <div class="card" style="margin-bottom:1rem;">
-          <div class="card-label">Apertura / cierre de caja</div>
-          <div id="cajaEstado" style="font-size:.78rem;color:var(--color-muted);margin-bottom:.8rem;">Cargando estado de caja...</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;align-items:end;">
-            <div>
-              <label class="form-label" for="cajaFondoInicial">Fondo inicial</label>
-              <input class="form-input" id="cajaFondoInicial" type="number" min="0" step="0.01" value="0" />
+      <section class="panel-tab" id="tab-productos" style="display:none;">
+        <div class="card clases-shell">
+          <div class="clases-toolbar">
+            <div class="clases-toolbar-copy">
+              <div class="card-label">Productos</div>
+              <p class="clases-hint">Catálogo de la tienda del TPV: fotos, categorías y precios para venta en el local.</p>
             </div>
-            <div>
-              <label class="form-label" for="cajaEfectivoDeclarado">Efectivo declarado al cierre</label>
-              <input class="form-input" id="cajaEfectivoDeclarado" type="number" min="0" step="0.01" value="0" />
+            <div class="clases-toolbar-actions">
+              <button type="button" class="btn btn-primary" id="abrirNuevoProductoBtn">Nuevo producto</button>
             </div>
-            <div>
-              <label class="form-label" for="cajaNota">Nota</label>
-              <input class="form-input" id="cajaNota" type="text" placeholder="Observaciones..." />
+          </div>
+
+          <div class="clases-zone">
+            <div class="card-label">Catálogo</div>
+            <p class="clases-hint" style="margin-bottom:.75rem;">Activa o desactiva lo que aparece en la tienda del TPV.</p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="productosAdminRows"></tbody>
+              </table>
             </div>
-            <button class="btn btn-primary" id="abrirCajaBtn">Abrir caja</button>
-            <button class="btn btn-outline" id="cerrarCajaBtn">Cerrar caja</button>
           </div>
         </div>
-        <div class="card" style="margin-bottom:1rem;">
-          <div class="card-label">Caja del día</div>
-          <div id="cajaResumen" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;">
-            <div class="stat-card"><div class="card-label">Total hoy</div><div class="card-value-sm" id="cajaTotalHoy">0 €</div></div>
-            <div class="stat-card"><div class="card-label">Bonos (hoy)</div><div class="card-value-sm" id="cajaBonosHoy">0 €</div></div>
-            <div class="stat-card"><div class="card-label">Tienda (hoy)</div><div class="card-value-sm" id="cajaTiendaHoy">0 €</div></div>
-            <div class="stat-card"><div class="card-label">Efectivo</div><div class="card-value-sm" id="cajaEfectivo">0 €</div></div>
-            <div class="stat-card"><div class="card-label">Tarjeta</div><div class="card-value-sm" id="cajaTarjeta">0 €</div></div>
-            <div class="stat-card"><div class="card-label">Transferencia</div><div class="card-value-sm" id="cajaTransferencia">0 €</div></div>
+      </section>
+
+      <section class="panel-tab" id="tab-finanzas" style="display:none;">
+        <div class="caja-estado-bar" id="cajaEstadoBar">
+          <span class="caja-estado-dot" id="cajaEstadoDot" aria-hidden="true"></span>
+          <p id="cajaEstado" class="caja-estado-text">Cargando estado de caja...</p>
+          <div class="caja-estado-actions">
+            <button type="button" class="btn btn-primary btn-sm" id="abrirCajaBtn">Abrir caja</button>
+            <button type="button" class="btn btn-outline btn-sm" id="cerrarCajaBtn">Cerrar caja</button>
+          </div>
+        </div>
+
+        <div class="card caja-dia-card" style="margin-bottom:1rem;">
+          <div class="caja-dia" id="cajaResumen">
+            <div class="caja-dia-total-row">
+              <div>
+                <div class="card-label" style="margin-bottom:.35rem;">Caja del día</div>
+                <span class="caja-dia-total-label">Total cobrado hoy</span>
+              </div>
+              <strong class="caja-dia-total" id="cajaTotalHoy">0,00 €</strong>
+            </div>
+            <div class="caja-dia-strip" role="list">
+              <div class="caja-dia-cell" role="listitem">
+                <span class="caja-dia-cell-label">Bonos</span>
+                <span class="caja-dia-cell-value" id="cajaBonosHoy">0,00 €</span>
+              </div>
+              <div class="caja-dia-cell" role="listitem">
+                <span class="caja-dia-cell-label">Tienda</span>
+                <span class="caja-dia-cell-value" id="cajaTiendaHoy">0,00 €</span>
+              </div>
+              <div class="caja-dia-cell" role="listitem">
+                <span class="caja-dia-cell-label">Efectivo</span>
+                <span class="caja-dia-cell-value" id="cajaEfectivo">0,00 €</span>
+              </div>
+              <div class="caja-dia-cell" role="listitem">
+                <span class="caja-dia-cell-label">Tarjeta</span>
+                <span class="caja-dia-cell-value" id="cajaTarjeta">0,00 €</span>
+              </div>
+              <div class="caja-dia-cell" role="listitem">
+                <span class="caja-dia-cell-label">Transferencia</span>
+                <span class="caja-dia-cell-value" id="cajaTransferencia">0,00 €</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="card">
-          <div class="card-label">Transacciones recientes</div>
-          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .5rem;">Para corregir un cobro por error usa <strong>Anular</strong>. Las ventas de bono solo se pueden anular si el bono aún no tiene reservas activas ni sesiones consumidas.</p>
-          <div class="table-wrap">
-            <table><thead><tr><th>Cliente</th><th>Tipo</th><th>Concepto</th><th>Importe</th><th>Método</th><th>Fecha</th><th style="white-space:nowrap;">Acción</th></tr></thead><tbody id="rowsFinanzas"></tbody></table>
+          <div class="card-label">Todas las transacciones</div>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Historial completo. Filtra por fecha, cliente o bono. Para corregir un cobro por error usa <strong>Anular</strong>.</p>
+          <div class="finanzas-filters">
+            <div class="form-group">
+              <label class="form-label" for="finanzasFiltroDesde">Desde</label>
+              <input class="form-input" id="finanzasFiltroDesde" type="date" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="finanzasFiltroHasta">Hasta</label>
+              <input class="form-input" id="finanzasFiltroHasta" type="date" />
+            </div>
+            <div class="form-group finanzas-filter-grow">
+              <label class="form-label" for="finanzasFiltroCliente">Cliente</label>
+              <input class="form-input" id="finanzasFiltroCliente" type="search" placeholder="Nombre o email…" autocomplete="off" />
+            </div>
+            <div class="form-group finanzas-filter-grow">
+              <label class="form-label" for="finanzasFiltroBono">Bono / tipo</label>
+              <select class="form-input" id="finanzasFiltroBono">
+                <option value="">Todos</option>
+                <option value="__tienda__">Solo tienda</option>
+                <option value="__bono__">Solo bonos</option>
+              </select>
+            </div>
+            <div class="form-group finanzas-filter-actions">
+              <label class="form-label" aria-hidden="true">&nbsp;</label>
+              <button type="button" class="btn btn-ghost btn-sm" id="finanzasFiltroLimpiar">Limpiar</button>
+            </div>
           </div>
+          <div class="table-wrap finanzas-tx-wrap">
+            <table><thead><tr><th>Cliente</th><th>Tipo</th><th>Concepto</th><th>Importe</th><th>Método</th><th>Vendido por</th><th>Fecha</th><th style="white-space:nowrap;">Acción</th></tr></thead><tbody id="rowsFinanzas"></tbody></table>
+          </div>
+          <p id="finanzasTxCount" class="clases-hint" style="margin:.6rem 0 0;"></p>
         </div>
       </section>
 
@@ -493,68 +484,290 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="tipoBonoModal">
+  <div class="modal-overlay" id="asignarBonoModal">
     <div class="modal">
       <div class="modal-header">
-        <h2 class="modal-title">Editar tipo de bono</h2>
-        <button class="modal-close" id="closeTipoBonoModal">×</button>
+        <h2 class="modal-title">Asignar bono</h2>
+        <button class="modal-close" id="closeAsignarBonoModal" type="button" aria-label="Cerrar">×</button>
       </div>
-      <form id="tipoBonoForm" style="display:grid;gap:.9rem;">
+      <form id="asignarBonoForm" class="clases-modal-form">
+        <p class="clases-hint" style="margin:0;">El bono anterior del cliente se desactiva automáticamente.</p>
         <div class="form-group">
-          <label class="form-label" for="modalTipoNombre">Nombre</label>
-          <input class="form-input" id="modalTipoNombre" type="text" required />
+          <label class="form-label" for="clienteSelect">Cliente</label>
+          <select class="form-input" id="clienteSelect" required></select>
         </div>
         <div class="form-group">
-          <label class="form-label" for="modalTipoSesiones">Sesiones (vacío = ilimitado)</label>
-          <input class="form-input" id="modalTipoSesiones" type="number" min="1" />
+          <label class="form-label" for="tipoBonoSelect">Tipo de bono</label>
+          <select class="form-input" id="tipoBonoSelect" required></select>
         </div>
         <div class="form-group">
-          <label class="form-label" for="modalTipoDuracion">Duración (días)</label>
-          <input class="form-input" id="modalTipoDuracion" type="number" min="1" required />
+          <label class="form-label" for="fechaFinBono">Fecha de vencimiento</label>
+          <input class="form-input" id="fechaFinBono" type="date" required />
+          <p class="clases-hint" style="margin:.35rem 0 0;">Se calcula según la validez del tipo; puedes cambiarla.</p>
+        </div>
+        <div class="clases-modal-actions">
+          <button class="btn btn-outline" type="button" id="cancelAsignarBonoBtn">Cancelar</button>
+          <button class="btn btn-primary" type="submit" id="asignarBonoBtn">Asignar bono</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="nuevoTipoBonoModal">
+    <div class="modal modal--wide">
+      <div class="modal-header">
+        <h2 class="modal-title">Nuevo bono</h2>
+        <button class="modal-close" id="closeNuevoTipoBonoModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <form id="nuevoTipoBonoForm" class="clases-modal-form">
+        <p class="clases-hint" style="margin:0;">Aparecerá en el TPV y al asignar bonos. Opcional: plantilla rápida abajo.</p>
+        <div class="bonos-presets" id="bonosPresetsWrap">
+          <span class="bonos-presets-label">Plantilla</span>
+          <div class="bonos-presets-row">
+            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="navidad">Navidad</button>
+            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="sanvalentin">San Valentín</button>
+            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="reyes">Reyes</button>
+            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="verano">Verano</button>
+            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="blackfriday">Black Friday</button>
+            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="express7">7 días</button>
+            <button type="button" class="btn btn-outline btn-sm js-bono-preset" data-preset="premium90">90 días</button>
+          </div>
+        </div>
+        <div class="clases-modal-grid">
+          <div class="form-group">
+            <label class="form-label" for="nuevoTipoNombre">Nombre</label>
+            <input class="form-input" id="nuevoTipoNombre" placeholder="Ej. Bono 8 clases" required autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="nuevoTipoSesiones">Sesiones</label>
+            <input class="form-input" id="nuevoTipoSesiones" type="number" min="1" placeholder="Vacío = ilimitado" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="nuevoTipoDuracion">Validez (días)</label>
+            <input class="form-input" id="nuevoTipoDuracion" type="number" min="1" value="30" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="nuevoTipoPrecio">Precio (€)</label>
+            <input class="form-input" id="nuevoTipoPrecio" type="number" min="0" step="0.01" placeholder="0.00" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="nuevoTipoPeriodicidad">Periodicidad</label>
+            <select class="form-input" id="nuevoTipoPeriodicidad">
+              <option value="mensual">Mensual</option>
+              <option value="semanal">Semanal</option>
+              <option value="trimestral">Trimestral</option>
+              <option value="ilimitado">Ilimitado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="nuevoTipoColor">Color</label>
+            <input class="form-input" id="nuevoTipoColor" type="color" value="#c9a96e" style="min-height:42px;padding:.2rem;" />
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="modalTipoPrecio">Precio (€)</label>
-          <input class="form-input" id="modalTipoPrecio" type="number" min="0" step="0.01" required />
+          <label class="form-label">Imagen en TPV</label>
+          <div class="bono-logo-preview">
+            <img id="nuevoTipoImagenPreview" src="/assets/branding/logo-bono-tile.jpg?v=4" alt="Logo NŌVA" />
+            <p class="tpv-hint" style="margin:0;">Por defecto se usa el logo NŌVA en todas las fichas del TPV.</p>
+          </div>
+          <input type="hidden" id="nuevoTipoImagenUrl" value="/assets/branding/logo-bono-tile.jpg?v=4" />
         </div>
         <div class="form-group">
-          <label class="form-label" for="modalTipoPeriodicidad">Periodicidad</label>
-          <select class="form-input" id="modalTipoPeriodicidad">
-            <option value="mensual">Mensual</option>
-            <option value="semanal">Semanal</option>
-            <option value="trimestral">Trimestral</option>
-            <option value="ilimitado">Ilimitado</option>
+          <label class="form-label" for="nuevoTipoDescripcion">Descripción</label>
+          <textarea class="form-input" id="nuevoTipoDescripcion" rows="2" placeholder="Visible en fichas, TPV y web" style="resize:vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="nuevoTipoVisibleWeb">Visible en la web</label>
+          <select class="form-input" id="nuevoTipoVisibleWeb">
+            <option value="false" selected>No · solo TPV / estudio</option>
+            <option value="true">Sí · aparece en Planes NŌVA</option>
           </select>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="modalTipoColor">Color</label>
-          <input class="form-input" id="modalTipoColor" type="color" style="min-height:42px;padding:.2rem;" />
+        <div class="bonos-web-panel" id="nuevoTipoWebPanel" hidden>
+          <div class="card-label" style="margin-bottom:.35rem;">Detalle en la web</div>
+          <p class="tpv-hint" style="margin:0 0 .75rem;">Textos para Planes NŌVA en la página principal.</p>
+          <div class="clases-modal-grid clases-modal-grid--compact">
+            <div class="form-group">
+              <label class="form-label" for="nuevoTipoWebTag">Etiqueta web</label>
+              <input class="form-input" id="nuevoTipoWebTag" placeholder="Ej. Flow 01" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="nuevoTipoWebMeta">Meta web</label>
+              <input class="form-input" id="nuevoTipoWebMeta" placeholder="Ej. 2 días / semana" />
+            </div>
+          </div>
+        </div>
+        <div class="clases-modal-actions">
+          <button class="btn btn-outline" type="button" id="cancelNuevoTipoBonoBtn">Cancelar</button>
+          <button class="btn btn-primary" type="submit" id="crearTipoBonoBtn">Crear tipo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="tipoBonoModal">
+    <div class="modal modal--wide">
+      <div class="modal-header">
+        <h2 class="modal-title">Editar tipo de bono</h2>
+        <button class="modal-close" id="closeTipoBonoModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <form id="tipoBonoForm" class="clases-modal-form">
+        <div class="clases-modal-grid">
+          <div class="form-group">
+            <label class="form-label" for="modalTipoNombre">Nombre</label>
+            <input class="form-input" id="modalTipoNombre" type="text" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalTipoSesiones">Sesiones (vacío = ilimitado)</label>
+            <input class="form-input" id="modalTipoSesiones" type="number" min="1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalTipoDuracion">Duración (días)</label>
+            <input class="form-input" id="modalTipoDuracion" type="number" min="1" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalTipoPrecio">Precio (€)</label>
+            <input class="form-input" id="modalTipoPrecio" type="number" min="0" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalTipoPeriodicidad">Periodicidad</label>
+            <select class="form-input" id="modalTipoPeriodicidad">
+              <option value="mensual">Mensual</option>
+              <option value="semanal">Semanal</option>
+              <option value="trimestral">Trimestral</option>
+              <option value="ilimitado">Ilimitado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalTipoColor">Color</label>
+            <input class="form-input" id="modalTipoColor" type="color" style="min-height:42px;padding:.2rem;" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalTipoActivo">Activo (TPV)</label>
+            <select class="form-input" id="modalTipoActivo">
+              <option value="true">Sí · se vende en TPV</option>
+              <option value="false">No · oculto en TPV</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalTipoVisibleWeb">Visible en la web</label>
+            <select class="form-input" id="modalTipoVisibleWeb">
+              <option value="false">No · solo TPV / estudio</option>
+              <option value="true">Sí · aparece en Planes NŌVA</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label" for="modalTipoDescripcion">Descripción</label>
           <textarea class="form-input" id="modalTipoDescripcion" rows="2" style="resize:vertical;"></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label" for="modalTipoWebTag">Etiqueta web</label>
-          <input class="form-input" id="modalTipoWebTag" type="text" placeholder="Ej. Flow 01" />
+          <label class="form-label" for="modalTipoImagenFile">Imagen en TPV</label>
+          <div class="tpv-prod-upload">
+            <div class="tpv-prod-upload-preview has-image" id="modalTipoImagenPreview" aria-hidden="true">
+              <img id="modalTipoImagenPreviewImg" src="/assets/branding/logo-bono-tile.jpg?v=4" alt="" />
+            </div>
+            <div class="tpv-prod-upload-actions">
+              <label class="btn btn-outline btn-sm" for="modalTipoImagenFile">Elegir foto</label>
+              <input id="modalTipoImagenFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
+              <button class="btn btn-ghost btn-sm" type="button" id="modalTipoImagenReset">Logo NŌVA</button>
+            </div>
+          </div>
+          <p class="tpv-hint" style="margin:.35rem 0 0;">JPG, PNG o WebP · máx. 5 MB. Por defecto el logo NŌVA.</p>
+          <input type="hidden" id="modalTipoImagenUrl" value="/assets/branding/logo-bono-tile.jpg?v=4" />
         </div>
-        <div class="form-group">
-          <label class="form-label" for="modalTipoWebMeta">Meta web</label>
-          <input class="form-input" id="modalTipoWebMeta" type="text" placeholder="Ej. 2 días / semana" />
+        <div class="bonos-web-panel" id="modalTipoWebPanel" hidden>
+          <div class="card-label" style="margin-bottom:.35rem;">Detalle en la web</div>
+          <p class="tpv-hint" style="margin:0 0 .75rem;">Textos que se muestran en Planes NŌVA de la página principal.</p>
+          <div class="clases-modal-grid clases-modal-grid--compact">
+            <div class="form-group">
+              <label class="form-label" for="modalTipoWebTag">Etiqueta web</label>
+              <input class="form-input" id="modalTipoWebTag" type="text" placeholder="Ej. Flow 01" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modalTipoWebMeta">Meta web</label>
+              <input class="form-input" id="modalTipoWebMeta" type="text" placeholder="Ej. 2 días / semana" />
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="modalTipoActivo">Activo (TPV)</label>
-          <select class="form-input" id="modalTipoActivo">
-            <option value="true">Sí</option>
-            <option value="false">No</option>
-          </select>
-        </div>
-        <label style="display:flex;align-items:center;gap:.5rem;font-size:.86rem;color:var(--color-cream);cursor:pointer;">
-          <input type="checkbox" id="modalTipoVisibleWeb" />
-          Mostrar en la página principal (Planes NŌVA)
-        </label>
-        <div style="display:flex;justify-content:flex-end;gap:.6rem;">
+        <div class="clases-modal-actions">
           <button class="btn btn-outline" type="button" id="cancelTipoBonoBtn">Cancelar</button>
           <button class="btn btn-primary" type="submit">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="nuevaClaseModal">
+    <div class="modal modal--wide">
+      <div class="modal-header">
+        <h2 class="modal-title">Nueva clase</h2>
+        <button class="modal-close" id="closeNuevaClaseModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <form id="nuevaClaseForm" class="clases-modal-form">
+        <p class="clases-hint">La sesión quedará en el calendario para reservas. La fecha debe ser futura.</p>
+        <div class="clases-modal-grid">
+          <div class="form-group">
+            <label class="form-label" for="disciplinaSelect">Tipo de clase</label>
+            <select class="form-input" id="disciplinaSelect" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fechaHoraClase">Fecha y hora</label>
+            <input class="form-input" id="fechaHoraClase" type="datetime-local" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="salaSelect">Sala</label>
+            <select class="form-input" id="salaSelect"></select>
+          </div>
+        </div>
+        <details class="clases-modal-more">
+          <summary>Más opciones</summary>
+          <div class="clases-modal-grid clases-modal-grid--compact">
+            <div class="form-group">
+              <label class="form-label" for="tituloClase">Título personalizado</label>
+              <input class="form-input" id="tituloClase" placeholder="Opcional (ej. Reformer nivel 2)" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="duracionMinClase">Duración (min)</label>
+              <input class="form-input" id="duracionMinClase" type="number" min="15" max="180" value="55" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="aforoClase">Plazas (aforo)</label>
+              <input class="form-input" id="aforoClase" type="number" min="1" value="12" />
+            </div>
+          </div>
+        </details>
+        <div class="clases-modal-actions">
+          <button class="btn btn-outline" type="button" id="cancelNuevaClaseBtn">Cancelar</button>
+          <button class="btn btn-primary" type="submit" id="crearClaseBtn">Crear clase</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="nuevaDisciplinaModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Nueva disciplina</h2>
+        <button class="modal-close" id="closeNuevaDisciplinaModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <form id="nuevaDisciplinaForm" style="display:grid;gap:.9rem;">
+        <p class="clases-hint" style="margin:0;">Aparecerá en el desplegable al programar clases.</p>
+        <div class="form-group">
+          <label class="form-label" for="nuevaDisciplinaNombre">Nombre</label>
+          <input class="form-input" id="nuevaDisciplinaNombre" placeholder="Ej. Barre" autocomplete="off" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="nuevaDisciplinaDesc">Descripción (opcional)</label>
+          <input class="form-input" id="nuevaDisciplinaDesc" placeholder="Texto breve" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="nuevaDisciplinaColor">Color en calendario</label>
+          <input class="form-input" id="nuevaDisciplinaColor" type="color" value="#c9a96e" style="min-height:42px;padding:.2rem;" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:.6rem;">
+          <button class="btn btn-outline" type="button" id="cancelNuevaDisciplinaBtn">Cancelar</button>
+          <button class="btn btn-primary" type="submit" id="crearDisciplinaBtn">Añadir disciplina</button>
         </div>
       </form>
     </div>
@@ -718,6 +931,179 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="nuevoProductoModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Nuevo producto</h2>
+        <button class="modal-close" id="closeNuevoProductoModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <form id="nuevoProductoForm" style="display:grid;gap:.9rem;">
+        <p class="tpv-hint" style="margin:0;">Se mostrará en la tienda del TPV para empleados y administración.</p>
+        <div class="form-group">
+          <label class="form-label" for="tpvNuevoProdNombre">Nombre</label>
+          <input class="form-input" id="tpvNuevoProdNombre" type="text" placeholder="Nombre del producto" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tpvNuevoProdPrecio">Precio (€)</label>
+          <input class="form-input" id="tpvNuevoProdPrecio" type="number" min="0" step="0.01" placeholder="0.00" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tpvNuevoProdCat">Categoría</label>
+          <select class="form-input" id="tpvNuevoProdCat"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tpvNuevoProdImagenFile">Imagen</label>
+          <div class="tpv-prod-upload">
+            <div class="tpv-prod-upload-preview" id="tpvNuevoProdImagenPreview" aria-hidden="true">
+              <span>Sin imagen</span>
+            </div>
+            <div class="tpv-prod-upload-actions">
+              <label class="btn btn-outline btn-sm" for="tpvNuevoProdImagenFile">Elegir foto</label>
+              <input id="tpvNuevoProdImagenFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
+              <button class="btn btn-ghost btn-sm" type="button" id="tpvNuevoProdImagenClear" hidden>Quitar</button>
+            </div>
+          </div>
+          <p class="tpv-hint" style="margin:.35rem 0 0;">Opcional. JPG, PNG o WebP · máx. 5 MB.</p>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:.6rem;">
+          <button class="btn btn-outline" type="button" id="cancelNuevoProductoBtn">Cancelar</button>
+          <button class="btn btn-primary" type="submit" id="tpvAddProductoBtn">Añadir producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="abrirCajaModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Abrir caja</h2>
+        <button class="modal-close" id="closeAbrirCajaModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <form id="abrirCajaForm" class="clases-modal-form">
+        <p class="clases-hint" style="margin:0;" id="abrirCajaHint">Indica el efectivo que hay en caja al empezar.</p>
+        <div class="form-group">
+          <label class="form-label" for="cajaFondoInicial">Fondo inicial (€)</label>
+          <input class="form-input" id="cajaFondoInicial" type="number" min="0" step="0.01" value="0" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cajaNotaApertura">Nota (opcional)</label>
+          <input class="form-input" id="cajaNotaApertura" type="text" placeholder="Observaciones…" autocomplete="off" />
+        </div>
+        <div class="clases-modal-actions">
+          <button class="btn btn-outline" type="button" id="cancelAbrirCajaBtn">Cancelar</button>
+          <button class="btn btn-primary" type="submit">Abrir caja</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="cerrarCajaModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Cerrar caja</h2>
+        <button class="modal-close" id="closeCerrarCajaModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <form id="cerrarCajaForm" class="clases-modal-form">
+        <p class="clases-hint" style="margin:0;" id="cerrarCajaHint">Compara con lo esperado, cuenta el efectivo y elige el fondo de mañana.</p>
+        <dl class="tpv-cobro-summary" id="cerrarCajaSummary">
+          <div>
+            <dt>Esperado</dt>
+            <dd id="cerrarCajaEsperado">—</dd>
+          </div>
+          <div>
+            <dt>Retiras</dt>
+            <dd id="cerrarCajaRetirado">—</dd>
+          </div>
+        </dl>
+        <div class="form-group">
+          <label class="form-label" for="cajaEfectivoDeclarado">Efectivo contado (€)</label>
+          <input class="form-input" id="cajaEfectivoDeclarado" type="number" min="0" step="0.01" value="0" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cajaFondoSiguiente">Fondo para mañana (€)</label>
+          <input class="form-input" id="cajaFondoSiguiente" type="number" min="0" step="0.01" value="0" required />
+          <p class="clases-hint" style="margin:.35rem 0 0;">Quedará en caja y se usará al abrir el día siguiente.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cajaNotaCierre">Nota (opcional)</label>
+          <input class="form-input" id="cajaNotaCierre" type="text" placeholder="Observaciones…" autocomplete="off" />
+        </div>
+        <div class="clases-modal-actions">
+          <button class="btn btn-outline" type="button" id="cancelCerrarCajaBtn">Cancelar</button>
+          <button class="btn btn-primary" type="submit">Cerrar caja</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="anularVentaModal">
+    <div class="modal tpv-cobro-modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="anularVentaTitle">Anular venta</h2>
+        <button class="modal-close" id="closeAnularVentaModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <div class="tpv-cobro-body">
+        <p class="tpv-cobro-lead" id="anularVentaLead">¿Anular esta venta?</p>
+        <dl class="tpv-cobro-summary" id="anularVentaSummary" hidden>
+          <div>
+            <dt>Cliente</dt>
+            <dd id="anularVentaCliente">—</dd>
+          </div>
+          <div>
+            <dt>Concepto</dt>
+            <dd id="anularVentaConcepto">—</dd>
+          </div>
+          <div>
+            <dt>Importe</dt>
+            <dd id="anularVentaImporte">—</dd>
+          </div>
+        </dl>
+        <p class="tpv-cobro-warn" id="anularVentaWarn" hidden>
+          Si es un bono, solo se anula si no tiene sesiones usadas ni reservas activas.
+        </p>
+      </div>
+      <div class="tpv-cobro-actions">
+        <button class="btn btn-outline" type="button" id="cancelAnularVentaBtn">Cancelar</button>
+        <button class="btn btn-danger" type="button" id="confirmAnularVentaBtn">Anular venta</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="tpvCobroConfirmModal">
+    <div class="modal tpv-cobro-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Confirmar cobro</h2>
+        <button class="modal-close" id="closeTpvCobroConfirmModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <div class="tpv-cobro-body">
+        <p class="tpv-cobro-lead" id="tpvCobroConfirmLead">¿Confirmas este cobro?</p>
+        <dl class="tpv-cobro-summary">
+          <div>
+            <dt>Cliente</dt>
+            <dd id="tpvCobroConfirmCliente">—</dd>
+          </div>
+          <div>
+            <dt>Método</dt>
+            <dd id="tpvCobroConfirmMetodo">—</dd>
+          </div>
+          <div>
+            <dt>Líneas</dt>
+            <dd id="tpvCobroConfirmLineas">—</dd>
+          </div>
+          <div class="tpv-cobro-total-row">
+            <dt>Total</dt>
+            <dd id="tpvCobroConfirmTotal">—</dd>
+          </div>
+        </dl>
+        <p class="tpv-cobro-warn" id="tpvCobroConfirmWarn" hidden>La caja de hoy no está abierta. Puedes cobrar igualmente, pero conviene abrir caja en Finanzas.</p>
+      </div>
+      <div class="tpv-cobro-actions">
+        <button class="btn btn-outline" type="button" id="cancelTpvCobroConfirmBtn">Cancelar</button>
+        <button class="btn btn-primary" type="button" id="confirmTpvCobroConfirmBtn">Cobrar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
   <script src="/supabase.js?v=20260716b"></script>
@@ -818,8 +1204,11 @@
       setDobIso(prefix, '');
     }
 
+    const TPV_BONO_LOGO_DEFAULT = '/assets/branding/logo-bono-tile.jpg?v=4';
+
     const TAB_LABELS = {
       tpv: 'TPV',
+      productos: 'Productos',
       bonos: 'Bonos',
       clases: 'Clases',
       finanzas: 'Finanzas',
@@ -834,6 +1223,10 @@
         toast('Solo administración puede abrir Ajustes.', 'error');
         tab = 'tpv';
       }
+      if (tab === 'productos' && staffProfile && staffProfile.rol !== 'admin') {
+        toast('Solo administración puede gestionar productos.', 'error');
+        tab = 'tpv';
+      }
       if (!TAB_LABELS[tab]) tab = 'tpv';
       document.querySelectorAll('.js-tab').forEach((a) => a.classList.toggle('active', a.dataset.tab === tab));
       document.querySelectorAll('.panel-tab').forEach((p) => p.style.display = 'none');
@@ -846,7 +1239,107 @@
       }
       if (tab === 'tpv') tpvRefreshCajaHint();
       if (tab === 'finanzas') loadFinanzas();
+      if (tab === 'productos') renderProductosAdminRows();
     }
+
+    function fmtEuroCaja(n) {
+      return `${Number(n || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+    }
+
+    function syncCajaFabButtons() {
+      const abrirBtn = document.getElementById('abrirCajaBtn');
+      const cerrarBtn = document.getElementById('cerrarCajaBtn');
+      const estado = appState.cajaHoyEstado; // 'none' | 'abierta' | 'cerrada' | null
+      if (abrirBtn) {
+        abrirBtn.disabled = estado === 'abierta' || estado === 'cerrada';
+        abrirBtn.title = estado === 'cerrada'
+          ? 'La caja de hoy ya está cerrada'
+          : estado === 'abierta'
+            ? 'La caja ya está abierta'
+            : 'Abrir caja del día';
+      }
+      if (cerrarBtn) {
+        cerrarBtn.disabled = estado !== 'abierta';
+        cerrarBtn.title = estado === 'abierta' ? 'Cerrar caja del día' : 'Abre la caja antes de cerrarla';
+      }
+      const bar = document.getElementById('cajaEstadoBar');
+      const dot = document.getElementById('cajaEstadoDot');
+      if (bar) {
+        bar.classList.toggle('is-open', estado === 'abierta');
+        bar.classList.toggle('is-closed', estado === 'cerrada');
+        bar.classList.toggle('is-idle', estado === 'none' || !estado);
+      }
+      if (dot) {
+        dot.classList.toggle('is-open', estado === 'abierta');
+        dot.classList.toggle('is-closed', estado === 'cerrada');
+      }
+    }
+
+    function openAbrirCajaModal() {
+      if (appState.cajaHoyEstado === 'abierta' || appState.cajaHoyEstado === 'cerrada') {
+        toast(appState.cajaHoyEstado === 'abierta' ? 'La caja ya está abierta.' : 'La caja de hoy ya está cerrada.', 'info');
+        return;
+      }
+      const fondo = document.getElementById('cajaFondoInicial');
+      const nota = document.getElementById('cajaNotaApertura');
+      const hint = document.getElementById('abrirCajaHint');
+      const sugerido = Number(appState.cajaSugeridoFondo || 0);
+      if (fondo) fondo.value = String(sugerido);
+      if (nota) nota.value = '';
+      if (hint) {
+        hint.textContent = sugerido > 0
+          ? `Fondo previsto del cierre anterior: ${fmtEuroCaja(sugerido)}. Puedes ajustarlo.`
+          : 'Indica el fondo inicial al abrir.';
+      }
+      document.getElementById('abrirCajaModal')?.classList.add('open');
+      fondo?.focus();
+      fondo?.select();
+    }
+
+    function closeAbrirCajaModal() {
+      document.getElementById('abrirCajaModal')?.classList.remove('open');
+    }
+
+    function updateCerrarCajaRetirado() {
+      const hay = Number(document.getElementById('cajaEfectivoDeclarado')?.value || 0);
+      const dejas = Number(document.getElementById('cajaFondoSiguiente')?.value || 0);
+      const el = document.getElementById('cerrarCajaRetirado');
+      if (!el) return;
+      if (Number.isNaN(hay) || Number.isNaN(dejas)) {
+        el.textContent = '—';
+        return;
+      }
+      el.textContent = fmtEuroCaja(Math.max(0, hay - dejas));
+    }
+
+    function openCerrarCajaModal() {
+      if (appState.cajaHoyEstado !== 'abierta') {
+        toast('No hay caja abierta para cerrar.', 'info');
+        return;
+      }
+      const efectivo = document.getElementById('cajaEfectivoDeclarado');
+      const fondoSig = document.getElementById('cajaFondoSiguiente');
+      const nota = document.getElementById('cajaNotaCierre');
+      const hint = document.getElementById('cerrarCajaHint');
+      const esperadoEl = document.getElementById('cerrarCajaEsperado');
+      const esperado = Number(appState.cajaEfectivoEsperado || 0);
+      if (efectivo) efectivo.value = String(esperado);
+      if (fondoSig) fondoSig.value = String(esperado);
+      if (nota) nota.value = '';
+      if (esperadoEl) esperadoEl.textContent = fmtEuroCaja(esperado);
+      if (hint) {
+        hint.textContent = `Fondo de hoy ${fmtEuroCaja(appState.cajaFondoHoy || 0)} + cobros en efectivo. Cuenta el cajón y define el fondo de mañana.`;
+      }
+      updateCerrarCajaRetirado();
+      document.getElementById('cerrarCajaModal')?.classList.add('open');
+      efectivo?.focus();
+      efectivo?.select();
+    }
+
+    function closeCerrarCajaModal() {
+      document.getElementById('cerrarCajaModal')?.classList.remove('open');
+    }
+
     document.querySelectorAll('.js-tab').forEach((a) => a.addEventListener('click', (e) => {
       e.preventDefault();
       setTab(a.dataset.tab);
@@ -871,12 +1364,19 @@
       usuariosCatalogo: [],
       productosTienda: [],
       productosTiendaAll: [],
+      tpvNuevoProdFile: null,
+      editBonoFile: null,
       disciplinasAll: [],
       clasesLista: [],
       duplicandoClase: null,
       tpvCart: [],
       tpvCobrando: false,
-      cajaHoyAbierta: null
+      cajaHoyAbierta: null,
+      cajaHoyEstado: null,
+      finanzasTxAll: [],
+      cajaSugeridoFondo: 0,
+      cajaEfectivoEsperado: 0,
+      cajaFondoHoy: 0
     };
 
     const BONO_PRESETS = {
@@ -886,8 +1386,7 @@
       verano: { nombre: 'Bono Verano', descripcion: 'Temporada alta · validez ampliada.', sesiones: 12, duracion: 90, precio: 145, color: '#0284c7', periodicidad: 'trimestral' },
       blackfriday: { nombre: 'Bono Black Friday', descripcion: 'Oferta limitada · noviembre.', sesiones: 10, duracion: 30, precio: 96, color: '#27272a', periodicidad: 'mensual' },
       express7: { nombre: 'Bono intensivo 7 días', descripcion: 'Corto plazo · alta frecuencia.', sesiones: 5, duracion: 7, precio: 54, color: '#c9a96e', periodicidad: 'mensual' },
-      premium90: { nombre: 'Bono premium 90 días', descripcion: 'Larga duración · mejor valor por sesión.', sesiones: 16, duracion: 90, precio: 188, color: '#64748b', periodicidad: 'trimestral' },
-      mini14: { nombre: 'Bono mini 14 días', descripcion: 'Prueba o estancia corta.', sesiones: 3, duracion: 14, precio: 42, color: '#86a88a', periodicidad: 'mensual' }
+      premium90: { nombre: 'Bono premium 90 días', descripcion: 'Larga duración · mejor valor por sesión.', sesiones: 16, duracion: 90, precio: 188, color: '#64748b', periodicidad: 'trimestral' }
     };
 
     function formatDatetimeLocal(d) {
@@ -934,14 +1433,100 @@
       document.getElementById('modalTipoWebTag').value = tipo.web_tag || '';
       document.getElementById('modalTipoWebMeta').value = tipo.web_meta || '';
       document.getElementById('modalTipoActivo').value = tipo.activo ? 'true' : 'false';
-      document.getElementById('modalTipoVisibleWeb').checked = !!tipo.visible_web;
+      document.getElementById('modalTipoVisibleWeb').value = tipo.visible_web ? 'true' : 'false';
+      syncModalTipoWebPanel();
+      const fileInput = document.getElementById('modalTipoImagenFile');
+      if (fileInput) fileInput.value = '';
+      setBonoTipoImagenPreview((tipo.imagen_url || '').trim() || TPV_BONO_LOGO_DEFAULT, null);
       document.getElementById('tipoBonoModal').classList.add('open');
+    }
+
+    function syncModalTipoWebPanel() {
+      const sel = document.getElementById('modalTipoVisibleWeb');
+      const panel = document.getElementById('modalTipoWebPanel');
+      if (!panel) return;
+      panel.hidden = !(sel && sel.value === 'true');
     }
 
     function closeTipoBonoModal() {
       appState.editingTipoBonoId = null;
+      appState.editBonoFile = null;
       document.getElementById('tipoBonoModal').classList.remove('open');
       document.getElementById('tipoBonoForm').reset();
+      resetBonoTipoImagenToDefault();
+    }
+
+    function defaultFechaFinDesdeTipo() {
+      const tipoSel = document.getElementById('tipoBonoSelect');
+      const option = tipoSel?.selectedOptions?.[0];
+      const dias = Number(option?.getAttribute('data-dias') || 30);
+      return new Date(Date.now() + Math.max(1, dias) * 86400000).toISOString().slice(0, 10);
+    }
+
+    function syncFechaFinBonoDesdeTipo() {
+      const fecha = document.getElementById('fechaFinBono');
+      if (fecha) fecha.value = defaultFechaFinDesdeTipo();
+    }
+
+    function openAsignarBonoModal() {
+      const clienteSel = document.getElementById('clienteSelect');
+      const tipoSel = document.getElementById('tipoBonoSelect');
+      if (!clienteSel?.options?.length) {
+        toast('No hay clientes. Crea uno en Usuarios o en el TPV.', 'error');
+        return;
+      }
+      if (!tipoSel?.options?.length) {
+        toast('No hay tipos de bono activos.', 'error');
+        if (staffProfile?.rol === 'admin') openNuevoTipoBonoModal();
+        return;
+      }
+      syncFechaFinBonoDesdeTipo();
+      document.getElementById('asignarBonoModal')?.classList.add('open');
+      clienteSel.focus();
+    }
+
+    function closeAsignarBonoModal() {
+      document.getElementById('asignarBonoModal')?.classList.remove('open');
+    }
+
+    function resetNuevoTipoBonoForm() {
+      document.getElementById('nuevoTipoNombre').value = '';
+      document.getElementById('nuevoTipoSesiones').value = '';
+      document.getElementById('nuevoTipoDuracion').value = '30';
+      document.getElementById('nuevoTipoPrecio').value = '';
+      document.getElementById('nuevoTipoPeriodicidad').value = 'mensual';
+      document.getElementById('nuevoTipoColor').value = '#c9a96e';
+      document.getElementById('nuevoTipoDescripcion').value = '';
+      document.getElementById('nuevoTipoWebTag').value = '';
+      document.getElementById('nuevoTipoWebMeta').value = '';
+      document.getElementById('nuevoTipoVisibleWeb').value = 'false';
+      syncNuevoTipoWebPanel();
+      const imgUrl = document.getElementById('nuevoTipoImagenUrl');
+      const imgPrev = document.getElementById('nuevoTipoImagenPreview');
+      if (imgUrl) imgUrl.value = TPV_BONO_LOGO_DEFAULT;
+      if (imgPrev) imgPrev.src = TPV_BONO_LOGO_DEFAULT;
+      document.querySelectorAll('.js-bono-preset').forEach((b) => b.classList.remove('btn-primary'));
+    }
+
+    function syncNuevoTipoWebPanel() {
+      const sel = document.getElementById('nuevoTipoVisibleWeb');
+      const panel = document.getElementById('nuevoTipoWebPanel');
+      if (!panel) return;
+      panel.hidden = !(sel && sel.value === 'true');
+    }
+
+    function openNuevoTipoBonoModal() {
+      if (!staffProfile || staffProfile.rol !== 'admin') {
+        toast('Solo administración puede crear tipos de bono.', 'error');
+        return;
+      }
+      resetNuevoTipoBonoForm();
+      document.getElementById('nuevoTipoBonoModal')?.classList.add('open');
+      document.getElementById('nuevoTipoNombre')?.focus();
+    }
+
+    function closeNuevoTipoBonoModal() {
+      document.getElementById('nuevoTipoBonoModal')?.classList.remove('open');
     }
 
     function openClaseEditModal(clase) {
@@ -1247,6 +1832,22 @@
             : 'Cliente creado. En el primer acceso solo necesita el correo para elegir su contraseña.',
         'success'
       );
+
+      if (rol === 'cliente' && !fueActualizacion) {
+        const nombreMail = [nombre, apellidos].filter(Boolean).join(' ').trim() || nombre;
+        try {
+          const { error: mailErr } = await novaSupabase.functions.invoke('enviar-bienvenida', {
+            body: { email, nombre: nombreMail }
+          });
+          if (mailErr) {
+            console.warn('Email bienvenida', mailErr);
+            toast('Cliente creado, pero no se pudo enviar el email de bienvenida.', 'info');
+          }
+        } catch (mailEx) {
+          console.warn('Email bienvenida', mailEx);
+          toast('Cliente creado, pero no se pudo enviar el email de bienvenida.', 'info');
+        }
+      }
     }
 
     async function initAuth() {
@@ -1265,6 +1866,8 @@
       if (delCliente) delCliente.style.display = profile.rol === 'admin' ? '' : 'none';
       const cardDisc = document.getElementById('cardDisciplinasAdmin');
       if (cardDisc) cardDisc.style.display = profile.rol === 'admin' ? '' : 'none';
+      const btnNuevaDisc = document.getElementById('abrirNuevaDisciplinaBtn');
+      if (btnNuevaDisc) btnNuevaDisc.style.display = profile.rol === 'admin' ? '' : 'none';
       applyStaffSidebarUi();
       return true;
     }
@@ -1289,7 +1892,111 @@
 
     function tpvCategoriaLabel(cat) {
       const m = { bebida: 'Bebida', accesorio: 'Accesorio', consumo: 'Consumo', otro: 'Otro' };
-      return m[cat] || cat || '—';
+      if (m[cat]) return m[cat];
+      if (!cat) return '—';
+      return String(cat)
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+
+    function categoriasTiendaOptions() {
+      const defaults = [
+        { value: 'bebida', label: 'Bebida' },
+        { value: 'accesorio', label: 'Accesorio' },
+        { value: 'consumo', label: 'Consumo' },
+        { value: 'otro', label: 'Otro' }
+      ];
+      const map = new Map(defaults.map((c) => [c.value, c]));
+      (appState.productosTiendaAll || []).forEach((p) => {
+        const v = (p.categoria || '').trim();
+        if (!v || map.has(v)) return;
+        map.set(v, { value: v, label: tpvCategoriaLabel(v) });
+      });
+      return Array.from(map.values());
+    }
+
+    function populateTpvCategoriasSelect(selected) {
+      const sel = document.getElementById('tpvNuevoProdCat');
+      if (!sel) return;
+      const opts = categoriasTiendaOptions();
+      const prefer = selected || sel.value || 'bebida';
+      sel.innerHTML = opts.map((c) =>
+        `<option value="${escHtml(c.value)}">${escHtml(c.label)}</option>`
+      ).join('');
+      if (opts.some((c) => c.value === prefer)) sel.value = prefer;
+      else if (opts.length) sel.value = opts[0].value;
+    }
+
+    function resetTpvProductoImagenPreview() {
+      const preview = document.getElementById('tpvNuevoProdImagenPreview');
+      const file = document.getElementById('tpvNuevoProdImagenFile');
+      const clearBtn = document.getElementById('tpvNuevoProdImagenClear');
+      if (file) file.value = '';
+      if (clearBtn) clearBtn.hidden = true;
+      if (preview) {
+        preview.classList.remove('has-image');
+        preview.innerHTML = '<span>Sin imagen</span>';
+        preview.removeAttribute('style');
+      }
+      appState.tpvNuevoProdFile = null;
+    }
+
+    function setTpvProductoImagenPreview(file) {
+      const preview = document.getElementById('tpvNuevoProdImagenPreview');
+      const clearBtn = document.getElementById('tpvNuevoProdImagenClear');
+      if (!file) {
+        resetTpvProductoImagenPreview();
+        return;
+      }
+      appState.tpvNuevoProdFile = file;
+      if (clearBtn) clearBtn.hidden = false;
+      if (!preview) return;
+      const url = URL.createObjectURL(file);
+      preview.classList.add('has-image');
+      preview.innerHTML = `<img src="${url}" alt="" />`;
+    }
+
+    async function uploadProductoTiendaImagen(file, folder = 'productos') {
+      if (!file) return null;
+      const maxBytes = 5 * 1024 * 1024;
+      if (file.size > maxBytes) throw new Error('La imagen supera 5 MB.');
+      const mime = (file.type || '').toLowerCase();
+      if (!/^image\/(jpeg|jpg|png|webp|gif)$/.test(mime)) {
+        throw new Error('Usa una imagen JPG, PNG, WebP o GIF.');
+      }
+      const ext = mime.includes('png') ? 'png'
+        : mime.includes('webp') ? 'webp'
+        : mime.includes('gif') ? 'gif'
+        : 'jpg';
+      const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await novaSupabase.storage.from('tienda').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type || `image/${ext}`
+      });
+      if (error) throw error;
+      const { data } = novaSupabase.storage.from('tienda').getPublicUrl(path);
+      return data?.publicUrl || null;
+    }
+
+    function setBonoTipoImagenPreview(url, file = null) {
+      const preview = document.getElementById('modalTipoImagenPreview');
+      const img = document.getElementById('modalTipoImagenPreviewImg');
+      const hidden = document.getElementById('modalTipoImagenUrl');
+      const src = (url || '').trim() || TPV_BONO_LOGO_DEFAULT;
+      appState.editBonoFile = file;
+      if (hidden && !file) hidden.value = src;
+      if (preview) preview.classList.add('has-image');
+      if (img) {
+        if (file) img.src = URL.createObjectURL(file);
+        else img.src = src;
+      }
+    }
+
+    function resetBonoTipoImagenToDefault() {
+      const fileInput = document.getElementById('modalTipoImagenFile');
+      if (fileInput) fileInput.value = '';
+      setBonoTipoImagenPreview(TPV_BONO_LOGO_DEFAULT, null);
     }
 
     /** Transacción ligada a bono (venta TPV bono) vs solo tienda / otro cobro sin bono. */
@@ -1310,10 +2017,150 @@
 
     function applyStaffTpvUi() {
       const btnNuevo = document.getElementById('tpvAbrirNuevoClienteBtn');
-      const adminCat = document.getElementById('tpvAdminCatalogoCard');
       const isAdmin = staffProfile && staffProfile.rol === 'admin';
       if (btnNuevo) btnNuevo.style.display = isAdmin ? '' : 'none';
-      if (adminCat) adminCat.style.display = isAdmin ? '' : 'none';
+    }
+
+    function openNuevoProductoModal() {
+      if (!staffProfile || staffProfile.rol !== 'admin') {
+        toast('Solo administración puede editar el catálogo de tienda.', 'error');
+        return;
+      }
+      const nombre = document.getElementById('tpvNuevoProdNombre');
+      const precio = document.getElementById('tpvNuevoProdPrecio');
+      if (nombre) nombre.value = '';
+      if (precio) precio.value = '';
+      populateTpvCategoriasSelect('bebida');
+      resetTpvProductoImagenPreview();
+      document.getElementById('nuevoProductoModal')?.classList.add('open');
+      nombre?.focus();
+    }
+
+    function closeNuevoProductoModal() {
+      document.getElementById('nuevoProductoModal')?.classList.remove('open');
+      resetTpvProductoImagenPreview();
+    }
+
+    function defaultClaseDateTimeLocal() {
+      const d = new Date();
+      d.setMinutes(0, 0, 0);
+      d.setHours(d.getHours() + 1);
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function openNuevaClaseModal() {
+      const ds = document.getElementById('disciplinaSelect');
+      if (!ds?.options?.length) {
+        toast('No hay tipos de clase activos.', 'error');
+        if (staffProfile?.rol === 'admin') openNuevaDisciplinaModal();
+        return;
+      }
+      const fecha = document.getElementById('fechaHoraClase');
+      const titulo = document.getElementById('tituloClase');
+      const duracion = document.getElementById('duracionMinClase');
+      const aforo = document.getElementById('aforoClase');
+      const more = document.querySelector('#nuevaClaseForm .clases-modal-more');
+      if (fecha) fecha.value = defaultClaseDateTimeLocal();
+      if (titulo) titulo.value = '';
+      if (duracion) duracion.value = '55';
+      if (aforo) aforo.value = '12';
+      if (more) more.open = false;
+      document.getElementById('nuevaClaseModal')?.classList.add('open');
+      document.getElementById('disciplinaSelect')?.focus();
+    }
+
+    function closeNuevaClaseModal() {
+      document.getElementById('nuevaClaseModal')?.classList.remove('open');
+    }
+
+    function openNuevaDisciplinaModal() {
+      if (!staffProfile || staffProfile.rol !== 'admin') {
+        toast('Solo administración puede crear disciplinas.', 'error');
+        return;
+      }
+      document.getElementById('nuevaDisciplinaNombre').value = '';
+      document.getElementById('nuevaDisciplinaDesc').value = '';
+      document.getElementById('nuevaDisciplinaColor').value = '#c9a96e';
+      document.getElementById('nuevaDisciplinaModal')?.classList.add('open');
+      document.getElementById('nuevaDisciplinaNombre')?.focus();
+    }
+
+    function closeNuevaDisciplinaModal() {
+      document.getElementById('nuevaDisciplinaModal')?.classList.remove('open');
+    }
+
+    let anularVentaResolver = null;
+
+    function closeAnularVentaModal(result = false) {
+      document.getElementById('anularVentaModal')?.classList.remove('open');
+      const resolve = anularVentaResolver;
+      anularVentaResolver = null;
+      if (resolve) resolve(Boolean(result));
+    }
+
+    function openAnularVentaModal({
+      title = 'Anular venta',
+      lead = '¿Anular esta venta?',
+      esBono = false,
+      cliente = '',
+      concepto = '',
+      importe = '',
+      confirmLabel = 'Anular venta'
+    } = {}) {
+      return new Promise((resolve) => {
+        anularVentaResolver = resolve;
+        const titleEl = document.getElementById('anularVentaTitle');
+        const leadEl = document.getElementById('anularVentaLead');
+        const warnEl = document.getElementById('anularVentaWarn');
+        const summary = document.getElementById('anularVentaSummary');
+        const confirmBtn = document.getElementById('confirmAnularVentaBtn');
+        if (titleEl) titleEl.textContent = title;
+        if (leadEl) leadEl.textContent = lead;
+        if (warnEl) warnEl.hidden = !esBono;
+        const hasDetail = Boolean(cliente || concepto || importe);
+        if (summary) summary.hidden = !hasDetail;
+        const elCliente = document.getElementById('anularVentaCliente');
+        const elConcepto = document.getElementById('anularVentaConcepto');
+        const elImporte = document.getElementById('anularVentaImporte');
+        if (elCliente) elCliente.textContent = cliente || '—';
+        if (elConcepto) elConcepto.textContent = concepto || '—';
+        if (elImporte) elImporte.textContent = importe || '—';
+        if (confirmBtn) confirmBtn.textContent = confirmLabel;
+        document.getElementById('anularVentaModal')?.classList.add('open');
+        confirmBtn?.focus();
+      });
+    }
+
+    let tpvCobroConfirmResolver = null;
+
+    function closeTpvCobroConfirmModal(result = false) {
+      document.getElementById('tpvCobroConfirmModal')?.classList.remove('open');
+      const resolve = tpvCobroConfirmResolver;
+      tpvCobroConfirmResolver = null;
+      if (resolve) resolve(Boolean(result));
+    }
+
+    function openTpvCobroConfirmModal({ clienteNombre, metodo, totalFmt, lineasCount, cajaCerrada }) {
+      return new Promise((resolve) => {
+        tpvCobroConfirmResolver = resolve;
+        const lead = document.getElementById('tpvCobroConfirmLead');
+        const elCliente = document.getElementById('tpvCobroConfirmCliente');
+        const elMetodo = document.getElementById('tpvCobroConfirmMetodo');
+        const elLineas = document.getElementById('tpvCobroConfirmLineas');
+        const elTotal = document.getElementById('tpvCobroConfirmTotal');
+        const elWarn = document.getElementById('tpvCobroConfirmWarn');
+        const confirmBtn = document.getElementById('confirmTpvCobroConfirmBtn');
+        if (lead) lead.textContent = `¿Cobrar ${totalFmt} en ${metodo}?`;
+        if (elCliente) elCliente.textContent = clienteNombre || '—';
+        if (elMetodo) elMetodo.textContent = metodo || '—';
+        if (elLineas) elLineas.textContent = `${lineasCount} línea(s) en el ticket`;
+        if (elTotal) elTotal.textContent = totalFmt || '—';
+        if (elWarn) elWarn.hidden = !cajaCerrada;
+        if (confirmBtn) confirmBtn.textContent = cajaCerrada ? 'Cobrar de todas formas' : 'Cobrar';
+        document.getElementById('tpvCobroConfirmModal')?.classList.add('open');
+        confirmBtn?.focus();
+      });
     }
 
     function applyStaffSidebarUi() {
@@ -1321,12 +2168,18 @@
       const isAdmin = staffProfile && staffProfile.rol === 'admin';
       const aj = document.getElementById('sidebarLinkAjustes');
       if (aj) aj.style.display = isAdmin ? '' : 'none';
+      const prodLink = document.getElementById('sidebarLinkProductos');
+      if (prodLink) prodLink.style.display = isAdmin ? '' : 'none';
       const bonosDesigner = document.getElementById('cardBonosDesigner');
       if (bonosDesigner) bonosDesigner.style.display = isAdmin ? '' : 'none';
+      const btnNuevoTipo = document.getElementById('abrirNuevoTipoBonoBtn');
+      if (btnNuevoTipo) btnNuevoTipo.style.display = isAdmin ? '' : 'none';
       const crearUsuario = document.getElementById('cardCrearUsuario');
       if (crearUsuario) crearUsuario.style.display = isAdmin ? '' : 'none';
       const discAdmin = document.getElementById('cardDisciplinasAdmin');
       if (discAdmin && !isAdmin) discAdmin.style.display = 'none';
+      const btnNuevaDisc = document.getElementById('abrirNuevaDisciplinaBtn');
+      if (btnNuevaDisc) btnNuevaDisc.style.display = isAdmin ? '' : 'none';
       const eliminarBtn = document.getElementById('eliminarClienteBtn');
       if (eliminarBtn) eliminarBtn.style.display = isAdmin ? '' : 'none';
     }
@@ -1463,7 +2316,7 @@
       const [{ data: d, error: dErr }, { data: s }, { data: tb }, { data: ajustes }] = await Promise.all([
         novaSupabase.from('disciplinas').select('id,nombre,descripcion,color_hex,activa,orden').order('orden'),
         novaSupabase.from('salas').select('id,nombre').eq('activa', true).order('nombre'),
-        novaSupabase.from('tipos_bono').select('id,nombre,sesiones,duracion_dias,precio,activo,orden,descripcion,periodicidad,color_hex,visible_web,web_tag,web_meta').order('orden'),
+        novaSupabase.from('tipos_bono').select('id,nombre,sesiones,duracion_dias,precio,activo,orden,descripcion,periodicidad,color_hex,imagen_url,visible_web,web_tag,web_meta').order('orden'),
         novaSupabase.from('ajustes_centro').select('margen_reserva_dias,margen_cancelacion_dias').eq('id', 1).maybeSingle()
       ]);
 
@@ -1517,8 +2370,9 @@
       renderTpvBonos();
       renderTpvProductos();
       renderTpvCart();
-      renderTpvAdminProductosRows();
+      renderProductosAdminRows();
       renderTiposBonoRows();
+      populateFinanzasBonoFilter();
     }
 
     function renderTiposBonoRows() {
@@ -1757,16 +2611,16 @@
       }
 
       await tpvRefreshCajaHint();
-      if (appState.cajaHoyAbierta === false) {
-        const okCaja = window.confirm('La caja de hoy no está abierta. ¿Cobrar de todas formas?\n\nRecomendado: abre caja en Finanzas primero.');
-        if (!okCaja) return;
-      }
-
+      const cajaCerrada = appState.cajaHoyAbierta === false;
       const total = tpvCartTotal();
       const totalFmt = `${total.toFixed(2).replace('.', ',')} €`;
-      const okPay = window.confirm(
-        `¿Cobrar ${totalFmt} en ${tpvMetodoLabel(metodoPago)} a ${nombreClienteDisplay(cliente)}?\n\n${cart.length} línea(s) en el ticket.`
-      );
+      const okPay = await openTpvCobroConfirmModal({
+        clienteNombre: nombreClienteDisplay(cliente),
+        metodo: tpvMetodoLabel(metodoPago),
+        totalFmt,
+        lineasCount: cart.length,
+        cajaCerrada
+      });
       if (!okPay) return;
 
       const notaGlobal = document.getElementById('tpvNota').value.trim() || null;
@@ -1804,6 +2658,23 @@
         }
         const totalDone = Number(data?.total || 0);
         const resumen = Array.isArray(data?.lineas) ? data.lineas : [];
+        let txIds = Array.isArray(data?.transaccion_ids)
+          ? data.transaccion_ids.filter(Boolean)
+          : [];
+        if (!txIds.length) {
+          try {
+            const { data: txs } = await novaSupabase
+              .from('transacciones')
+              .select('id')
+              .eq('perfil_id', cliente.id)
+              .eq('registrado_por', staffProfile.id)
+              .order('created_at', { ascending: false })
+              .limit(cartSnapshot.length);
+            txIds = (txs || []).map((t) => t.id).filter(Boolean);
+          } catch (_) {
+            txIds = [];
+          }
+        }
         document.getElementById('tpvNota').value = '';
         appState.tpvCart = [];
         renderTpvCart();
@@ -1818,10 +2689,12 @@
           importe: totalDone,
           metodoPago,
           nota: resumen.join(' · '),
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          transaccionIds: txIds,
+          esBono: cartSnapshot.some((l) => l.kind === 'bono')
         };
         renderLastTicket();
-        toast('Cobro registrado correctamente. Puedes imprimir el ticket si lo necesitas.', 'success');
+        toast('Cobro registrado correctamente. Puedes imprimir o anular el ticket si fue un error.', 'success');
         await Promise.all([loadBonos(), loadFinanzas(), tpvRefreshCajaHint()]);
       } catch (err) {
         toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo completar el cobro')), 'error');
@@ -1839,8 +2712,12 @@
       }
       grid.innerHTML = appState.tiposBono.map((b) => {
         const precio = Number(b.precio) || 0;
+        const logo = (b.imagen_url || '').trim() || TPV_BONO_LOGO_DEFAULT;
         return `
-        <button type="button" class="tpv-tile js-tpv-tile-bono" data-id="${b.id}">
+        <button type="button" class="tpv-tile tpv-tile--prod js-tpv-tile-bono" data-id="${b.id}">
+          <span class="tpv-tile-media tpv-tile-media--bono" aria-hidden="true">
+            <img src="${escHtml(logo)}" alt="" loading="lazy" decoding="async" />
+          </span>
           <span class="tpv-tile-cat">Bono</span>
           <span class="tpv-tile-name">${escHtml(b.nombre)}</span>
           <span class="tpv-tile-meta">${b.sesiones ?? '∞'} ses. · ${b.duracion_dias} d</span>
@@ -1859,8 +2736,13 @@
       }
       grid.innerHTML = list.map((p) => {
         const ref = Number(p.precio_referencia) || 0;
+        const img = (p.imagen_url || '').trim();
+        const media = img
+          ? `<span class="tpv-tile-media"><img src="${escHtml(img)}" alt="" loading="lazy" /></span>`
+          : `<span class="tpv-tile-media tpv-tile-media--empty" aria-hidden="true"><span>${escHtml((p.nombre || '·').charAt(0))}</span></span>`;
         return `
-        <button type="button" class="tpv-tile js-tpv-tile-prod" data-id="${p.id}">
+        <button type="button" class="tpv-tile tpv-tile--prod js-tpv-tile-prod" data-id="${p.id}">
+          ${media}
           <span class="tpv-tile-cat">${escHtml(tpvCategoriaLabel(p.categoria))}</span>
           <span class="tpv-tile-name">${escHtml(p.nombre)}</span>
           <span class="tpv-tile-price">${ref.toFixed(2)} €</span>
@@ -1868,8 +2750,8 @@
       }).join('');
     }
 
-    function renderTpvAdminProductosRows() {
-      const tbody = document.getElementById('tpvProductosAdminRows');
+    function renderProductosAdminRows() {
+      const tbody = document.getElementById('productosAdminRows');
       if (!tbody) return;
       if (!staffProfile || staffProfile.rol !== 'admin') {
         tbody.innerHTML = '';
@@ -1877,32 +2759,47 @@
       }
       const list = appState.productosTiendaAll || [];
       if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="4">Sin productos. Añade uno arriba.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6">Sin productos. Pulsa «Nuevo producto» para añadir el primero.</td></tr>';
         return;
       }
-      tbody.innerHTML = list.map((p) => `
+      tbody.innerHTML = list.map((p) => {
+        const img = (p.imagen_url || '').trim();
+        const thumb = img
+          ? `<img class="prod-admin-thumb" src="${escHtml(img)}" alt="" loading="lazy" />`
+          : `<span class="prod-admin-thumb prod-admin-thumb--empty" aria-hidden="true">${escHtml((p.nombre || '·').charAt(0))}</span>`;
+        return `
         <tr>
-          <td>${escHtml(p.nombre)}${p.activo ? '' : ' <span style="opacity:.65">(inactivo)</span>'}</td>
+          <td>${thumb}</td>
+          <td>${escHtml(p.nombre)}</td>
           <td>${escHtml(tpvCategoriaLabel(p.categoria))}</td>
           <td>${Number(p.precio_referencia || 0).toFixed(2)} €</td>
+          <td>${p.activo ? 'Activo' : 'Inactivo'}</td>
           <td>
             <button type="button" class="btn btn-outline btn-sm js-tpv-toggle-prod" data-id="${p.id}" data-activo="${p.activo ? '1' : '0'}">${p.activo ? 'Desactivar' : 'Activar'}</button>
           </td>
-        </tr>
-      `).join('');
+        </tr>`;
+      }).join('');
     }
 
     function renderLastTicket() {
       const box = document.getElementById('tpvLastTicket');
+      const printBtn = document.getElementById('tpvPrintTicketBtn');
+      const printCartBtn = document.getElementById('tpvPrintTicketCartBtn');
+      const anularBtn = document.getElementById('tpvAnularUltimoBtn');
       const t = appState.lastTicket;
       if (!t) {
         box.className = 'empty-state';
         box.innerHTML = '<p>Aún no hay cobros en esta sesión.</p>';
+        if (printBtn) printBtn.disabled = true;
+        if (printCartBtn) printCartBtn.hidden = true;
+        if (anularBtn) anularBtn.disabled = true;
         return;
       }
       box.className = '';
       const concepto = t.concepto || t.bonoNombre || 'Venta';
       const etiqueta = t.subtipo === 'producto' ? 'Producto' : t.subtipo === 'mixto' ? 'Ticket' : 'Bono';
+      const canAnular = Array.isArray(t.transaccionIds) && t.transaccionIds.length > 0;
+      if (printCartBtn) printCartBtn.hidden = false;
       box.innerHTML = `
         <div style="display:grid;gap:.25rem;">
           <div style="font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--color-muted);">${etiqueta}</div>
@@ -1912,6 +2809,48 @@
           ${t.nota ? `<div style="font-size:.75rem;color:var(--color-muted);">Nota: ${escHtml(t.nota)}</div>` : ''}
         </div>
       `;
+      if (printBtn) printBtn.disabled = false;
+      if (anularBtn) anularBtn.disabled = !canAnular;
+    }
+
+    async function anularUltimoCobroTpv() {
+      const t = appState.lastTicket;
+      const ids = t && Array.isArray(t.transaccionIds) ? t.transaccionIds.filter(Boolean) : [];
+      if (!ids.length) {
+        toast('No se puede anular: falta el identificador del cobro. Usa Anular en Finanzas.', 'error');
+        return;
+      }
+      const ok = await openAnularVentaModal({
+        title: 'Anular cobro',
+        lead: t.esBono
+          ? 'Se anulará este cobro y se desactivará el bono asociado.'
+          : 'Se eliminará este cobro del registro de caja.',
+        esBono: Boolean(t.esBono),
+        cliente: t.clienteNombre || '',
+        concepto: t.concepto || t.bonoNombre || '',
+        importe: `${Number(t.importe || 0).toFixed(2)} €`,
+        confirmLabel: 'Anular cobro'
+      });
+      if (!ok) return;
+      try {
+        for (const id of ids) {
+          const { error } = await novaSupabase.rpc('anular_transaccion_tpv', { p_transaccion_id: id });
+          if (error) {
+            const m = error.message || '';
+            if (m.includes('function') && m.includes('does not exist')) {
+              toast('Falta ejecutar en Supabase el SQL del parche anular_transaccion_tpv.', 'error');
+              return;
+            }
+            throw error;
+          }
+        }
+        appState.lastTicket = null;
+        renderLastTicket();
+        toast('Cobro anulado', 'success');
+        await Promise.all([loadBonos(), loadFinanzas(), tpvRefreshCajaHint()]);
+      } catch (err) {
+        toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo anular')), 'error');
+      }
     }
 
     function printTicket() {
@@ -2224,35 +3163,109 @@
         .order('created_at', { ascending: false })
         .limit(50);
       const rows = document.getElementById('rowsBonos');
-      rows.innerHTML = (data || []).map(b => `<tr><td>${b.perfil?.nombre || b.perfil?.email || '-'}</td><td>${b.tipo_bono?.nombre || '-'}</td><td>${b.sesiones_usadas}/${b.sesiones_totales ?? '∞'}</td><td>${b.fecha_fin}</td></tr>`).join('') || '<tr><td colspan="4">Sin bonos</td></tr>';
+      rows.innerHTML = (data || []).map((b) => {
+        const cliente = escHtml(b.perfil?.nombre || b.perfil?.email || '-');
+        const bono = escHtml(b.tipo_bono?.nombre || '-');
+        const uso = `${b.sesiones_usadas}/${b.sesiones_totales ?? '∞'}`;
+        let vence = b.fecha_fin || '—';
+        if (b.fecha_fin) {
+          const d = new Date(`${b.fecha_fin}T12:00:00`);
+          if (!Number.isNaN(d.getTime())) {
+            vence = d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+          }
+        }
+        return `<tr><td>${cliente}</td><td>${bono}</td><td>${uso}</td><td>${escHtml(vence)}</td></tr>`;
+      }).join('') || '<tr><td colspan="4">Sin bonos activos. Pulsa «Asignar bono» para empezar.</td></tr>';
     }
 
-    async function loadFinanzas() {
-      const inicioDia = new Date();
-      inicioDia.setHours(0, 0, 0, 0);
-      const inicioIso = inicioDia.toISOString();
-
-      const [hoyRes, listRes] = await Promise.all([
-        novaSupabase
+    async function fetchAllTransaccionesLista() {
+      const pageSize = 1000;
+      const all = [];
+      let from = 0;
+      for (;;) {
+        const { data, error } = await novaSupabase
           .from('transacciones')
-          .select('importe,metodo_pago,nota,bono_activo_id,tipo_bono_id')
-          .gte('created_at', inicioIso)
-          .limit(2000),
-        novaSupabase
-          .from('transacciones')
-          .select('id,registrado_por,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,email)')
+          .select('id,registrado_por,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,apellidos,email),vendedor:registrado_por(nombre,apellidos,email,rol)')
           .order('created_at', { ascending: false })
-          .limit(100)
-      ]);
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        const batch = data || [];
+        all.push(...batch);
+        if (batch.length < pageSize) break;
+        from += pageSize;
+        if (from > 50000) break;
+      }
+      return all;
+    }
 
-      if (hoyRes.error) console.warn('Finanzas hoy:', hoyRes.error.message);
-      if (listRes.error) console.warn('Finanzas lista:', listRes.error.message);
+    function populateFinanzasBonoFilter() {
+      const sel = document.getElementById('finanzasFiltroBono');
+      if (!sel) return;
+      const current = sel.value;
+      const tipos = appState.tiposBonoAll || [];
+      const opts = [
+        '<option value="">Todos</option>',
+        '<option value="__tienda__">Solo tienda</option>',
+        '<option value="__bono__">Solo bonos</option>',
+        ...tipos.map((b) => `<option value="${escHtml(b.id)}">${escHtml(b.nombre)}</option>`)
+      ];
+      sel.innerHTML = opts.join('');
+      if ([...sel.options].some((o) => o.value === current)) sel.value = current;
+    }
 
-      const hoy = hoyRes.data || [];
-      const list = listRes.data || [];
+    function getFinanzasFiltros() {
+      return {
+        desde: document.getElementById('finanzasFiltroDesde')?.value || '',
+        hasta: document.getElementById('finanzasFiltroHasta')?.value || '',
+        cliente: (document.getElementById('finanzasFiltroCliente')?.value || '').trim().toLowerCase(),
+        bono: document.getElementById('finanzasFiltroBono')?.value || ''
+      };
+    }
+
+    function filtrarTransaccionesFinanzas(list) {
+      const f = getFinanzasFiltros();
+      return (list || []).filter((t) => {
+        const created = t.created_at ? new Date(t.created_at) : null;
+        if (f.desde) {
+          const desde = new Date(`${f.desde}T00:00:00`);
+          if (!created || created < desde) return false;
+        }
+        if (f.hasta) {
+          const hasta = new Date(`${f.hasta}T23:59:59.999`);
+          if (!created || created > hasta) return false;
+        }
+        if (f.cliente) {
+          const nombre = nombreClienteDisplay(t.perfil) || '';
+          const email = t.perfil?.email || '';
+          if (!textoBusquedaCoincide(nombre, f.cliente) && !textoBusquedaCoincide(email, f.cliente)) return false;
+        }
+        if (f.bono === '__tienda__') {
+          if (!finanzasEsTienda(t)) return false;
+        } else if (f.bono === '__bono__') {
+          if (finanzasEsTienda(t)) return false;
+        } else if (f.bono) {
+          if (String(t.tipo_bono_id || '') !== String(f.bono)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderFinanzasRows() {
       const rows = document.getElementById('rowsFinanzas');
+      const countEl = document.getElementById('finanzasTxCount');
+      if (!rows) return;
+      const all = appState.finanzasTxAll || [];
+      const list = filtrarTransaccionesFinanzas(all);
+      const f = getFinanzasFiltros();
+      const filtrado = Boolean(f.desde || f.hasta || f.cliente || f.bono);
+
       rows.innerHTML = list.map((t) => {
         const cliente = nombreClienteDisplay(t.perfil) || t.perfil?.email || '-';
+        const vendedor = nombreClienteDisplay(t.vendedor) || t.vendedor?.email || '—';
+        const vendedorRol = (t.vendedor?.rol || '').toLowerCase();
+        const vendedorMeta = vendedorRol === 'admin' || vendedorRol === 'empleado'
+          ? ` <span style="font-size:.68rem;color:var(--color-muted);">(${escHtml(vendedorRol)})</span>`
+          : '';
         const esTienda = finanzasEsTienda(t);
         const tipoBadge = esTienda
           ? '<span class="badge badge-neutral">Tienda</span>'
@@ -2264,7 +3277,7 @@
           (staffProfile.rol === 'admin' ||
             (staffProfile.rol === 'empleado' && t.registrado_por === staffProfile.id));
         const btnAnular = puedeAnular
-          ? `<button type="button" class="btn btn-ghost btn-sm js-anular-transaccion" data-id="${t.id}" data-es-bono="${esTienda ? '0' : '1'}">Anular</button>`
+          ? `<button type="button" class="btn btn-ghost btn-sm js-anular-transaccion" data-id="${t.id}" data-es-bono="${esTienda ? '0' : '1'}" data-cliente="${escHtml(cliente)}" data-concepto="${concepto}" data-importe="${imp} €">Anular</button>`
           : '<span style="color:var(--color-muted);">—</span>';
         return `<tr>
           <td>${escHtml(cliente)}</td>
@@ -2272,10 +3285,50 @@
           <td style="font-size:.82rem;max-width:14rem;">${concepto}</td>
           <td>${imp} €</td>
           <td>${escHtml(t.metodo_pago || '-')}</td>
+          <td style="font-size:.82rem;">${escHtml(vendedor)}${vendedorMeta}</td>
           <td style="white-space:nowrap;font-size:.8rem;">${new Date(t.created_at).toLocaleString('es-ES')}</td>
           <td style="white-space:nowrap;">${btnAnular}</td>
         </tr>`;
-      }).join('') || '<tr><td colspan="7">Sin transacciones</td></tr>';
+      }).join('') || `<tr><td colspan="8">${filtrado ? 'Ninguna transacción con estos filtros.' : 'Sin transacciones'}</td></tr>`;
+
+      if (countEl) {
+        if (!all.length) {
+          countEl.textContent = '';
+        } else if (filtrado) {
+          countEl.textContent = `Mostrando ${list.length} de ${all.length} transacción${all.length === 1 ? '' : 'es'}`;
+        } else {
+          countEl.textContent = `${all.length} transacción${all.length === 1 ? '' : 'es'} en total`;
+        }
+      }
+    }
+
+    async function loadFinanzas() {
+      const inicioDia = new Date();
+      inicioDia.setHours(0, 0, 0, 0);
+      const inicioIso = inicioDia.toISOString();
+
+      let hoy = [];
+      let list = [];
+      try {
+        const [hoyRes, listData] = await Promise.all([
+          novaSupabase
+            .from('transacciones')
+            .select('importe,metodo_pago,nota,bono_activo_id,tipo_bono_id')
+            .gte('created_at', inicioIso)
+            .limit(5000),
+          fetchAllTransaccionesLista()
+        ]);
+        if (hoyRes.error) console.warn('Finanzas hoy:', hoyRes.error.message);
+        hoy = hoyRes.data || [];
+        list = listData || [];
+      } catch (err) {
+        console.warn('Finanzas lista:', err.message || err);
+        toast(err.message || 'No se pudieron cargar las transacciones', 'error');
+      }
+
+      appState.finanzasTxAll = list;
+      populateFinanzasBonoFilter();
+      renderFinanzasRows();
 
       const suma = (arr) => arr.reduce((acc, x) => acc + Number(x.importe || 0), 0);
       const total = suma(hoy);
@@ -2284,47 +3337,76 @@
       const efectivo = suma(hoy.filter(x => (x.metodo_pago || 'efectivo') === 'efectivo'));
       const tarjeta = suma(hoy.filter(x => x.metodo_pago === 'tarjeta'));
       const transferencia = suma(hoy.filter(x => x.metodo_pago === 'transferencia'));
-      document.getElementById('cajaTotalHoy').textContent = `${total.toFixed(2)} €`;
+      const fmtEuro = (n) => `${Number(n || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+      document.getElementById('cajaTotalHoy').textContent = fmtEuro(total);
       const elBonos = document.getElementById('cajaBonosHoy');
       const elTienda = document.getElementById('cajaTiendaHoy');
-      if (elBonos) elBonos.textContent = `${bonosHoy.toFixed(2)} €`;
-      if (elTienda) elTienda.textContent = `${tiendaHoy.toFixed(2)} €`;
-      document.getElementById('cajaEfectivo').textContent = `${efectivo.toFixed(2)} €`;
-      document.getElementById('cajaTarjeta').textContent = `${tarjeta.toFixed(2)} €`;
-      document.getElementById('cajaTransferencia').textContent = `${transferencia.toFixed(2)} €`;
+      if (elBonos) elBonos.textContent = fmtEuro(bonosHoy);
+      if (elTienda) elTienda.textContent = fmtEuro(tiendaHoy);
+      document.getElementById('cajaEfectivo').textContent = fmtEuro(efectivo);
+      document.getElementById('cajaTarjeta').textContent = fmtEuro(tarjeta);
+      document.getElementById('cajaTransferencia').textContent = fmtEuro(transferencia);
 
       try {
-        const { data: caja, error: cajaErr } = await novaSupabase
-          .from('caja_diaria')
-          .select('*')
-          .eq('fecha', new Date().toISOString().slice(0, 10))
-          .maybeSingle();
+        const hoyFecha = new Date().toISOString().slice(0, 10);
+        const [{ data: caja, error: cajaErr }, { data: cajaAnt }] = await Promise.all([
+          novaSupabase.from('caja_diaria').select('*').eq('fecha', hoyFecha).maybeSingle(),
+          novaSupabase
+            .from('caja_diaria')
+            .select('fecha,cierre_efectivo_declarado,cierre_efectivo_sistema,fondo_siguiente,estado')
+            .eq('estado', 'cerrada')
+            .order('fecha', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        ]);
         if (cajaErr) throw cajaErr;
 
         const estadoEl = document.getElementById('cajaEstado');
-        const abrirBtn = document.getElementById('abrirCajaBtn');
-        const cerrarBtn = document.getElementById('cerrarCajaBtn');
+        const sugerido = Number(
+          cajaAnt?.fondo_siguiente ??
+          cajaAnt?.cierre_efectivo_declarado ??
+          cajaAnt?.cierre_efectivo_sistema ??
+          0
+        );
+        appState.cajaSugeridoFondo = Number.isFinite(sugerido) ? sugerido : 0;
+
         if (!caja) {
-          estadoEl.textContent = 'Caja de hoy no abierta.';
-          abrirBtn.disabled = false;
-          cerrarBtn.disabled = true;
+          estadoEl.textContent = appState.cajaSugeridoFondo > 0
+            ? `Caja de hoy no abierta · Fondo previsto ${fmtEuroCaja(appState.cajaSugeridoFondo)}`
+            : 'Caja de hoy no abierta.';
           appState.cajaHoyAbierta = false;
+          appState.cajaHoyEstado = 'none';
+          appState.cajaFondoHoy = 0;
+          appState.cajaEfectivoEsperado = 0;
         } else if (caja.estado === 'abierta') {
-          estadoEl.textContent = `Caja abierta desde ${new Date(caja.abierta_at).toLocaleString('es-ES')} · Fondo inicial ${Number(caja.fondo_inicial || 0).toFixed(2)} €`;
-          abrirBtn.disabled = true;
-          cerrarBtn.disabled = false;
+          const fondo = Number(caja.fondo_inicial || 0);
+          appState.cajaFondoHoy = fondo;
+          appState.cajaEfectivoEsperado = fondo + efectivo;
+          estadoEl.textContent = `Caja abierta desde ${new Date(caja.abierta_at).toLocaleString('es-ES')} · Fondo ${fmtEuroCaja(fondo)}`;
           appState.cajaHoyAbierta = true;
+          appState.cajaHoyEstado = 'abierta';
         } else {
-          estadoEl.textContent = `Caja cerrada · Declarado ${Number(caja.cierre_efectivo_declarado || 0).toFixed(2)} € · Sistema ${Number(caja.cierre_efectivo_sistema || 0).toFixed(2)} € · Diferencia ${Number(caja.diferencia_efectivo || 0).toFixed(2)} €`;
-          abrirBtn.disabled = true;
-          cerrarBtn.disabled = true;
+          estadoEl.textContent = `Caja cerrada · Contado ${fmtEuroCaja(caja.cierre_efectivo_declarado)} · Fondo mañana ${fmtEuroCaja(caja.fondo_siguiente ?? caja.cierre_efectivo_declarado)} · Dif. ${fmtEuroCaja(caja.diferencia_efectivo)}`;
           appState.cajaHoyAbierta = false;
+          appState.cajaHoyEstado = 'cerrada';
+          appState.cajaFondoHoy = Number(caja.fondo_inicial || 0);
+          appState.cajaEfectivoEsperado = Number(caja.cierre_efectivo_sistema || 0);
+          if (caja.fondo_siguiente != null && Number(caja.fondo_siguiente) >= 0) {
+            appState.cajaSugeridoFondo = Number(caja.fondo_siguiente);
+          } else if (Number(caja.cierre_efectivo_declarado || 0) > 0) {
+            appState.cajaSugeridoFondo = Number(caja.cierre_efectivo_declarado || 0);
+          }
         }
+        syncCajaFabButtons();
       } catch (err) {
         appState.cajaHoyAbierta = null;
+        appState.cajaHoyEstado = null;
         document.getElementById('cajaEstado').textContent = 'No se pudo cargar caja diaria (ejecuta el parche de caja).';
-        document.getElementById('abrirCajaBtn').disabled = true;
-        document.getElementById('cerrarCajaBtn').disabled = true;
+        syncCajaFabButtons();
+        const abrirBtn = document.getElementById('abrirCajaBtn');
+        const cerrarBtn = document.getElementById('cerrarCajaBtn');
+        if (abrirBtn) abrirBtn.disabled = true;
+        if (cerrarBtn) cerrarBtn.disabled = true;
       }
     }
 
@@ -2340,17 +3422,18 @@
         .join('') || '<tr><td colspan="4">Sin notificaciones</td></tr>';
     }
 
-    document.getElementById('crearClaseBtn').addEventListener('click', async () => {
+    document.getElementById('nuevaClaseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       try {
         const disciplinaId = document.getElementById('disciplinaSelect').value;
         const salaId = document.getElementById('salaSelect').value;
         const fechaVal = document.getElementById('fechaHoraClase').value;
         if (!disciplinaId) {
-          toast('Selecciona una disciplina.', 'error');
+          toast('Selecciona un tipo de clase.', 'error');
           return;
         }
         if (!fechaVal) {
-          toast('Indica la fecha y hora de la sesión.', 'error');
+          toast('Indica la fecha y hora.', 'error');
           return;
         }
         const fecha = new Date(fechaVal);
@@ -2359,7 +3442,7 @@
           return;
         }
         if (fecha.getTime() < Date.now() - 60000) {
-          toast('La sesión debe ser en una fecha y hora futuras.', 'error');
+          toast('La clase debe ser en una fecha y hora futuras.', 'error');
           return;
         }
         const aforo = Number(document.getElementById('aforoClase').value || 12);
@@ -2385,16 +3468,16 @@
         };
         const { error } = await novaSupabase.from('clases').insert(payload);
         if (error) throw error;
-        document.getElementById('tituloClase').value = '';
-        document.getElementById('fechaHoraClase').value = '';
-        toast('Sesión creada correctamente', 'success');
+        closeNuevaClaseModal();
+        toast('Clase creada correctamente', 'success');
         await loadClases();
-      } catch (e) {
-        toast(e.message || 'No se pudo crear la sesión', 'error');
+      } catch (err) {
+        toast(err.message || 'No se pudo crear la clase', 'error');
       }
     });
 
-    document.getElementById('crearDisciplinaBtn').addEventListener('click', async () => {
+    document.getElementById('nuevaDisciplinaForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       if (!staffProfile || staffProfile.rol !== 'admin') {
         toast('Solo administración puede crear disciplinas.', 'error');
         return;
@@ -2429,6 +3512,7 @@
         }
         document.getElementById('nuevaDisciplinaNombre').value = '';
         document.getElementById('nuevaDisciplinaDesc').value = '';
+        closeNuevaDisciplinaModal();
         toast('Disciplina creada', 'success');
         await loadCatalogs();
         if (ins?.id) document.getElementById('disciplinaSelect').value = ins.id;
@@ -2647,41 +3731,6 @@
         return;
       }
 
-      if (e.target.closest('#tpvAddProductoBtn')) {
-        e.preventDefault();
-        if (!staffProfile || staffProfile.rol !== 'admin') {
-          toast('Solo administración puede editar el catálogo de tienda.', 'error');
-          return;
-        }
-        (async () => {
-          try {
-            const nombre = document.getElementById('tpvNuevoProdNombre').value.trim();
-            const precio = Number(document.getElementById('tpvNuevoProdPrecio').value || 0);
-            const categoria = document.getElementById('tpvNuevoProdCat').value || 'otro';
-            if (!nombre) {
-              toast('Indica el nombre del producto.', 'error');
-              return;
-            }
-            const ordenBase = (appState.productosTiendaAll || []).reduce((m, p) => Math.max(m, Number(p.orden) || 0), 0);
-            const { error } = await novaSupabase.from('productos_tienda').insert({
-              nombre,
-              precio_referencia: precio,
-              categoria,
-              activo: true,
-              orden: ordenBase + 1
-            });
-            if (error) throw error;
-            document.getElementById('tpvNuevoProdNombre').value = '';
-            document.getElementById('tpvNuevoProdPrecio').value = '';
-            toast('Producto añadido al catálogo', 'success');
-            await loadCatalogs();
-          } catch (err) {
-            toast(err.message || 'No se pudo añadir el producto', 'error');
-          }
-        })();
-        return;
-      }
-
       const btnToggleProd = e.target.closest('.js-tpv-toggle-prod');
       if (btnToggleProd) {
         if (!staffProfile || staffProfile.rol !== 'admin') return;
@@ -2762,9 +3811,21 @@
     document.getElementById('tpvPrintTicketBtn').addEventListener('click', () => {
       printTicket();
     });
+    document.getElementById('tpvPrintTicketCartBtn')?.addEventListener('click', () => {
+      printTicket();
+    });
+    document.getElementById('tpvAnularUltimoBtn')?.addEventListener('click', () => {
+      anularUltimoCobroTpv();
+    });
     document.getElementById('tpvCobrarEfectivo').addEventListener('click', () => tpvEjecutarCobro('efectivo'));
     document.getElementById('tpvCobrarTarjeta').addEventListener('click', () => tpvEjecutarCobro('tarjeta'));
     document.getElementById('tpvCobrarTransferencia').addEventListener('click', () => tpvEjecutarCobro('transferencia'));
+    document.getElementById('closeTpvCobroConfirmModal')?.addEventListener('click', () => closeTpvCobroConfirmModal(false));
+    document.getElementById('cancelTpvCobroConfirmBtn')?.addEventListener('click', () => closeTpvCobroConfirmModal(false));
+    document.getElementById('confirmTpvCobroConfirmBtn')?.addEventListener('click', () => closeTpvCobroConfirmModal(true));
+    document.getElementById('tpvCobroConfirmModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'tpvCobroConfirmModal') closeTpvCobroConfirmModal(false);
+    });
     document.getElementById('tpvVaciarCarrito').addEventListener('click', () => {
       if (!(appState.tpvCart || []).length) return;
       if (!window.confirm('¿Vaciar el ticket?')) return;
@@ -2781,6 +3842,21 @@
       else if (open.id === 'claseEditModal') closeClaseEditModal();
       else if (open.id === 'claseDeleteModal') closeClaseDeleteModal();
       else if (open.id === 'nuevoClienteModal') closeNuevoClienteModal();
+      else if (open.id === 'nuevoProductoModal') closeNuevoProductoModal();
+      else if (open.id === 'nuevaClaseModal') closeNuevaClaseModal();
+      else if (open.id === 'nuevaDisciplinaModal') closeNuevaDisciplinaModal();
+      else if (open.id === 'asignarBonoModal') closeAsignarBonoModal();
+      else if (open.id === 'nuevoTipoBonoModal') closeNuevoTipoBonoModal();
+      else if (open.id === 'abrirCajaModal') closeAbrirCajaModal();
+      else if (open.id === 'cerrarCajaModal') closeCerrarCajaModal();
+      else if (open.id === 'anularVentaModal') closeAnularVentaModal(false);
+      else if (open.id === 'tpvCobroConfirmModal') closeTpvCobroConfirmModal(false);
+    });
+    document.getElementById('closeAnularVentaModal')?.addEventListener('click', () => closeAnularVentaModal(false));
+    document.getElementById('cancelAnularVentaBtn')?.addEventListener('click', () => closeAnularVentaModal(false));
+    document.getElementById('confirmAnularVentaBtn')?.addEventListener('click', () => closeAnularVentaModal(true));
+    document.getElementById('anularVentaModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'anularVentaModal') closeAnularVentaModal(false);
     });
     document.getElementById('closeTipoBonoModal').addEventListener('click', closeTipoBonoModal);
     document.getElementById('cancelTipoBonoBtn').addEventListener('click', closeTipoBonoModal);
@@ -2799,6 +3875,79 @@
     });
     document.getElementById('abrirNuevoClienteBtn').addEventListener('click', () => openNuevoClienteModal('usuarios'));
     document.getElementById('tpvAbrirNuevoClienteBtn').addEventListener('click', () => openNuevoClienteModal('tpv'));
+    document.getElementById('abrirNuevaClaseBtn')?.addEventListener('click', openNuevaClaseModal);
+    document.getElementById('closeNuevaClaseModal')?.addEventListener('click', closeNuevaClaseModal);
+    document.getElementById('cancelNuevaClaseBtn')?.addEventListener('click', closeNuevaClaseModal);
+    document.getElementById('nuevaClaseModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'nuevaClaseModal') closeNuevaClaseModal();
+    });
+    document.getElementById('abrirNuevaDisciplinaBtn')?.addEventListener('click', openNuevaDisciplinaModal);
+    document.getElementById('closeNuevaDisciplinaModal')?.addEventListener('click', closeNuevaDisciplinaModal);
+    document.getElementById('cancelNuevaDisciplinaBtn')?.addEventListener('click', closeNuevaDisciplinaModal);
+    document.getElementById('nuevaDisciplinaModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'nuevaDisciplinaModal') closeNuevaDisciplinaModal();
+    });
+    document.getElementById('abrirNuevoProductoBtn')?.addEventListener('click', openNuevoProductoModal);
+    document.getElementById('closeNuevoProductoModal')?.addEventListener('click', closeNuevoProductoModal);
+    document.getElementById('cancelNuevoProductoBtn')?.addEventListener('click', closeNuevoProductoModal);
+    document.getElementById('nuevoProductoModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'nuevoProductoModal') closeNuevoProductoModal();
+    });
+    document.getElementById('tpvNuevoProdImagenFile')?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0] || null;
+      if (!file) {
+        resetTpvProductoImagenPreview();
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast('La imagen supera 5 MB.', 'error');
+        resetTpvProductoImagenPreview();
+        return;
+      }
+      setTpvProductoImagenPreview(file);
+    });
+    document.getElementById('tpvNuevoProdImagenClear')?.addEventListener('click', () => {
+      resetTpvProductoImagenPreview();
+    });
+    document.getElementById('nuevoProductoForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!staffProfile || staffProfile.rol !== 'admin') {
+        toast('Solo administración puede editar el catálogo de tienda.', 'error');
+        return;
+      }
+      const submitBtn = document.getElementById('tpvAddProductoBtn');
+      try {
+        const nombre = document.getElementById('tpvNuevoProdNombre').value.trim();
+        const precio = Number(document.getElementById('tpvNuevoProdPrecio').value || 0);
+        const categoria = document.getElementById('tpvNuevoProdCat').value || 'otro';
+        if (!nombre) {
+          toast('Indica el nombre del producto.', 'error');
+          return;
+        }
+        if (submitBtn) submitBtn.disabled = true;
+        let imagen_url = null;
+        if (appState.tpvNuevoProdFile) {
+          imagen_url = await uploadProductoTiendaImagen(appState.tpvNuevoProdFile);
+        }
+        const ordenBase = (appState.productosTiendaAll || []).reduce((m, p) => Math.max(m, Number(p.orden) || 0), 0);
+        const { error } = await novaSupabase.from('productos_tienda').insert({
+          nombre,
+          precio_referencia: precio,
+          categoria,
+          imagen_url,
+          activo: true,
+          orden: ordenBase + 1
+        });
+        if (error) throw error;
+        closeNuevoProductoModal();
+        toast('Producto añadido al catálogo', 'success');
+        await loadCatalogs();
+      } catch (err) {
+        toast(err.message || 'No se pudo añadir el producto', 'error');
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
     document.getElementById('closeNuevoClienteModal').addEventListener('click', closeNuevoClienteModal);
     document.getElementById('cancelNuevoClienteBtn').addEventListener('click', closeNuevoClienteModal);
     document.getElementById('nuevoClienteModal').addEventListener('click', (e) => {
@@ -2940,7 +4089,8 @@
       }
     });
 
-    document.getElementById('crearTipoBonoBtn').addEventListener('click', async () => {
+    document.getElementById('nuevoTipoBonoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       try {
         if (staffProfile.rol !== 'admin') {
           toast('Solo admin puede crear tipos de bono.', 'error');
@@ -2955,7 +4105,8 @@
         const descripcion = document.getElementById('nuevoTipoDescripcion').value.trim() || null;
         const web_tag = document.getElementById('nuevoTipoWebTag').value.trim() || null;
         const web_meta = document.getElementById('nuevoTipoWebMeta').value.trim() || null;
-        const visible_web = document.getElementById('nuevoTipoVisibleWeb').checked;
+        const visible_web = document.getElementById('nuevoTipoVisibleWeb').value === 'true';
+        const imagen_url = (document.getElementById('nuevoTipoImagenUrl')?.value || '').trim() || TPV_BONO_LOGO_DEFAULT;
         if (!nombre || Number.isNaN(duracion) || duracion < 1 || Number.isNaN(precio) || precio < 0) {
           toast('Completa bien nombre, validez (días) y precio.', 'error');
           return;
@@ -2977,6 +4128,7 @@
             duracion_dias: duracion,
             precio,
             color_hex,
+            imagen_url,
             activo: true,
             orden,
             visible_web,
@@ -2984,16 +4136,7 @@
             web_meta
           });
         if (error) throw error;
-        document.getElementById('nuevoTipoNombre').value = '';
-        document.getElementById('nuevoTipoSesiones').value = '';
-        document.getElementById('nuevoTipoDuracion').value = '30';
-        document.getElementById('nuevoTipoPrecio').value = '';
-        document.getElementById('nuevoTipoPeriodicidad').value = 'mensual';
-        document.getElementById('nuevoTipoColor').value = '#c9a96e';
-        document.getElementById('nuevoTipoDescripcion').value = '';
-        document.getElementById('nuevoTipoWebTag').value = '';
-        document.getElementById('nuevoTipoWebMeta').value = '';
-        document.getElementById('nuevoTipoVisibleWeb').checked = false;
+        closeNuevoTipoBonoModal();
         await loadCatalogs();
         toast('Tipo de bono creado', 'success');
       } catch (err) {
@@ -3003,6 +4146,7 @@
 
     document.getElementById('tipoBonoForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
       try {
         if (staffProfile.rol !== 'admin') {
           toast('Solo admin puede editar tipos de bono.', 'error');
@@ -3024,10 +4168,15 @@
         const descripcion = document.getElementById('modalTipoDescripcion').value.trim() || null;
         const web_tag = document.getElementById('modalTipoWebTag').value.trim() || null;
         const web_meta = document.getElementById('modalTipoWebMeta').value.trim() || null;
-        const visible_web = document.getElementById('modalTipoVisibleWeb').checked;
+        const visible_web = document.getElementById('modalTipoVisibleWeb').value === 'true';
         if (!nombre || Number.isNaN(duracion) || duracion < 1 || Number.isNaN(precio) || precio < 0 || (sesiones !== null && (Number.isNaN(sesiones) || sesiones < 1))) {
           toast('Valores de bono inválidos.', 'error');
           return;
+        }
+        if (submitBtn) submitBtn.disabled = true;
+        let imagen_url = (document.getElementById('modalTipoImagenUrl')?.value || '').trim() || TPV_BONO_LOGO_DEFAULT;
+        if (appState.editBonoFile) {
+          imagen_url = await uploadProductoTiendaImagen(appState.editBonoFile, 'bonos');
         }
         const { error } = await novaSupabase
           .from('tipos_bono')
@@ -3038,6 +4187,7 @@
             ilimitado: sesiones === null,
             periodicidad,
             color_hex,
+            imagen_url,
             duracion_dias: duracion,
             precio,
             activo,
@@ -3052,8 +4202,26 @@
         toast('Tipo de bono actualizado', 'success');
       } catch (err) {
         toast(err.message || 'No se pudo actualizar el tipo de bono', 'error');
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
       }
     });
+
+    document.getElementById('modalTipoImagenFile')?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0] || null;
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        toast('La imagen supera 5 MB.', 'error');
+        e.target.value = '';
+        return;
+      }
+      setBonoTipoImagenPreview(null, file);
+    });
+    document.getElementById('modalTipoImagenReset')?.addEventListener('click', () => {
+      resetBonoTipoImagenToDefault();
+    });
+    document.getElementById('modalTipoVisibleWeb')?.addEventListener('change', syncModalTipoWebPanel);
+    document.getElementById('nuevoTipoVisibleWeb')?.addEventListener('change', syncNuevoTipoWebPanel);
 
     document.getElementById('claseEditForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -3177,48 +4345,38 @@
         document.getElementById('nuevoTipoPeriodicidad').value = p.periodicidad;
         document.getElementById('nuevoTipoColor').value = p.color;
         document.getElementById('nuevoTipoDescripcion').value = p.descripcion;
-        toast('Plantilla aplicada · revisa precio y pulsa «Crear tipo de bono»', 'success');
+        document.querySelectorAll('.js-bono-preset').forEach((b) => b.classList.remove('btn-primary'));
+        btn.classList.add('btn-primary');
+        toast('Plantilla aplicada · revisa y pulsa «Crear tipo»', 'success');
       });
     });
 
-    document.getElementById('abrirCajaBtn').addEventListener('click', async () => {
-      try {
-        const fondo = Number(document.getElementById('cajaFondoInicial').value || 0);
-        const nota = document.getElementById('cajaNota').value.trim() || null;
-        const { error } = await novaSupabase.rpc('abrir_caja_diaria', {
-          p_fondo_inicial: fondo,
-          p_notas: nota
-        });
-        if (error) throw error;
-        toast('Caja abierta correctamente', 'success');
-        await loadFinanzas();
-      } catch (err) {
-        toast(err.message || 'No se pudo abrir caja', 'error');
-      }
+    document.getElementById('tipoBonoSelect')?.addEventListener('change', syncFechaFinBonoDesdeTipo);
+
+    document.getElementById('abrirAsignarBonoBtn')?.addEventListener('click', openAsignarBonoModal);
+    document.getElementById('closeAsignarBonoModal')?.addEventListener('click', closeAsignarBonoModal);
+    document.getElementById('cancelAsignarBonoBtn')?.addEventListener('click', closeAsignarBonoModal);
+    document.getElementById('asignarBonoModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'asignarBonoModal') closeAsignarBonoModal();
+    });
+    document.getElementById('abrirNuevoTipoBonoBtn')?.addEventListener('click', openNuevoTipoBonoModal);
+    document.getElementById('closeNuevoTipoBonoModal')?.addEventListener('click', closeNuevoTipoBonoModal);
+    document.getElementById('cancelNuevoTipoBonoBtn')?.addEventListener('click', closeNuevoTipoBonoModal);
+    document.getElementById('nuevoTipoBonoModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'nuevoTipoBonoModal') closeNuevoTipoBonoModal();
     });
 
-    document.getElementById('cerrarCajaBtn').addEventListener('click', async () => {
-      try {
-        const efectivo = Number(document.getElementById('cajaEfectivoDeclarado').value || 0);
-        const nota = document.getElementById('cajaNota').value.trim() || null;
-        const { error } = await novaSupabase.rpc('cerrar_caja_diaria', {
-          p_efectivo_declarado: efectivo,
-          p_notas: nota
-        });
-        if (error) throw error;
-        toast('Caja cerrada correctamente', 'success');
-        await loadFinanzas();
-      } catch (err) {
-        toast(err.message || 'No se pudo cerrar caja', 'error');
-      }
-    });
-
-    document.getElementById('asignarBonoBtn').addEventListener('click', async () => {
+    document.getElementById('asignarBonoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       try {
         const clienteId = document.getElementById('clienteSelect').value;
         const tipoSel = document.getElementById('tipoBonoSelect');
         const option = tipoSel.selectedOptions[0];
         const tipoId = tipoSel.value;
+        if (!clienteId || !tipoId || !option) {
+          toast('Elige cliente y tipo de bono.', 'error');
+          return;
+        }
         const sesiones = option.getAttribute('data-sesiones');
         const dias = Number(option.getAttribute('data-dias') || 30);
         const fechaFinInput = document.getElementById('fechaFinBono').value;
@@ -3238,10 +4396,106 @@
           asignado_por: staffProfile.id
         });
         if (error) throw error;
+        closeAsignarBonoModal();
         toast('Bono asignado correctamente. El cliente ya puede reservar clases.', 'success');
         loadBonos();
-      } catch (e) { toast((typeof friendlyError === 'function' ? friendlyError(e) : (e.message || 'No se pudo asignar bono')), 'error'); }
+      } catch (err) {
+        toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo asignar bono')), 'error');
+      }
     });
+
+    function bindFinanzasFilters() {
+      const rerender = () => renderFinanzasRows();
+      document.getElementById('finanzasFiltroDesde')?.addEventListener('change', rerender);
+      document.getElementById('finanzasFiltroHasta')?.addEventListener('change', rerender);
+      document.getElementById('finanzasFiltroCliente')?.addEventListener('input', rerender);
+      document.getElementById('finanzasFiltroBono')?.addEventListener('change', rerender);
+      document.getElementById('finanzasFiltroLimpiar')?.addEventListener('click', () => {
+        const desde = document.getElementById('finanzasFiltroDesde');
+        const hasta = document.getElementById('finanzasFiltroHasta');
+        const cliente = document.getElementById('finanzasFiltroCliente');
+        const bono = document.getElementById('finanzasFiltroBono');
+        if (desde) desde.value = '';
+        if (hasta) hasta.value = '';
+        if (cliente) cliente.value = '';
+        if (bono) bono.value = '';
+        renderFinanzasRows();
+      });
+    }
+    bindFinanzasFilters();
+
+    document.getElementById('abrirCajaBtn')?.addEventListener('click', () => openAbrirCajaModal());
+    document.getElementById('cerrarCajaBtn')?.addEventListener('click', () => openCerrarCajaModal());
+    document.getElementById('closeAbrirCajaModal')?.addEventListener('click', closeAbrirCajaModal);
+    document.getElementById('cancelAbrirCajaBtn')?.addEventListener('click', closeAbrirCajaModal);
+    document.getElementById('abrirCajaModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'abrirCajaModal') closeAbrirCajaModal();
+    });
+    document.getElementById('closeCerrarCajaModal')?.addEventListener('click', closeCerrarCajaModal);
+    document.getElementById('cancelCerrarCajaBtn')?.addEventListener('click', closeCerrarCajaModal);
+    document.getElementById('cerrarCajaModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'cerrarCajaModal') closeCerrarCajaModal();
+    });
+    document.getElementById('abrirCajaForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const fondo = Number(document.getElementById('cajaFondoInicial').value || 0);
+        const nota = document.getElementById('cajaNotaApertura').value.trim() || null;
+        if (Number.isNaN(fondo) || fondo < 0) {
+          toast('Fondo inicial no válido.', 'error');
+          return;
+        }
+        const { error } = await novaSupabase.rpc('abrir_caja_diaria', {
+          p_fondo_inicial: fondo,
+          p_notas: nota
+        });
+        if (error) throw error;
+        closeAbrirCajaModal();
+        toast('Caja abierta correctamente', 'success');
+        await loadFinanzas();
+      } catch (err) {
+        toast(err.message || 'No se pudo abrir caja', 'error');
+      }
+    });
+    document.getElementById('cerrarCajaForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const efectivo = Number(document.getElementById('cajaEfectivoDeclarado').value || 0);
+        const fondoSig = Number(document.getElementById('cajaFondoSiguiente').value || 0);
+        const nota = document.getElementById('cajaNotaCierre').value.trim() || null;
+        if (Number.isNaN(efectivo) || efectivo < 0) {
+          toast('Revisa el efectivo contado.', 'error');
+          return;
+        }
+        if (Number.isNaN(fondoSig) || fondoSig < 0) {
+          toast('Revisa el fondo para mañana.', 'error');
+          return;
+        }
+        if (fondoSig > efectivo) {
+          toast('El fondo para mañana no puede ser mayor que el efectivo contado.', 'error');
+          return;
+        }
+        const { error } = await novaSupabase.rpc('cerrar_caja_diaria', {
+          p_efectivo_declarado: efectivo,
+          p_notas: nota,
+          p_fondo_siguiente: fondoSig
+        });
+        if (error) throw error;
+        closeCerrarCajaModal();
+        const retirado = efectivo - fondoSig;
+        toast(
+          retirado > 0
+            ? `Caja cerrada. Fondo mañana ${fmtEuroCaja(fondoSig)} · Retiras ${fmtEuroCaja(retirado)}.`
+            : 'Caja cerrada correctamente',
+          'success'
+        );
+        await loadFinanzas();
+      } catch (err) {
+        toast(err.message || 'No se pudo cerrar caja', 'error');
+      }
+    });
+    document.getElementById('cajaEfectivoDeclarado')?.addEventListener('input', updateCerrarCajaRetirado);
+    document.getElementById('cajaFondoSiguiente')?.addEventListener('input', updateCerrarCajaRetirado);
 
     document.getElementById('guardarPoliticaBtn').addEventListener('click', async () => {
       try {
@@ -3304,10 +4558,18 @@
       const id = btn.getAttribute('data-id');
       if (!id) return;
       const esBono = btn.getAttribute('data-es-bono') === '1';
-      const msg = esBono
-        ? 'Se anulará la venta y se desactivará el bono (solo si no tiene sesiones usadas ni reservas activas). ¿Continuar?'
-        : 'Se eliminará este cobro del registro de caja. ¿Continuar?';
-      if (!window.confirm(msg)) return;
+      const ok = await openAnularVentaModal({
+        title: 'Anular venta',
+        lead: esBono
+          ? 'Se anulará la venta y se desactivará el bono asociado.'
+          : 'Se eliminará este cobro del registro de caja.',
+        esBono,
+        cliente: btn.getAttribute('data-cliente') || '',
+        concepto: btn.getAttribute('data-concepto') || '',
+        importe: btn.getAttribute('data-importe') || '',
+        confirmLabel: 'Anular venta'
+      });
+      if (!ok) return;
       try {
         const { error } = await novaSupabase.rpc('anular_transaccion_tpv', { p_transaccion_id: id });
         if (error) {

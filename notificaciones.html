@@ -50,11 +50,11 @@
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;justify-content:space-between;">
           <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm js-filter" data-filter="all">Todas</button>
-            <button class="btn btn-outline btn-sm js-filter" data-filter="unread">No le?das</button>
-            <button class="btn btn-outline btn-sm js-filter" data-filter="own">M?as</button>
+            <button class="btn btn-outline btn-sm js-filter" data-filter="unread">No leídas</button>
+            <button class="btn btn-outline btn-sm js-filter" data-filter="own">Mías</button>
             <button class="btn btn-outline btn-sm js-filter" data-filter="global">Generales</button>
           </div>
-          <button class="btn btn-ghost" id="markAllBtn">Marcar m?as como le?das</button>
+          <button class="btn btn-ghost" id="markAllBtn">Marcar mías como leídas</button>
         </div>
       </div>
       <div id="list" class="card">Cargando...</div>
@@ -126,12 +126,12 @@
           <div>
             <h3 style="font-size:1.05rem;">${n.titulo}</h3>
             <p style="margin-top:.2rem;font-size:.82rem;color:var(--color-cream-dim)">${n.mensaje}</p>
-            <p style="font-size:.7rem;color:var(--color-muted);margin-top:.35rem;">${new Date(n.created_at).toLocaleString('es-ES')} ? ${isOwn ? 'Personal' : 'General'}${isPlaza ? ' ? Lista de espera' : ''}</p>
+            <p style="font-size:.7rem;color:var(--color-muted);margin-top:.35rem;">${new Date(n.created_at).toLocaleString('es-ES')} · ${isOwn ? 'Personal' : 'General'}${isPlaza ? ' · Lista de espera' : ''}</p>
             ${isPlaza ? '<p style="margin-top:.35rem;"><a href="/calendario.html" class="btn btn-outline btn-sm">Ver calendario</a> <a href="/mis-clases.html" class="btn btn-primary btn-sm">Mis clases</a></p>' : ''}
           </div>
           <div class="day-detail-actions">
-            ${n.leida ? '<span class="badge badge-neutral">Le?da</span>' : '<span class="badge badge-accent">Nueva</span>'}
-            ${(!n.leida && isOwn) ? `<button class="btn btn-outline btn-sm js-read-one" data-id="${n.id}">Marcar le?da</button>` : ''}
+            ${n.leida ? '<span class="badge badge-neutral">Leída</span>' : '<span class="badge badge-accent">Nueva</span>'}
+            ${(!n.leida && isOwn) ? `<button class="btn btn-outline btn-sm js-read-one" data-id="${n.id}">Marcar leída</button>` : ''}
           </div>`;
         el.appendChild(item);
       });
@@ -157,7 +157,7 @@
           .eq('perfil_id', state.perfilId);
         if (error) throw error;
         await loadNotifs();
-        toast('Notificaci?n marcada como le?da', 'success');
+        toast('Notificación marcada como leída', 'success');
       } catch (err) {
         toast(err.message || 'No se pudo marcar', 'error');
       }
@@ -177,7 +177,7 @@
           .eq('perfil_id', state.perfilId);
         if (error) throw error;
         await loadNotifs();
-        toast('Notificaciones personales marcadas como le?das', 'success');
+        toast('Notificaciones personales marcadas como leídas', 'success');
       } catch (err) {
         toast(err.message || 'No se pudo completar', 'error');
       }

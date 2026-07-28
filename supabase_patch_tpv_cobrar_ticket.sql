@@ -2,6 +2,7 @@
 -- - Valida staff (empleado/admin) y cliente.
 -- - Como máximo 1 bono por ticket; desactiva bonos activos previos al asignar el nuevo.
 -- - Precios desde catálogo (tipos_bono / productos_tienda), no confía en el cliente.
+-- - Devuelve transaccion_ids para poder anular el ticket desde Último cobro.
 -- Ejecutar en Supabase → SQL Editor.
 
 CREATE OR REPLACE FUNCTION public.tpv_cobrar_ticket(
@@ -30,6 +31,7 @@ DECLARE
   v_tipo RECORD;
   v_prod RECORD;
   v_bono_id UUID;
+  v_tx_id UUID;
   v_fecha_inicio DATE := CURRENT_DATE;
   v_fecha_fin DATE;
   v_dias INT;
@@ -37,6 +39,7 @@ DECLARE
   v_nota_global TEXT := nullif(trim(coalesce(p_nota, '')), '');
   v_total NUMERIC(10,2) := 0;
   v_resumen TEXT[] := ARRAY[]::TEXT[];
+  v_tx_ids UUID[] := ARRAY[]::UUID[];
   v_line_label TEXT;
 BEGIN
   IF v_uid IS NULL THEN
@@ -69,7 +72,6 @@ BEGIN
     RAISE EXCEPTION 'El ticket está vacío.';
   END IF;
 
-  -- Pre-chequeo: máximo un bono
   FOR v_linea IN SELECT * FROM jsonb_array_elements(p_lineas)
   LOOP
     IF lower(coalesce(v_linea->>'kind', '')) = 'bono' THEN
@@ -120,8 +122,10 @@ BEGIN
         perfil_id, bono_activo_id, tipo_bono_id, importe, metodo_pago, nota, registrado_por
       ) VALUES (
         p_cliente_id, NULL, NULL, v_importe, v_metodo, v_nota_linea, v_uid
-      );
+      )
+      RETURNING id INTO v_tx_id;
 
+      v_tx_ids := array_append(v_tx_ids, v_tx_id);
       v_line_label := v_nombre || CASE WHEN v_qty > 1 THEN ' ×' || v_qty::text ELSE '' END
         || ' (' || to_char(v_importe, 'FM999999990.00') || ' €)';
       v_resumen := array_append(v_resumen, v_line_label);
@@ -167,8 +171,10 @@ BEGIN
         perfil_id, bono_activo_id, tipo_bono_id, importe, metodo_pago, nota, registrado_por
       ) VALUES (
         p_cliente_id, v_bono_id, v_tipo.id, v_importe, v_metodo, v_nota_global, v_uid
-      );
+      )
+      RETURNING id INTO v_tx_id;
 
+      v_tx_ids := array_append(v_tx_ids, v_tx_id);
       v_line_label := v_tipo.nombre || ' (' || to_char(v_importe, 'FM999999990.00') || ' €)';
       v_resumen := array_append(v_resumen, v_line_label);
       v_total := v_total + v_importe;
@@ -187,7 +193,8 @@ BEGIN
     'total', v_total,
     'metodo_pago', v_metodo,
     'lineas', to_jsonb(v_resumen),
-    'num_lineas', jsonb_array_length(p_lineas)
+    'num_lineas', jsonb_array_length(p_lineas),
+    'transaccion_ids', to_jsonb(v_tx_ids)
   );
 END;
 $$;

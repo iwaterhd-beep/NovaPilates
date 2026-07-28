@@ -29,11 +29,12 @@ CREATE POLICY "Admin actualiza ajustes" ON public.ajustes_centro
   FOR UPDATE USING (mi_rol() = 'admin');
 
 CREATE OR REPLACE FUNCTION public.crear_reserva_segura(p_clase_id UUID)
-RETURNS UUID AS $$
+RETURNS JSONB AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_clase RECORD;
   v_bono RECORD;
+  v_reserva RECORD;
   v_reserva_id UUID;
   v_ocupacion INTEGER;
   v_margen_reserva_dias INTEGER := 0;
@@ -68,23 +69,35 @@ BEGIN
     RAISE EXCEPTION 'Debes reservar con al menos % días de antelación.', v_margen_reserva_dias;
   END IF;
 
+  SELECT id, estado, lista_espera, bono_activo_id
+  INTO v_reserva
+  FROM public.reservas
+  WHERE perfil_id = v_user_id
+    AND clase_id = p_clase_id
+  FOR UPDATE;
+
+  IF FOUND THEN
+    IF v_reserva.estado IN ('confirmada', 'asistida') THEN
+      IF COALESCE(v_reserva.lista_espera, FALSE) THEN
+        RAISE EXCEPTION 'Ya estás en lista de espera para esta clase.';
+      END IF;
+      RAISE EXCEPTION 'Ya tienes una reserva activa para esta clase.';
+    END IF;
+
+    IF v_reserva.estado <> 'cancelada' THEN
+      RAISE EXCEPTION 'Ya existe una reserva para esta clase.';
+    END IF;
+  END IF;
+
   SELECT COUNT(*)::INTEGER
   INTO v_ocupacion
   FROM public.reservas
   WHERE clase_id = p_clase_id
-    AND estado IN ('confirmada', 'asistida');
+    AND estado IN ('confirmada', 'asistida')
+    AND COALESCE(lista_espera, FALSE) = FALSE;
 
   IF v_ocupacion >= v_clase.aforo_max THEN
     RAISE EXCEPTION 'No hay plazas disponibles.';
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM public.reservas
-    WHERE perfil_id = v_user_id
-      AND clase_id = p_clase_id
-      AND estado IN ('confirmada', 'asistida')
-  ) THEN
-    RAISE EXCEPTION 'Ya tienes una reserva activa para esta clase.';
   END IF;
 
   SELECT id, sesiones_totales, sesiones_usadas
@@ -105,15 +118,32 @@ BEGIN
     RAISE EXCEPTION 'No tienes sesiones disponibles en tu bono.';
   END IF;
 
-  INSERT INTO public.reservas (perfil_id, clase_id, bono_activo_id, estado)
-  VALUES (v_user_id, p_clase_id, v_bono.id, 'confirmada')
-  RETURNING id INTO v_reserva_id;
+  IF v_reserva.id IS NOT NULL THEN
+    UPDATE public.reservas
+    SET estado = 'confirmada',
+        fecha_reserva = NOW(),
+        fecha_cancelacion = NULL,
+        motivo_cancelacion = NULL,
+        lista_espera = FALSE,
+        posicion_espera = NULL,
+        bono_activo_id = v_bono.id
+    WHERE id = v_reserva.id
+    RETURNING id INTO v_reserva_id;
+  ELSE
+    INSERT INTO public.reservas (perfil_id, clase_id, bono_activo_id, estado)
+    VALUES (v_user_id, p_clase_id, v_bono.id, 'confirmada')
+    RETURNING id INTO v_reserva_id;
+  END IF;
 
   UPDATE public.bonos_activos
   SET sesiones_usadas = sesiones_usadas + 1
   WHERE id = v_bono.id;
 
-  RETURN v_reserva_id;
+  RETURN jsonb_build_object(
+    'reserva_id', v_reserva_id,
+    'en_espera', FALSE,
+    'posicion_espera', NULL
+  );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
