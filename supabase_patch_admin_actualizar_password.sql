@@ -1,4 +1,5 @@
--- Permite al admin actualizar la contraseña de un usuario existente (mismo email en alta / TPV).
+-- PARCHE LEGACY: actualizar contraseña manual desde panel admin.
+-- Si ya aplicaste `supabase_patch_primera_activacion.sql`, este archivo queda superado.
 -- Ejecutar en Supabase → SQL Editor después de tener pgcrypto (mismo esquema que admin_crear_usuario).
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;

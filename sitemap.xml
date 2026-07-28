@@ -16,17 +16,17 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://nova-pilates.vercel.app/aviso-legal.html</loc>
+    <loc>https://nova-pilates.vercel.app/aviso-legal</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://nova-pilates.vercel.app/privacidad.html</loc>
+    <loc>https://nova-pilates.vercel.app/privacidad</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://nova-pilates.vercel.app/cookies.html</loc>
+    <loc>https://nova-pilates.vercel.app/cookies</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

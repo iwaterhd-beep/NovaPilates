@@ -1,4 +1,6 @@
--- PARCHE: crear usuarios desde panel admin
+-- PARCHE LEGACY: crear usuarios desde panel admin
+-- Si ya aplicaste `supabase_patch_primera_activacion.sql`, este archivo queda superado.
+-- Mantener solo como referencia/histórico para instalaciones antiguas.
 -- Ejecuta este script en Supabase SQL Editor.
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;

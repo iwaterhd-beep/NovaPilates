@@ -4,8 +4,8 @@ App estática (HTML/CSS/JS) + Supabase. Hosting recomendado: **Vercel**.
 
 ## 1) Branding
 Isotipo: `assets/branding/logo-isotipo.svg` (cabecera, favicon, pie).
-Logo principal: `assets/branding/logo-nova-main.PNG`.
-Vídeo hero: `assets/video/nova-hero.mp4` (usa `preload="metadata"` + `poster`).
+Activo público base: `assets/branding/logo-isotipo.svg`.
+La home ya no depende de un vídeo local obligatorio; usa identidad visual estática si no hay media adicional lista para publicar.
 Logos PNG optimizados en `assets/branding/` (también hay SVG `logo-isotipo.svg` para UI ligera).
 
 > `home.css` y `styles.css` existen pero **no se usan** en las páginas actuales (landing = `zen.css`, app = `portal.css`).
@@ -48,11 +48,13 @@ Proyecto vacío:
 1. `supabase_full_setup.sql` (tablas, RLS, RPCs base, seeds)
 2. `supabase_patch_lista_espera.sql` (RPCs JSONB + lista de espera)
 3. `supabase_patch_lista_espera_notify.sql` (notificación al liberar plaza)
+4. `supabase_patch_staff_waitlist_rpc.sql` (promover / quitar / reordenar lista de espera desde staff)
+5. `supabase_patch_primera_activacion.sql` (alta cliente sin contraseña fija + primer acceso seguro)
 4. Patches según features que uses:
    - `supabase_patch_margen_reservas.sql`
    - `supabase_patch_asistencia_compatible.sql`
-   - `supabase_patch_admin_crear_usuarios.sql`
-   - `supabase_patch_admin_actualizar_password.sql`
+   - `supabase_patch_admin_crear_usuarios.sql` (**legacy**; no aplicar si ya ejecutaste `supabase_patch_primera_activacion.sql`)
+   - `supabase_patch_admin_actualizar_password.sql` (**legacy**; no aplicar si ya ejecutaste `supabase_patch_primera_activacion.sql`)
    - `supabase_fix_gen_salt_admin_usuario.sql` (si falla `gen_salt`)
    - `supabase_patch_tpv_apellidos_y_tienda.sql`
    - `supabase_patch_caja_apertura_cierre.sql`
@@ -60,8 +62,12 @@ Proyecto vacío:
    - `supabase_patch_tpv_cobrar_ticket.sql` (cobro TPV atómico)
    - `supabase_patch_tipos_bono_web.sql` (planes en web + casilla visible_web)
    - `supabase_patch_eliminar_cliente.sql`
-   - `supabase_patch_primera_activacion.sql` (primer login solo con email → elegir contraseña)
    - `supabase_patch_perfiles_*.sql` (si faltan columnas)
+
+Notas importantes:
+
+- El frontend actual de staff ya usa `staff_reordenar_lista_espera`, `staff_promover_reserva_espera` y `staff_cancelar_reserva_espera`; sin `supabase_patch_staff_waitlist_rpc.sql` esa parte no queda operativa.
+- El flujo actual de login/alta cliente asume `debe_definir_password`, `cliente_marcar_password_definida()` y el endurecimiento de `raw_app_meta_data`; por eso `supabase_patch_primera_activacion.sql` deja de ser opcional en instalaciones nuevas.
 
 Opcional demo: `supabase_seed_demo.sql` (requiere usuarios Auth previos).
 

@@ -131,7 +131,9 @@ a { text-decoration: none; color: inherit; }
   min-height: 100%;
   object-fit: cover;
   object-position: center;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transform: scale(1.02);
   animation: heroDrift 32s var(--ease-soft) infinite alternate;
   will-change: transform;
@@ -329,6 +331,16 @@ a { text-decoration: none; color: inherit; }
 }
 .pillar-icon-img--wide {
   max-width: 7.5rem;
+}
+.pillar-icon-word {
+  display: inline-block;
+  font-size: .74rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: #8f887d;
+}
+.pillar-icon-word--wide {
+  letter-spacing: .22em;
 }
 .pillar-icon--dual {
   display: flex;

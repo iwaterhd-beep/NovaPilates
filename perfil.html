@@ -9,10 +9,10 @@
   <meta property="og:title" content="Mi perfil — NŌVA Pilates Studio" />
   <meta property="og:description" content="Gestiona tus datos personales y preferencias de cuenta." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-nova-main.PNG" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-isotipo.svg" />
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/assets/branding/logo-nova-main.PNG" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-isotipo.svg" />
   <link rel="stylesheet" href="portal.css?v=7" />
 </head>
 <body>
@@ -44,7 +44,7 @@
     <div class="content">
       <div class="page-header">
         <h1 class="page-title">Tu perfil</h1>
-        <p class="page-subtitle">Mantén tus datos actualizados para una mejor gestión de tus clases.</p>
+        <p class="page-subtitle">Mant�n tus datos actualizados para una mejor gesti�n de tus clases.</p>
       </div>
       <div class="card" style="margin-bottom:1rem;">
         <div class="card-label">Datos personales</div>
@@ -63,7 +63,7 @@
               <input class="form-input" id="email" type="email" disabled />
             </div>
             <div>
-              <label class="form-label" for="telefono">Teléfono</label>
+              <label class="form-label" for="telefono">Tel�fono</label>
               <input class="form-input" id="telefono" type="text" placeholder="+34..." />
             </div>
             <div>
@@ -75,18 +75,18 @@
               <input class="form-input" id="rol" type="text" disabled />
             </div>
           </div>
-          <div style="font-size:.72rem;color:var(--color-muted);margin-top:-.2rem;">Dirección y documento (opcional, visible solo para ti y el centro).</div>
+          <div style="font-size:.72rem;color:var(--color-muted);margin-top:-.2rem;">Direcci�n y documento (opcional, visible solo para ti y el centro).</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;">
             <div>
-              <label class="form-label" for="direccion">Dirección</label>
-              <input class="form-input" id="direccion" type="text" placeholder="Calle, número, piso..." />
+              <label class="form-label" for="direccion">Direcci�n</label>
+              <input class="form-input" id="direccion" type="text" placeholder="Calle, n�mero, piso..." />
             </div>
             <div>
               <label class="form-label" for="ciudad">Ciudad</label>
               <input class="form-input" id="ciudad" type="text" />
             </div>
             <div>
-              <label class="form-label" for="cp">Código postal</label>
+              <label class="form-label" for="cp">C�digo postal</label>
               <input class="form-input" id="cp" type="text" />
             </div>
             <div>
@@ -94,7 +94,7 @@
               <input class="form-input" id="dni" type="text" />
             </div>
             <div>
-              <label class="form-label" for="telefonoEmergencia">Teléfono de emergencia</label>
+              <label class="form-label" for="telefonoEmergencia">Tel�fono de emergencia</label>
               <input class="form-input" id="telefonoEmergencia" type="text" />
             </div>
           </div>
@@ -104,7 +104,7 @@
         </form>
       </div>
       <div class="card">
-        <div class="card-label">Información de cuenta</div>
+        <div class="card-label">Informaci�n de cuenta</div>
         <div id="perfilInfo" style="font-size:.82rem;color:var(--color-cream-dim);display:grid;gap:.4rem;">Cargando...</div>
       </div>
     </div>
@@ -150,7 +150,7 @@
         '<p><strong>ID usuario:</strong> ' + (p.id || '') + '</p>' +
         '<p><strong>Estado:</strong> ' + (p.activo ? 'Activo' : 'Inactivo') + '</p>' +
         '<p><strong>Alta:</strong> ' + (p.created_at ? new Date(p.created_at).toLocaleString('es-ES') : '-') + '</p>' +
-        '<p><strong>Última actualización:</strong> ' + (p.updated_at ? new Date(p.updated_at).toLocaleString('es-ES') : '-') + '</p>';
+        '<p><strong>�ltima actualizaci�n:</strong> ' + (p.updated_at ? new Date(p.updated_at).toLocaleString('es-ES') : '-') + '</p>';
     }
 
     async function init() {

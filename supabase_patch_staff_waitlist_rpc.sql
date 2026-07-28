@@ -22,6 +22,13 @@ BEGIN
   END IF;
 
   IF (
+    SELECT COUNT(DISTINCT x.id)
+    FROM unnest(p_reserva_ids) AS x(id)
+  ) <> array_length(p_reserva_ids, 1) THEN
+    RAISE EXCEPTION 'El orden contiene reservas duplicadas.';
+  END IF;
+
+  IF (
     SELECT COUNT(*)
     FROM public.reservas
     WHERE clase_id = p_clase_id

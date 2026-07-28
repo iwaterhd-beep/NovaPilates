@@ -18,14 +18,16 @@ function formatShopPrice(amount, currency) {
 }
 
 /** Catálogo de vista previa hasta conectar Medusa Cloud / backend. */
+const SHOP_PREVIEW_IMAGE = '/assets/branding/logo-isotipo.svg';
+
 const SHOP_PREVIEW_PRODUCTS = [
   {
     id: 'preview-botella',
     variantId: 'preview-botella',
     title: 'Botella NŌVA',
     description: 'Hidratación ligera para antes y después de clase.',
-    thumbnail: '/assets/shop/botella-nova.jpg?v=2',
-    images: ['/assets/shop/botella-nova.jpg?v=2'],
+    thumbnail: SHOP_PREVIEW_IMAGE,
+    images: [SHOP_PREVIEW_IMAGE],
     price: 28,
     currency: 'eur',
     collection: 'Accesorios',
@@ -46,8 +48,8 @@ const SHOP_PREVIEW_PRODUCTS = [
     variantId: 'preview-tote',
     title: 'Tote Studio',
     description: 'Bolsa de lona para esterilla, muda y lo esencial.',
-    thumbnail: '/assets/shop/tote-studio.jpg?v=2',
-    images: ['/assets/shop/tote-studio.jpg?v=2'],
+    thumbnail: SHOP_PREVIEW_IMAGE,
+    images: [SHOP_PREVIEW_IMAGE],
     price: 32,
     currency: 'eur',
     collection: 'Accesorios',
@@ -67,8 +69,8 @@ const SHOP_PREVIEW_PRODUCTS = [
     variantId: 'preview-camiseta',
     title: 'Camiseta técnica',
     description: 'Tejido moisture-wicking y quick-dry, marca discreta.',
-    thumbnail: '/assets/shop/camiseta-tecnica.jpg?v=2',
-    images: ['/assets/shop/camiseta-tecnica.jpg?v=2'],
+    thumbnail: SHOP_PREVIEW_IMAGE,
+    images: [SHOP_PREVIEW_IMAGE],
     price: 38,
     currency: 'eur',
     collection: 'Ropa',
@@ -92,8 +94,8 @@ const SHOP_PREVIEW_PRODUCTS = [
     variantId: 'preview-banda',
     title: 'Banda de resistencia',
     description: 'Loop de tela para suelo o casa. Elige la intensidad.',
-    thumbnail: '/assets/shop/banda-resistencia.jpg?v=2',
-    images: ['/assets/shop/banda-resistencia.jpg?v=2'],
+    thumbnail: SHOP_PREVIEW_IMAGE,
+    images: [SHOP_PREVIEW_IMAGE],
     price: 18,
     currency: 'eur',
     collection: 'Movimiento',
@@ -181,7 +183,7 @@ function renderShopProducts(grid, products) {
             <p class="shop-card-price">${escShop(formatShopPrice(p.price, p.currency))}</p>
             <p class="shop-card-desc">${escShop(p.description || '')}</p>
           </button>
-          <button type="button" class="btn btn-outline shop-card-cta" data-add-to-cart="${escShop(key)}">Añadir al carrito</button>
+          <button type="button" class="btn btn-outline shop-card-cta" data-add-to-cart="${escShop(key)}">Guardar en carrito demo</button>
         </div>
       </article>`;
     })
@@ -228,7 +230,7 @@ function ensureProductModal() {
               </div>
             </div>
           </div>
-          <button type="button" class="btn btn-primary product-modal-cta" id="productModalAdd">Añadir al carrito</button>
+          <button type="button" class="btn btn-primary product-modal-cta" id="productModalAdd">Guardar en carrito demo</button>
         </div>
       </div>
     </div>`;
@@ -716,19 +718,19 @@ async function loadShopCatalog() {
       const products = await medusaListProducts();
       if (!products.length) {
         renderShopProducts(grid, SHOP_PREVIEW_PRODUCTS);
-        setShopStatus('Sin productos en Medusa · mostrando vista previa');
+        setShopStatus('Catalogo en preparacion · mostrando vista previa');
       } else {
         renderShopProducts(grid, products);
-        setShopStatus('Catálogo Medusa');
+        setShopStatus('Catalogo online activo');
       }
     } catch (err) {
       console.warn('[tienda] Medusa:', err);
       renderShopProducts(grid, SHOP_PREVIEW_PRODUCTS);
-      setShopStatus('Medusa no disponible · vista previa');
+      setShopStatus('Catalogo en preparacion · vista previa');
     }
   } else {
     renderShopProducts(grid, SHOP_PREVIEW_PRODUCTS);
-    setShopStatus('Vista previa · conecta Medusa en js/medusa.js');
+    setShopStatus('Catalogo en preparacion · compra online aun no activa');
   }
 
   initCartUi();
