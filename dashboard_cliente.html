@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -630,7 +630,7 @@ function escNotif(s) {
 }
 
 function getUnreadNotifs() {
-  return clientNotifs.filter((n) => !n.leida);
+  return clientNotifs.filter((n) => !n.leida && n.perfil_id);
 }
 
 function renderNotifPopover() {
@@ -694,7 +694,7 @@ function updateNotifBadge(notifs) {
   const badge = document.getElementById('notifBadge');
   const dot = document.getElementById('topbarDot');
   const list = Array.isArray(notifs) ? notifs : clientNotifs;
-  const unread = list.filter((n) => !n.leida).length;
+  const unread = list.filter((n) => !n.leida && n.perfil_id).length;
   if (badge) {
     badge.textContent = String(unread);
     badge.style.display = unread > 0 ? 'inline-block' : 'none';
@@ -702,25 +702,8 @@ function updateNotifBadge(notifs) {
   if (dot) dot.style.display = unread > 0 ? 'block' : 'none';
 }
 
-// DEMO DATA (mientras no hay Supabase) 
-const DEMO = {
-  nombre: 'María',
-  bono: { nombre: 'Bono 8 clases', restantes: 5, totales: 8, ilimitado: false, vence: '30 abr 2025' },
-  stats: { proxima: 'Reformer Pilates', proximaFecha: 'Mié 16 abr · 10:00', mes: 3, total: 24 },
-  reservas: [
-    { id: 'r1', clase: { fecha_hora: new Date(Date.now() + 86400000*2).toISOString(), disciplina: { nombre: 'Reformer Pilates', color_hex: '#c9a96e' }, sala: { nombre: 'Sala Reformer' } } },
-    { id: 'r2', clase: { fecha_hora: new Date(Date.now() + 86400000*4).toISOString(), disciplina: { nombre: 'Yoga', color_hex: '#1d9e75' }, sala: { nombre: 'Sala Principal' } } },
-    { id: 'r3', clase: { fecha_hora: new Date(Date.now() + 86400000*6).toISOString(), disciplina: { nombre: 'Barre', color_hex: '#9e7d48' }, sala: { nombre: 'Sala Principal' } } },
-  ],
-  notifs: [
-    { id: 'n1', titulo: '¡Recuerda tu clase de mañana!', mensaje: 'Reformer Pilates · Miércoles 10:00 · Sala Reformer', leida: false, created_at: new Date(Date.now() - 3600000*2).toISOString() },
-    { id: 'n2', titulo: 'Cambio de horario', mensaje: 'La clase del viernes 18 abr pasa de 19:00 a 19:30.', leida: true, created_at: new Date(Date.now() - 3600000*26).toISOString() },
-  ]
-};
-
 // Inicializar página 
 async function init() {
-  // Intenta cargar de Supabase; si falla usa demo
   let perfil = null;
   let bonoActivo = null;
   let reservas = [];
@@ -763,25 +746,10 @@ async function init() {
     const totalEl = document.getElementById('statTotal');
     if (totalEl) totalEl.textContent = String(totalAsistidas ?? 0);
   } catch(e) {
-    // Usa datos de demo si no hay Supabase configurado
-    console.warn('Supabase no disponible, usando datos de demo.', e);
-    renderDemo(); return;
+    console.error('No se pudo cargar el dashboard cliente.', e);
+    throw e;
   }
   renderAll(perfil, bonoActivo, reservas, notifs);
-}
-
-function renderDemo() {
-  const d = DEMO;
-  document.getElementById('greetName').textContent = d.nombre;
-  document.getElementById('greetSub').textContent = saludo();
-  renderBonoSection({ nombre: d.bono.nombre, sesiones_totales: d.bono.totales, sesiones_usadas: d.bono.totales - d.bono.restantes, tipo_bono: { ilimitado: false }, fecha_fin: '2025-04-30', activo: true });
-  renderStats(d.stats);
-  renderProximas(d.reservas);
-  const proxDemo = d.reservas[0]?.clase;
-  renderClaseCountdown(proxDemo?.fecha_hora, proxDemo?.disciplina?.nombre);
-  setClientNotifs(d.notifs);
-  const totalEl = document.getElementById('statTotal');
-  if (totalEl) totalEl.textContent = String(d.stats.total ?? 0);
 }
 
 function saludo() {
@@ -913,7 +881,16 @@ function renderStats(stats) {
 }
 
 // Arrancar 
-init();
+init().catch((e) => {
+  const msg = typeof friendlyError === 'function' ? friendlyError(e) : (e.message || 'No se pudo cargar tu panel.');
+  toast(msg, 'error');
+  document.getElementById('greetName').textContent = 'Error de carga';
+  document.getElementById('greetSub').textContent = 'No hemos podido cargar tus datos ahora mismo.';
+  const proximas = document.getElementById('proximasClases');
+  if (proximas) {
+    proximas.innerHTML = '<div class=\"empty-state\"><p>No se pudo cargar tu información. Inténtalo de nuevo en unos minutos.</p></div>';
+  }
+});
 </script>
 </body>
 </html>

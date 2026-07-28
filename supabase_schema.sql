@@ -45,9 +45,32 @@ RETURNS TRIGGER AS $$
 BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION public.guard_perfiles_sensitive_fields()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Debes iniciar sesión.';
+  END IF;
+
+  IF public.mi_rol() <> 'admin' AND NEW.id = auth.uid() THEN
+    NEW.rol := OLD.rol;
+    NEW.activo := OLD.activo;
+    NEW.notas := OLD.notas;
+    NEW.avatar_url := OLD.avatar_url;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 CREATE TRIGGER perfiles_updated_at
   BEFORE UPDATE ON public.perfiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS perfiles_guard_sensitive_fields ON public.perfiles;
+CREATE TRIGGER perfiles_guard_sensitive_fields
+  BEFORE UPDATE ON public.perfiles
+  FOR EACH ROW EXECUTE FUNCTION public.guard_perfiles_sensitive_fields();
 
 -- Trigger: crear perfil automáticamente al registrarse en Auth
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -58,7 +81,7 @@ BEGIN
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'nombre', split_part(NEW.email, '@', 1)),
-    COALESCE((NEW.raw_user_meta_data->>'rol')::rol_usuario, 'cliente')
+    COALESCE((NEW.raw_app_meta_data->>'rol')::rol_usuario, 'cliente')
   );
   RETURN NEW;
 END;
@@ -403,7 +426,7 @@ CREATE POLICY "Admin actualiza ajustes" ON public.ajustes_centro
 --  VISTA: calendario_semanal
 --  Útil para el cliente: clases + estado reserva
 -- ══════════════════════════════════════════════
-CREATE OR REPLACE VIEW public.calendario_clases AS
+CREATE OR REPLACE VIEW public.calendario_clases WITH (security_invoker = true) AS
 SELECT
   c.id,
   c.fecha_hora,
@@ -429,7 +452,11 @@ GROUP BY c.id, d.nombre, d.color_hex, s.nombre, p.nombre;
 -- ══════════════════════════════════════════════
 
 CREATE OR REPLACE FUNCTION public.crear_reserva_segura(p_clase_id UUID)
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_clase RECORD;
@@ -545,10 +572,14 @@ BEGIN
     'posicion_espera', NULL
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 CREATE OR REPLACE FUNCTION public.cancelar_reserva_segura(p_reserva_id UUID)
-RETURNS VOID AS $$
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_reserva RECORD;
@@ -595,4 +626,4 @@ BEGIN
     WHERE id = v_reserva.bono_activo_id;
   END IF;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;

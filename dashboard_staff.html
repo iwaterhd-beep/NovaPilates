@@ -2985,36 +2985,21 @@
         .eq('lista_espera', true)
         .order('posicion_espera', { ascending: true });
       if (error) throw error;
-      for (let i = 0; i < (data || []).length; i++) {
-        const r = data[i];
-        const expected = i + 1;
-        if (r.posicion_espera !== expected) {
-          const { error: updErr } = await novaSupabase
-            .from('reservas')
-            .update({ posicion_espera: expected })
-            .eq('id', r.id);
-          if (updErr) throw updErr;
-        }
-      }
+      const orderedIds = (data || []).map((r) => r.id);
+      if (!orderedIds.length) return;
+      const { error: rpcErr } = await novaSupabase.rpc('staff_reordenar_lista_espera', {
+        p_clase_id: claseId,
+        p_reserva_ids: orderedIds
+      });
+      if (rpcErr) throw rpcErr;
     }
 
     async function aplicarOrdenListaEspera(claseId, orderedIds) {
-      const { data, error } = await novaSupabase
-        .from('reservas')
-        .select('id,posicion_espera')
-        .eq('clase_id', claseId)
-        .eq('estado', 'confirmada')
-        .eq('lista_espera', true);
+      const { error } = await novaSupabase.rpc('staff_reordenar_lista_espera', {
+        p_clase_id: claseId,
+        p_reserva_ids: orderedIds
+      });
       if (error) throw error;
-      const current = new Map((data || []).map(x => [x.id, x.posicion_espera]));
-      for (let i = 0; i < orderedIds.length; i++) {
-        const id = orderedIds[i];
-        const nextPos = i + 1;
-        if (current.get(id) !== nextPos) {
-          const { error: updErr } = await novaSupabase.from('reservas').update({ posicion_espera: nextPos }).eq('id', id);
-          if (updErr) throw updErr;
-        }
-      }
     }
 
     function bindWaitlistDragAndDrop() {
@@ -3079,76 +3064,10 @@
       const rowsW = document.getElementById('rowsWaitlist');
       const claseId = rowsW.dataset.claseId;
       if (!claseId) return;
-
-      const { data: reserva, error: rErr } = await novaSupabase
-        .from('reservas')
-        .select('id,perfil_id,clase_id,estado,lista_espera')
-        .eq('id', reservaId)
-        .single();
-      if (rErr) throw rErr;
-
-      const { count, error: cErr } = await novaSupabase
-        .from('reservas')
-        .select('id', { count: 'exact', head: true })
-        .eq('clase_id', claseId)
-        .in('estado', ['confirmada', 'asistida'])
-        .eq('lista_espera', false);
-      if (cErr) throw cErr;
-
-      const { data: clase, error: clErr } = await novaSupabase
-        .from('clases')
-        .select('aforo_max')
-        .eq('id', claseId)
-        .single();
-      if (clErr) throw clErr;
-
-      if ((count || 0) >= (clase?.aforo_max || 0)) {
-        toast('No hay plaza libre para promover ahora.', 'error');
-        return;
-      }
-
-      const { data: bono, error: bErr } = await novaSupabase
-        .from('bonos_activos')
-        .select('id,sesiones_totales,sesiones_usadas')
-        .eq('perfil_id', reserva.perfil_id)
-        .eq('activo', true)
-        .gte('fecha_fin', new Date().toISOString().slice(0, 10))
-        .order('fecha_inicio', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (bErr) throw bErr;
-      if (!bono) {
-        toast('El cliente no tiene bono activo; no se puede promover.', 'error');
-        return;
-      }
-      if (bono.sesiones_totales !== null && bono.sesiones_usadas >= bono.sesiones_totales) {
-        toast('El cliente no tiene sesiones disponibles.', 'error');
-        return;
-      }
-
-      const { error: updErr } = await novaSupabase
-        .from('reservas')
-        .update({
-          lista_espera: false,
-          posicion_espera: null,
-          bono_activo_id: bono.id
-        })
-        .eq('id', reservaId);
-      if (updErr) throw updErr;
-
-      const { error: bonoErr } = await novaSupabase
-        .from('bonos_activos')
-        .update({ sesiones_usadas: bono.sesiones_usadas + 1 })
-        .eq('id', bono.id);
-      if (bonoErr) throw bonoErr;
-
-      await novaSupabase.from('notificaciones').insert({
-        perfil_id: reserva.perfil_id,
-        titulo: 'Plaza confirmada',
-        mensaje: 'Tu reserva en lista de espera ha pasado a confirmada.',
-        tipo: 'aviso',
-        enviada_por: staffProfile.id
+      const { error } = await novaSupabase.rpc('staff_promover_reserva_espera', {
+        p_reserva_id: reservaId
       });
+      if (error) throw error;
 
       await renumerarListaEspera(claseId);
       await loadAsistenciaClase(claseId, rowsW.dataset.claseNombre || 'Clase');
@@ -3688,10 +3607,9 @@
       if (btnWaitRemove) {
         try {
           const rowsW = document.getElementById('rowsWaitlist');
-          const { error } = await novaSupabase
-            .from('reservas')
-            .update({ estado: 'cancelada', fecha_cancelacion: new Date().toISOString() })
-            .eq('id', btnWaitRemove.dataset.id);
+          const { error } = await novaSupabase.rpc('staff_cancelar_reserva_espera', {
+            p_reserva_id: btnWaitRemove.dataset.id
+          });
           if (error) throw error;
           await renumerarListaEspera(rowsW.dataset.claseId);
           await loadAsistenciaClase(rowsW.dataset.claseId, rowsW.dataset.claseNombre || 'Clase');

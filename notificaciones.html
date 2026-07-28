@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notificaciones â€” NÅŒVA Pilates Studio</title>
+  <title>Notificaciones ? N?VA Pilates Studio</title>
   <meta name="description" content="Avisos del estudio: lista de espera, clases y comunicaciones." />
   <meta name="robots" content="noindex,nofollow" />
-  <meta property="og:title" content="Notificaciones â€” NÅŒVA Pilates Studio" />
+  <meta property="og:title" content="Notificaciones ? N?VA Pilates Studio" />
   <meta property="og:description" content="Avisos del estudio: lista de espera, clases y comunicaciones." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-nova-main.PNG" />
@@ -16,9 +16,9 @@
   <link rel="stylesheet" href="portal.css" />
 </head>
 <body>
-  <button class="sidebar-toggle" id="sidebarToggle" aria-label="MenÃº"><span></span><span></span></button>
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NÅŒV<em>A</em> PILATES</a></div>
+    <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">N?V<em>A</em> PILATES</a></div>
     <div class="sidebar-user">
       <div class="sidebar-avatar" id="userAvatar">C</div>
       <div class="sidebar-user-info">
@@ -37,24 +37,24 @@
       <div class="sidebar-section-label">Cuenta</div>
       <a href="perfil.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Mi perfil</a>
     </nav>
-    <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesiÃ³n</button></div>
+    <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
   </aside>
   <main class="main">
     <header class="topbar"><span class="topbar-title">Notificaciones</span></header>
     <div class="content">
       <div class="page-header">
         <h1 class="page-title">Centro de notificaciones</h1>
-        <p class="page-subtitle">Mantente al dÃ­a con cambios de horario, recordatorios y avisos del estudio.</p>
+        <p class="page-subtitle">Mantente al día con cambios de horario, recordatorios y avisos del estudio.</p>
       </div>
       <div class="card" style="margin-bottom:1rem;">
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;justify-content:space-between;">
           <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm js-filter" data-filter="all">Todas</button>
-            <button class="btn btn-outline btn-sm js-filter" data-filter="unread">No leÃ­das</button>
-            <button class="btn btn-outline btn-sm js-filter" data-filter="own">MÃ­as</button>
+            <button class="btn btn-outline btn-sm js-filter" data-filter="unread">No leídas</button>
+            <button class="btn btn-outline btn-sm js-filter" data-filter="own">Mías</button>
             <button class="btn btn-outline btn-sm js-filter" data-filter="global">Generales</button>
           </div>
-          <button class="btn btn-ghost" id="markAllBtn">Marcar mÃ­as como leÃ­das</button>
+          <button class="btn btn-ghost" id="markAllBtn">Marcar mías como leídas</button>
         </div>
       </div>
       <div id="list" class="card">Cargando...</div>
@@ -83,8 +83,16 @@
       setTimeout(() => el.remove(), 3500);
     }
 
+    function escHtml(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
     function filteredItems() {
-      if (state.filter === 'unread') return state.items.filter(n => !n.leida);
+      if (state.filter === 'unread') return state.items.filter(n => !n.leida && n.perfil_id === state.perfilId);
       if (state.filter === 'own') return state.items.filter(n => n.perfil_id === state.perfilId);
       if (state.filter === 'global') return state.items.filter(n => n.perfil_id == null);
       return state.items;
@@ -124,14 +132,14 @@
         if (isPlaza && !n.leida) item.style.borderColor = 'var(--color-accent, #8a9a8c)';
         item.innerHTML = `
           <div>
-            <h3 style="font-size:1.05rem;">${n.titulo}</h3>
-            <p style="margin-top:.2rem;font-size:.82rem;color:var(--color-cream-dim)">${n.mensaje}</p>
-            <p style="font-size:.7rem;color:var(--color-muted);margin-top:.35rem;">${new Date(n.created_at).toLocaleString('es-ES')} Â· ${isOwn ? 'Personal' : 'General'}${isPlaza ? ' Â· Lista de espera' : ''}</p>
+            <h3 style="font-size:1.05rem;">${escHtml(n.titulo || 'Aviso')}</h3>
+            <p style="margin-top:.2rem;font-size:.82rem;color:var(--color-cream-dim)">${escHtml(n.mensaje || '')}</p>
+            <p style="font-size:.7rem;color:var(--color-muted);margin-top:.35rem;">${escHtml(new Date(n.created_at).toLocaleString('es-ES'))} · ${isOwn ? 'Personal' : 'General'}${isPlaza ? ' · Lista de espera' : ''}</p>
             ${isPlaza ? '<p style="margin-top:.35rem;"><a href="/calendario.html" class="btn btn-outline btn-sm">Ver calendario</a> <a href="/mis-clases.html" class="btn btn-primary btn-sm">Mis clases</a></p>' : ''}
           </div>
           <div class="day-detail-actions">
-            ${n.leida ? '<span class="badge badge-neutral">LeÃ­da</span>' : '<span class="badge badge-accent">Nueva</span>'}
-            ${(!n.leida && isOwn) ? `<button class="btn btn-outline btn-sm js-read-one" data-id="${n.id}">Marcar leÃ­da</button>` : ''}
+            ${n.leida ? '<span class="badge badge-neutral">Leída</span>' : '<span class="badge badge-accent">Nueva</span>'}
+            ${(!n.leida && isOwn) ? `<button class="btn btn-outline btn-sm js-read-one" data-id="${escHtml(n.id)}">Marcar leída</button>` : ''}
           </div>`;
         el.appendChild(item);
       });
@@ -157,7 +165,7 @@
           .eq('perfil_id', state.perfilId);
         if (error) throw error;
         await loadNotifs();
-        toast('NotificaciÃ³n marcada como leÃ­da', 'success');
+        toast('Notificación marcada como leída', 'success');
       } catch (err) {
         toast(err.message || 'No se pudo marcar', 'error');
       }
@@ -177,7 +185,7 @@
           .eq('perfil_id', state.perfilId);
         if (error) throw error;
         await loadNotifs();
-        toast('Notificaciones personales marcadas como leÃ­das', 'success');
+        toast('Notificaciones personales marcadas como leídas', 'success');
       } catch (err) {
         toast(err.message || 'No se pudo completar', 'error');
       }

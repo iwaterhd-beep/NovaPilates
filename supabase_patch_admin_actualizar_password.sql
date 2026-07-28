@@ -39,4 +39,5 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.admin_actualizar_password_usuario(TEXT, TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.admin_actualizar_password_usuario(TEXT, TEXT) FROM anon;
 GRANT EXECUTE ON FUNCTION public.admin_actualizar_password_usuario(TEXT, TEXT) TO authenticated;

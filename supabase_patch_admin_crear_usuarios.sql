@@ -4,7 +4,9 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE OR REPLACE FUNCTION public.mi_rol()
-RETURNS TEXT AS $$
+RETURNS TEXT
+SET search_path = public
+AS $$
   SELECT rol::TEXT FROM public.perfiles WHERE id = auth.uid();
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
@@ -116,4 +118,5 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.admin_crear_usuario(TEXT, TEXT, TEXT, TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.admin_crear_usuario(TEXT, TEXT, TEXT, TEXT) FROM anon;
 GRANT EXECUTE ON FUNCTION public.admin_crear_usuario(TEXT, TEXT, TEXT, TEXT) TO authenticated;

@@ -112,8 +112,8 @@ BEGIN
     '',
     '',
     '',
-    jsonb_build_object('provider', 'email', 'providers', ARRAY['email']),
-    jsonb_build_object('nombre', p_nombre, 'rol', v_rol::text),
+    jsonb_build_object('provider', 'email', 'providers', ARRAY['email'], 'rol', v_rol::text),
+    jsonb_build_object('nombre', p_nombre),
     FALSE,
     FALSE,
     v_now,
@@ -205,56 +205,18 @@ $$;
 REVOKE ALL ON FUNCTION public.admin_actualizar_password_usuario(TEXT, TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.admin_actualizar_password_usuario(TEXT, TEXT) TO authenticated;
 
--- Primer acceso: solo email → contraseña temporal de un uso para signInWithPassword.
 CREATE OR REPLACE FUNCTION public.cliente_iniciar_primera_vez(p_email TEXT)
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth, extensions
 AS $$
-DECLARE
-  v_email TEXT := lower(btrim(COALESCE(p_email, '')));
-  v_perfil RECORD;
-  v_temp TEXT;
 BEGIN
-  IF v_email = '' OR position('@' IN v_email) = 0 THEN
-    RAISE EXCEPTION 'Introduce un correo válido.';
-  END IF;
-
-  SELECT p.id, p.activo, p.debe_definir_password, p.rol
-  INTO v_perfil
-  FROM public.perfiles p
-  WHERE p.email = v_email
-  LIMIT 1;
-
-  IF NOT FOUND
-     OR v_perfil.activo IS NOT TRUE
-     OR v_perfil.debe_definir_password IS NOT TRUE
-     OR v_perfil.rol::TEXT <> 'cliente' THEN
-    RAISE EXCEPTION 'No hay una primera activación pendiente para este correo.';
-  END IF;
-
-  IF NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id = v_perfil.id) THEN
-    RAISE EXCEPTION 'No hay una primera activación pendiente para este correo.';
-  END IF;
-
-  v_temp := encode(gen_random_bytes(24), 'hex');
-
-  UPDATE auth.users
-  SET encrypted_password = crypt(v_temp, gen_salt('bf')),
-      updated_at = NOW()
-  WHERE id = v_perfil.id;
-
-  UPDATE public.perfiles
-  SET updated_at = NOW()
-  WHERE id = v_perfil.id;
-
-  RETURN v_temp;
+  RAISE EXCEPTION 'La primera activación por correo directo está deshabilitada. Usa recuperación por email.';
 END;
 $$;
 
 REVOKE ALL ON FUNCTION public.cliente_iniciar_primera_vez(TEXT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.cliente_iniciar_primera_vez(TEXT) TO anon, authenticated;
 
 CREATE OR REPLACE FUNCTION public.cliente_marcar_password_definida()
 RETURNS VOID

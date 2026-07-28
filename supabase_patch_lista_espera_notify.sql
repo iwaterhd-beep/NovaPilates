@@ -3,7 +3,9 @@
 -- Ejecutar en Supabase SQL Editor después de supabase_patch_lista_espera.sql (o junto a él).
 
 CREATE OR REPLACE FUNCTION public.cancelar_reserva_segura(p_reserva_id UUID)
-RETURNS VOID AS $$
+RETURNS VOID
+SET search_path = public
+AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_reserva RECORD;

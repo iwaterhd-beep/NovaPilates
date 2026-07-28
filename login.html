@@ -63,7 +63,7 @@
       <div id="msg" class="msg" role="status"></div>
 
       <div id="panel-login" class="panel active">
-        <p class="hint">Si es tu primera vez (ficha creada en el estudio), introduce solo tu correo e inicia sesión para elegir tu contraseña.</p>
+        <p class="hint">Si es tu primera vez, usa “Recuperar” para recibir un enlace seguro y elegir tu contraseña.</p>
         <form id="loginForm" novalidate>
           <div class="group">
             <label for="email">Correo</label>
@@ -166,36 +166,13 @@
         showMsg('Elige tu contraseña para continuar.', 'success');
         return;
       }
-      const rol = profile?.rol || user.user_metadata?.rol || 'cliente';
+      const rol = profile?.rol || 'cliente';
       const redirects = {
         cliente: '/dashboard_cliente.html',
         empleado: '/dashboard_staff.html',
         admin: '/dashboard_staff.html'
       };
       window.location.assign(redirects[rol] || '/dashboard_cliente.html');
-    }
-
-    async function loginPrimeraVez(email) {
-      const { data: tempPassword, error } = await novaSupabase.rpc('cliente_iniciar_primera_vez', {
-        p_email: email
-      });
-      if (error) {
-        const m = error.message || '';
-        if (m.includes('Could not find') || m.includes('schema cache')) {
-          throw new Error('Falta el parche de primera activación en Supabase (supabase_patch_primera_activacion.sql).');
-        }
-        throw error;
-      }
-      if (!tempPassword) throw new Error('No se pudo iniciar la primera activación.');
-      const { data, error: signErr } = await novaSupabase.auth.signInWithPassword({
-        email,
-        password: tempPassword
-      });
-      if (signErr) throw signErr;
-      if (!data?.user) throw new Error('No se pudo obtener la sesión.');
-      firstActivationMode = true;
-      showPanel('reset');
-      showMsg('Bienvenida. Elige tu contraseña.', 'success');
     }
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -208,7 +185,9 @@
       try {
         showPageSpinner(true);
         if (!password) {
-          await loginPrimeraVez(email);
+          showPanel('recover');
+          document.getElementById('recoverEmail').value = email;
+          showMsg('Para el primer acceso o si no recuerdas tu contraseña, usa el enlace de recuperación por email.', 'info');
           return;
         }
         if (password.length < 6) return showMsg('La contraseña debe tener al menos 6 caracteres.', 'error');

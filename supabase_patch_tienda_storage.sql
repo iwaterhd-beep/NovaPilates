@@ -13,11 +13,9 @@ ON CONFLICT (id) DO UPDATE SET
   file_size_limit = EXCLUDED.file_size_limit,
   allowed_mime_types = EXCLUDED.allowed_mime_types;
 
+-- No creamos policy SELECT global: al ser bucket público, las URLs públicas ya sirven
+-- los archivos sin exponer además el listado completo del bucket.
 DROP POLICY IF EXISTS "Lectura pública tienda" ON storage.objects;
-CREATE POLICY "Lectura pública tienda"
-  ON storage.objects FOR SELECT
-  TO public
-  USING (bucket_id = 'tienda');
 
 DROP POLICY IF EXISTS "Admin sube tienda" ON storage.objects;
 CREATE POLICY "Admin sube tienda"

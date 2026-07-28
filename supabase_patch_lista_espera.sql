@@ -2,7 +2,9 @@
 -- Ejecutar en Supabase SQL Editor.
 
 CREATE OR REPLACE FUNCTION public.crear_reserva_segura(p_clase_id UUID)
-RETURNS JSONB AS $$
+RETURNS JSONB
+SET search_path = public
+AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_clase RECORD;
@@ -146,7 +148,9 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE OR REPLACE FUNCTION public.cancelar_reserva_segura(p_reserva_id UUID)
-RETURNS VOID AS $$
+RETURNS VOID
+SET search_path = public
+AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_reserva RECORD;

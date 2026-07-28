@@ -224,10 +224,33 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION public.guard_perfiles_sensitive_fields()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Debes iniciar sesión.';
+  END IF;
+
+  IF public.mi_rol() <> 'admin' AND NEW.id = auth.uid() THEN
+    NEW.rol := OLD.rol;
+    NEW.activo := OLD.activo;
+    NEW.notas := OLD.notas;
+    NEW.avatar_url := OLD.avatar_url;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 DROP TRIGGER IF EXISTS perfiles_updated_at ON public.perfiles;
 CREATE TRIGGER perfiles_updated_at
   BEFORE UPDATE ON public.perfiles
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+DROP TRIGGER IF EXISTS perfiles_guard_sensitive_fields ON public.perfiles;
+CREATE TRIGGER perfiles_guard_sensitive_fields
+  BEFORE UPDATE ON public.perfiles
+  FOR EACH ROW EXECUTE FUNCTION public.guard_perfiles_sensitive_fields();
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -237,7 +260,7 @@ BEGIN
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'nombre', split_part(NEW.email, '@', 1)),
-    COALESCE((NEW.raw_user_meta_data->>'rol')::rol_usuario, 'cliente')
+    COALESCE((NEW.raw_app_meta_data->>'rol')::rol_usuario, 'cliente')
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
@@ -471,7 +494,7 @@ GRANT EXECUTE ON FUNCTION public.admin_crear_usuario(TEXT, TEXT, TEXT, rol_usuar
 -- ══════════════════════════════════════════════
 -- VISTA
 -- ══════════════════════════════════════════════
-CREATE OR REPLACE VIEW public.calendario_clases AS
+CREATE OR REPLACE VIEW public.calendario_clases WITH (security_invoker = true) AS
 SELECT
   c.id,
   c.fecha_hora,

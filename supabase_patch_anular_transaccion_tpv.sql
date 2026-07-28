@@ -57,6 +57,8 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.anular_transaccion_tpv(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.anular_transaccion_tpv(UUID) FROM anon;
 GRANT EXECUTE ON FUNCTION public.anular_transaccion_tpv(UUID) TO authenticated;
 
 -- Empleados ven solo sus cobros (para listado y anulación); admin ya tenía SELECT global.

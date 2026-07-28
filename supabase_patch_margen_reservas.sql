@@ -16,7 +16,9 @@ ON CONFLICT (id) DO NOTHING;
 ALTER TABLE public.ajustes_centro ENABLE ROW LEVEL SECURITY;
 
 CREATE OR REPLACE FUNCTION public.mi_rol()
-RETURNS TEXT AS $$
+RETURNS TEXT
+SET search_path = public
+AS $$
   SELECT rol::TEXT FROM public.perfiles WHERE id = auth.uid();
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
@@ -29,7 +31,9 @@ CREATE POLICY "Admin actualiza ajustes" ON public.ajustes_centro
   FOR UPDATE USING (mi_rol() = 'admin');
 
 CREATE OR REPLACE FUNCTION public.crear_reserva_segura(p_clase_id UUID)
-RETURNS JSONB AS $$
+RETURNS JSONB
+SET search_path = public
+AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_clase RECORD;
@@ -148,7 +152,9 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE OR REPLACE FUNCTION public.cancelar_reserva_segura(p_reserva_id UUID)
-RETURNS VOID AS $$
+RETURNS VOID
+SET search_path = public
+AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_reserva RECORD;
