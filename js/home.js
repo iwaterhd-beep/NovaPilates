@@ -247,7 +247,8 @@ const HOME_MERCH_PREVIEW = [
     id: 'preview-botella',
     title: 'Botella NŌVA',
     description: 'Hidratación ligera para antes y después de clase.',
-    thumbnail: '/assets/branding/logo-isotipo.svg',
+    thumbnail: '/assets/shop/botella-nova.png',
+    images: ['/assets/shop/botella-nova.png'],
     price: 28,
     currency: 'eur',
     collection: 'Accesorios',
@@ -256,7 +257,8 @@ const HOME_MERCH_PREVIEW = [
     id: 'preview-tote',
     title: 'Tote Studio',
     description: 'Bolsa de lona para esterilla, muda y lo esencial.',
-    thumbnail: '/assets/branding/logo-isotipo.svg',
+    thumbnail: '/assets/shop/tote-studio.png',
+    images: ['/assets/shop/tote-studio.png'],
     price: 32,
     currency: 'eur',
     collection: 'Accesorios',
@@ -265,7 +267,8 @@ const HOME_MERCH_PREVIEW = [
     id: 'preview-camiseta',
     title: 'Camiseta técnica',
     description: 'Tejido moisture-wicking y quick-dry, marca discreta.',
-    thumbnail: '/assets/branding/logo-isotipo.svg',
+    thumbnail: '/assets/shop/camiseta-tecnica.png',
+    images: ['/assets/shop/camiseta-tecnica.png'],
     price: 38,
     currency: 'eur',
     collection: 'Ropa',
@@ -274,12 +277,27 @@ const HOME_MERCH_PREVIEW = [
     id: 'preview-banda',
     title: 'Banda de resistencia',
     description: 'Loop de tela, resistencia media. Para suelo o casa.',
-    thumbnail: '/assets/branding/logo-isotipo.svg',
+    thumbnail: '/assets/shop/banda-resistencia.png',
+    images: ['/assets/shop/banda-resistencia.png'],
     price: 18,
     currency: 'eur',
     collection: 'Movimiento',
   },
 ];
+
+let homeMerchById = new Map();
+
+function homeMerchId(product, index) {
+  return String(product?.id || product?.variantId || `home-merch-${index}`);
+}
+
+function homeMerchImages(product) {
+  const list = Array.isArray(product?.images)
+    ? product.images.map((img) => (typeof img === 'string' ? img : img && img.url)).filter(Boolean)
+    : [];
+  if (list.length) return [...new Set(list)];
+  return product?.thumbnail ? [product.thumbnail] : [];
+}
 
 function formatHomeMerchPrice(amount, currency) {
   if (amount == null || Number.isNaN(Number(amount))) return '—';
@@ -295,24 +313,117 @@ function formatHomeMerchPrice(amount, currency) {
 function renderHomeMerch(grid, products) {
   if (!grid) return;
   const list = (products || []).slice(0, 4);
+  homeMerchById = new Map(list.map((product, index) => [homeMerchId(product, index), product]));
   grid.innerHTML = list
-    .map((p) => {
+    .map((p, index) => {
+      const id = homeMerchId(p, index);
       const tag = p.collection || 'Merch';
       const media = p.thumbnail
         ? `<img class="shop-card-img" src="${escHome(p.thumbnail)}" alt="" loading="lazy" decoding="async" />`
         : `<div class="shop-card-placeholder" aria-hidden="true"><span>${escHome((p.title || 'N').charAt(0))}</span></div>`;
       return `
-      <a class="shop-card" href="tienda.html">
-        <div class="shop-card-media">${media}</div>
+      <article class="shop-card reveal" data-home-product-id="${escHome(id)}">
+        <button type="button" class="shop-card-media" data-open-home-product="${escHome(id)}" aria-label="Ver ${escHome(p.title || 'producto')}">
+          ${media}
+        </button>
         <div class="shop-card-body">
-          <p class="shop-card-tag">${escHome(tag)}</p>
-          <h3 class="shop-card-title">${escHome(p.title)}</h3>
-          <p class="shop-card-price">${escHome(formatHomeMerchPrice(p.price, p.currency))}</p>
-          <p class="shop-card-desc">${escHome(p.description || '')}</p>
+          <button type="button" class="shop-card-open" data-open-home-product="${escHome(id)}">
+            <p class="shop-card-tag">${escHome(tag)}</p>
+            <h3 class="shop-card-title">${escHome(p.title)}</h3>
+            <p class="shop-card-price">${escHome(formatHomeMerchPrice(p.price, p.currency))}</p>
+            <p class="shop-card-desc">${escHome(p.description || '')}</p>
+          </button>
+          <button type="button" class="btn btn-outline shop-card-cta" data-open-home-product="${escHome(id)}">Ver producto</button>
         </div>
-      </a>`;
+      </article>`;
     })
     .join('');
+}
+
+function ensureHomeProductModal() {
+  if (document.getElementById('homeProductModal')) return;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="product-modal-backdrop" id="homeProductModalBackdrop" hidden></div>
+    <div class="product-modal" id="homeProductModal" role="dialog" aria-modal="true" aria-labelledby="homeProductModalTitle" hidden>
+      <div class="product-modal-layout">
+        <button type="button" class="product-modal-close" id="homeProductModalClose" aria-label="Cerrar">×</button>
+        <div class="product-modal-gallery">
+          <div class="product-modal-frame">
+            <img id="homeProductModalImg" class="product-modal-img" alt="" />
+          </div>
+        </div>
+        <div class="product-modal-info">
+          <p class="product-modal-tag" id="homeProductModalTag"></p>
+          <h2 class="product-modal-title" id="homeProductModalTitle"></h2>
+          <p class="product-modal-price" id="homeProductModalPrice"></p>
+          <p class="product-modal-desc" id="homeProductModalDesc"></p>
+          <a href="tienda.html" class="btn btn-primary product-modal-cta">Ir a la tienda</a>
+        </div>
+      </div>
+    </div>`;
+  while (wrap.firstChild) document.body.appendChild(wrap.firstChild);
+
+  document.getElementById('homeProductModalClose')?.addEventListener('click', closeHomeProductModal);
+  document.getElementById('homeProductModalBackdrop')?.addEventListener('click', closeHomeProductModal);
+}
+
+function openHomeProductModal(id) {
+  const product = homeMerchById.get(id);
+  if (!product) return;
+  ensureHomeProductModal();
+
+  const images = homeMerchImages(product);
+  const img = document.getElementById('homeProductModalImg');
+  const tag = document.getElementById('homeProductModalTag');
+  const title = document.getElementById('homeProductModalTitle');
+  const price = document.getElementById('homeProductModalPrice');
+  const desc = document.getElementById('homeProductModalDesc');
+  const modal = document.getElementById('homeProductModal');
+  const backdrop = document.getElementById('homeProductModalBackdrop');
+
+  if (img) {
+    img.src = images[0] || product.thumbnail || '';
+    img.alt = product.title || '';
+  }
+  if (tag) tag.textContent = product.collection || 'Merch';
+  if (title) title.textContent = product.title || '';
+  if (price) price.textContent = formatHomeMerchPrice(product.price, product.currency);
+  if (desc) desc.textContent = product.description || '';
+  if (!modal) return;
+
+  modal.hidden = false;
+  if (backdrop) backdrop.hidden = false;
+  document.body.classList.add('product-modal-open');
+  requestAnimationFrame(() => {
+    modal.classList.add('is-open');
+    if (backdrop) backdrop.classList.add('is-open');
+  });
+}
+
+function closeHomeProductModal() {
+  const modal = document.getElementById('homeProductModal');
+  const backdrop = document.getElementById('homeProductModalBackdrop');
+  if (!modal || modal.hidden) return;
+  modal.classList.remove('is-open');
+  if (backdrop) backdrop.classList.remove('is-open');
+  document.body.classList.remove('product-modal-open');
+  window.setTimeout(() => {
+    modal.hidden = true;
+    if (backdrop) backdrop.hidden = true;
+  }, 240);
+}
+
+function initHomeMerchModal() {
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('[data-open-home-product]');
+    if (!trigger) return;
+    openHomeProductModal(trigger.getAttribute('data-open-home-product'));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeHomeProductModal();
+  });
 }
 
 async function loadHomeMerch() {
@@ -415,6 +526,7 @@ async function loadHomeSections() {
     if (!response.ok) throw new Error('No se pudo cargar la home.');
     root.innerHTML = await response.text();
     await Promise.all([loadPublicPlans(), loadHomeMerch()]);
+    initHomeMerchModal();
     initHomeMotion();
   } catch (error) {
     root.innerHTML = `

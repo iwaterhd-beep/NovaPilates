@@ -18,16 +18,14 @@ function formatShopPrice(amount, currency) {
 }
 
 /** Catálogo de vista previa hasta conectar Medusa Cloud / backend. */
-const SHOP_PREVIEW_IMAGE = '/assets/branding/logo-isotipo.svg';
-
 const SHOP_PREVIEW_PRODUCTS = [
   {
     id: 'preview-botella',
     variantId: 'preview-botella',
     title: 'Botella NŌVA',
     description: 'Hidratación ligera para antes y después de clase.',
-    thumbnail: SHOP_PREVIEW_IMAGE,
-    images: [SHOP_PREVIEW_IMAGE],
+    thumbnail: '/assets/shop/botella-nova.png',
+    images: ['/assets/shop/botella-nova.png'],
     price: 28,
     currency: 'eur',
     collection: 'Accesorios',
@@ -48,9 +46,8 @@ const SHOP_PREVIEW_PRODUCTS = [
     variantId: 'preview-tote',
     title: 'Tote Studio',
     description: 'Bolsa de lona para esterilla, muda y lo esencial.',
-    thumbnail: SHOP_PREVIEW_IMAGE,
-    images: [SHOP_PREVIEW_IMAGE],
-    price: 32,
+    thumbnail: '/assets/shop/tote-studio.png',
+    images: ['/assets/shop/tote-studio.png'],
     currency: 'eur',
     collection: 'Accesorios',
     sizeLabel: 'Talla',
@@ -69,9 +66,8 @@ const SHOP_PREVIEW_PRODUCTS = [
     variantId: 'preview-camiseta',
     title: 'Camiseta técnica',
     description: 'Tejido moisture-wicking y quick-dry, marca discreta.',
-    thumbnail: SHOP_PREVIEW_IMAGE,
-    images: [SHOP_PREVIEW_IMAGE],
-    price: 38,
+    thumbnail: '/assets/shop/camiseta-tecnica.png',
+    images: ['/assets/shop/camiseta-tecnica.png'],
     currency: 'eur',
     collection: 'Ropa',
     sizeLabel: 'Talla',
@@ -94,9 +90,8 @@ const SHOP_PREVIEW_PRODUCTS = [
     variantId: 'preview-banda',
     title: 'Banda de resistencia',
     description: 'Loop de tela para suelo o casa. Elige la intensidad.',
-    thumbnail: SHOP_PREVIEW_IMAGE,
-    images: [SHOP_PREVIEW_IMAGE],
-    price: 18,
+    thumbnail: '/assets/shop/banda-resistencia.png',
+    images: ['/assets/shop/banda-resistencia.png'],
     currency: 'eur',
     collection: 'Movimiento',
     sizeLabel: 'Resistencia',

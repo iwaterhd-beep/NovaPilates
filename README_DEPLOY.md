@@ -5,7 +5,7 @@ App estática (HTML/CSS/JS) + Supabase. Hosting recomendado: **Vercel**.
 ## 1) Branding
 Isotipo: `assets/branding/logo-isotipo.svg` (cabecera, favicon, pie).
 Activo público base: `assets/branding/logo-isotipo.svg`.
-La home ya no depende de un vídeo local obligatorio; usa identidad visual estática si no hay media adicional lista para publicar.
+Vídeo hero local: `assets/video/nova-hero.mp4` con `poster="/assets/branding/logo-isotipo.svg"`.
 Logos PNG optimizados en `assets/branding/` (también hay SVG `logo-isotipo.svg` para UI ligera).
 
 > `home.css` y `styles.css` existen pero **no se usan** en las páginas actuales (landing = `zen.css`, app = `portal.css`).
