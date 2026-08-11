@@ -324,6 +324,15 @@ a { text-decoration: none; color: inherit; }
   color: var(--accent);
   letter-spacing: -0.04em;
 }
+.view-logo {
+  display: block;
+  max-width: 100%;
+  max-height: 44px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: left center;
+}
 .view-title {
   font-family: var(--font-display);
   font-size: 1.55rem;
