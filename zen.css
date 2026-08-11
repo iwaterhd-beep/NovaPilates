@@ -283,6 +283,24 @@ a { text-decoration: none; color: inherit; }
   color: var(--ink);
   margin: 0 0 .85rem;
 }
+.empezar-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  margin: 0 0 .9rem;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.empezar-eyebrow::before {
+  content: '';
+  width: 1.6rem;
+  height: 1px;
+  background: currentColor;
+  opacity: .7;
+}
 .empezar-lead {
   margin: 0;
   max-width: 32rem;
@@ -300,21 +318,37 @@ a { text-decoration: none; color: inherit; }
   position: relative;
   background: var(--card);
   border: 1px dashed var(--line-strong);
-  padding: 1.6rem 1.35rem 1.75rem;
+  padding: 1.4rem 1.35rem 1.75rem;
   min-height: 100%;
   display: flex;
   flex-direction: column;
   gap: .55rem;
-  transition: border-color .25s ease, transform .25s var(--ease-soft), background .25s ease;
+  transition: border-color .25s ease, transform .25s var(--ease-soft), box-shadow .25s var(--ease-soft), background .25s ease;
 }
 .view-card:hover {
   border-color: var(--accent);
   border-style: solid;
-  transform: translateY(-3px);
+  transform: translateY(-5px);
+  box-shadow: 0 16px 36px rgba(92, 61, 138, 0.13);
 }
 .view-card--accent {
-  background: linear-gradient(165deg, #ebe6f2 0%, var(--card) 55%);
-  border-color: rgba(92, 61, 138, .35);
+  background: linear-gradient(163deg, #e9e0f6 0%, #f3effa 46%, var(--card) 82%);
+  border-color: rgba(92, 61, 138, .32);
+}
+.view-card--accent:hover {
+  background: linear-gradient(163deg, #e4d9f4 0%, #f0eaf9 46%, var(--card) 82%);
+}
+.view-meta {
+  align-self: flex-start;
+  font-size: .64rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px dashed rgba(92, 61, 138, .4);
+  border-radius: 2px;
+  padding: .24rem .5rem .22rem;
+  margin-bottom: .25rem;
 }
 .view-letter {
   font-family: var(--font-display);
@@ -327,11 +361,12 @@ a { text-decoration: none; color: inherit; }
 .view-logo {
   display: block;
   max-width: 100%;
-  max-height: 44px;
+  max-height: 52px;
   width: auto;
   height: auto;
   object-fit: contain;
   object-position: left center;
+  margin-top: .35rem;
 }
 .view-title {
   font-family: var(--font-display);
