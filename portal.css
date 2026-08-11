@@ -939,6 +939,14 @@ select.form-input { appearance: none; cursor: pointer; }
 .tpv-selected-strip.empty-state p {
   margin: 0;
 }
+#tpvSelectedClient.empty-state::before {
+  content: '';
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 0;
+  background: url('/assets/branding/logo-isotipo.svg') no-repeat center center / contain;
+}
 .tpv-client-chips {
   display: flex;
   flex-wrap: wrap;
