@@ -338,18 +338,6 @@ a { text-decoration: none; color: inherit; }
 .view-card--accent:hover {
   background: linear-gradient(163deg, #e4d9f4 0%, #f0eaf9 46%, var(--card) 82%);
 }
-.view-meta {
-  align-self: flex-start;
-  font-size: .64rem;
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--accent);
-  border: 1px dashed rgba(92, 61, 138, .4);
-  border-radius: 2px;
-  padding: .24rem .5rem .22rem;
-  margin-bottom: .25rem;
-}
 .view-letter {
   font-family: var(--font-display);
   font-size: 2.4rem;
