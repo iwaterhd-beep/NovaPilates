@@ -1,6 +1,12 @@
 # Branding NŌVA
 
-- **`logo-isotipo.svg`** — Activo base disponible para cabecera, pie, login y metadatos públicos.
-- **`favicon.svg`** — Favicon principal del sitio.
+## Activo
 
-Rutas en HTML: `/assets/branding/...` desde la raíz del sitio.
+Isotipo simple (círculo + línea violeta), como el original:
+
+- `logo-isotipo.svg` — uso principal (nav, login, footer, sidebars)
+- `logo-isotipo.png` — PNG transparente equivalente
+- `favicon.svg` — mismo isotipo
+- `apple-touch-icon.png` / `og-image.png`
+
+Wordmarks fotográficos quedan en carpeta por si se necesitan más adelante (`logo-wordmark*.png`), pero la web usa el isotipo.

@@ -20,6 +20,15 @@
       "url": "http://localhost:8080",
       "webRoot": "${workspaceFolder}",
       "preLaunchTask": "Start local server (Node 8080)"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Iniciar Brave para localhost",
+      "runtimeExecutable": "brave",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Start local server (Node 8080)"
     }
   ]
 }

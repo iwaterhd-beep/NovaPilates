@@ -9,25 +9,27 @@
   <meta property="og:title" content="Página no encontrada — NŌVA Pilates Studio" />
   <meta property="og:description" content="La página que buscas no existe o fue movida." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-isotipo.svg" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/og-image.png" />
   <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
   <link rel="alternate icon" href="/assets/branding/logo-isotipo.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/assets/branding/logo-isotipo.svg" />
+  <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Figtree:wght@400;500;600&display=swap');
     :root {
-      --bg: #f6f4ef;
-      --card: #fffdfa;
-      --ink: #4a453d;
-      --muted: #8f887d;
-      --line: #e8e2d8;
-      --accent: #8a9a8c;
+      --bg: #e4e7e2;
+      --card: #f1f3f0;
+      --ink: #1a1f1c;
+      --muted: #4a524c;
+      --line: #c5cbc4;
+      --accent: #5c3d8a;
+      --accent-ink: #f7f4fc;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100svh;
-      background: radial-gradient(circle at 20% 10%, rgba(138,154,140,0.12), transparent 40%), var(--bg);
+      background: var(--bg);
       color: var(--ink);
-      font-family: Inter, Arial, sans-serif;
+      font-family: Figtree, system-ui, sans-serif;
       display: grid;
       place-items: center;
       padding: 1.2rem;
@@ -35,52 +37,48 @@
     .card {
       width: min(560px, 100%);
       background: var(--card);
-      border: 1px solid var(--line);
+      border: 1px dashed #9aa39a;
       padding: 2.2rem 1.8rem;
       text-align: center;
-      box-shadow: 0 14px 38px rgba(74,69,61,0.1);
     }
     .mark {
-      width: 58px;
-      height: 58px;
+      width: 72px;
+      height: 72px;
       margin: 0 auto 1rem;
-      border: 1px solid #d9d0c3;
-      border-radius: 50%;
       display: grid;
       place-items: center;
-      color: var(--accent);
-      font-size: 1.6rem;
-      font-family: "Cormorant Garamond", serif;
     }
+    .mark img { width: 48px; height: auto; display: block; }
     h1 {
-      font-family: "Cormorant Garamond", serif;
+      font-family: 'Fraunces', Georgia, serif;
       font-size: clamp(2rem, 5vw, 2.8rem);
-      font-weight: 400;
+      font-weight: 500;
+      letter-spacing: -0.03em;
       margin-bottom: .3rem;
     }
     p { color: var(--muted); line-height: 1.7; margin-bottom: 1.3rem; }
     .actions { display: flex; justify-content: center; gap: .7rem; flex-wrap: wrap; }
     .btn {
       text-decoration: none;
-      padding: .68rem 1.2rem;
-      border-radius: 999px;
+      padding: .7rem 1.2rem;
       font-size: .72rem;
-      letter-spacing: .15em;
+      font-weight: 600;
+      letter-spacing: .08em;
       text-transform: uppercase;
-      border: 1px solid var(--line);
+      border: 1px solid var(--ink);
       color: var(--ink);
-      background: #fff;
+      background: var(--card);
     }
     .btn.primary {
       border-color: var(--accent);
       background: var(--accent);
-      color: #f7f5f0;
+      color: var(--accent-ink);
     }
   </style>
 </head>
 <body>
   <main class="card">
-    <div class="mark">N</div>
+    <div class="mark"><img src="/assets/branding/logo-isotipo.svg" alt="" width="44" height="52" /></div>
     <h1>404</h1>
     <p>La página que buscas no está disponible. Puede que la ruta haya cambiado o el enlace no sea válido.</p>
     <div class="actions">

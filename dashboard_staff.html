@@ -10,16 +10,16 @@
   <meta property="og:title" content="Panel Staff — NŌVA Pilates Studio" />
   <meta property="og:description" content="Panel de gestión del estudio: clientes, clases, TPV y asistencia." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/logo-isotipo.svg" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/og-image.png" />
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/assets/branding/logo-isotipo.svg" />
-  <link rel="stylesheet" href="portal.css?v=38" />
+  <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
+  <link rel="stylesheet" href="portal.css?v=42" />
 </head>
 <body data-panel-build="2026-04-18-clases-modal">
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><a href="index.html" class="sidebar-logo-text">NŌV<em>A</em> PILATES</a></div>
+    <div class="sidebar-logo"><a href="index.html" class="sidebar-brand" aria-label="NŌVA PILATES STUDIO"><img class="sidebar-brand-mark" src="/assets/branding/logo-isotipo.svg" width="36" height="42" alt="" /></a></div>
     <div class="sidebar-user">
       <div class="sidebar-avatar" id="userAvatar">S</div>
       <div class="sidebar-user-info">
@@ -163,6 +163,7 @@
               <div class="tpv-last-actions">
                 <button class="btn btn-ghost btn-sm" type="button" id="tpvAnularUltimoBtn" disabled>Anular cobro</button>
                 <button class="btn btn-outline btn-sm" type="button" id="tpvPrintTicketBtn" disabled>Imprimir ticket</button>
+                <button class="btn btn-outline btn-sm" type="button" id="tpvPrintFacturaBtn" disabled>Factura</button>
               </div>
             </div>
           </div>
@@ -179,12 +180,22 @@
               <button type="button" class="btn btn-primary tpv-pay-btn" id="tpvCobrarEfectivo" data-metodo="efectivo">Cobrar efectivo</button>
               <button type="button" class="btn btn-primary tpv-pay-btn tpv-pay-tarjeta" id="tpvCobrarTarjeta" data-metodo="tarjeta">Cobrar tarjeta</button>
               <button type="button" class="btn btn-outline tpv-pay-btn" id="tpvCobrarTransferencia" data-metodo="transferencia">Transferencia</button>
+              <button type="button" class="btn btn-outline tpv-pay-btn" id="tpvCobrarVale" data-metodo="vale">Ticket regalo</button>
               <button type="button" class="btn btn-ghost btn-sm" id="tpvVaciarCarrito">Vaciar ticket</button>
             </div>
             <div class="tpv-cart-footer">
+              <div class="tpv-vale-row" id="tpvValeRow" hidden>
+                <label class="form-label" for="tpvValeCodigo">Código del ticket regalo</label>
+                <div style="display:flex;gap:.5rem;">
+                  <input class="form-input" id="tpvValeCodigo" placeholder="NV-XXXX-XXXX" autocomplete="off" style="text-transform:uppercase;" />
+                  <button type="button" class="btn btn-outline" id="tpvValeConsultar" title="Comprobar saldo y validez">Comprobar</button>
+                </div>
+                <p class="tpv-caja-hint" id="tpvValeInfo" hidden></p>
+              </div>
               <label class="form-label" for="tpvNota">Nota interna (opcional)</label>
               <input class="form-input" id="tpvNota" placeholder="Nota para todo el cobro…" autocomplete="off" />
               <button type="button" class="btn btn-outline tpv-print-after-sale" id="tpvPrintTicketCartBtn" hidden>Imprimir ticket</button>
+              <button type="button" class="btn btn-outline tpv-print-after-sale" id="tpvPrintFacturaCartBtn" hidden>Factura</button>
             </div>
           </aside>
         </div>
@@ -234,6 +245,56 @@
           </div>
         </div>
 
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label" id="finDashboardTitulo">Panel financiero</div>
+          <div class="fin-kpis">
+            <div class="fin-kpi">
+              <div class="fin-kpi-label">Ingresos del mes</div>
+              <div class="fin-kpi-value" id="finKpiIngresos">0,00 €</div>
+              <div class="fin-kpi-delta is-flat" id="finKpiDelta">—</div>
+            </div>
+            <div class="fin-kpi">
+              <div class="fin-kpi-label">Ventas</div>
+              <div class="fin-kpi-value" id="finKpiVentas">0</div>
+              <div class="fin-kpi-delta is-flat" id="finKpiVentasDelta">—</div>
+            </div>
+            <div class="fin-kpi">
+              <div class="fin-kpi-label">Ticket medio</div>
+              <div class="fin-kpi-value" id="finKpiTicketMedio">0,00 €</div>
+            </div>
+            <div class="fin-kpi">
+              <div class="fin-kpi-label">Cobros en efectivo</div>
+              <div class="fin-kpi-value" id="finKpiEfectivo">0,00 €</div>
+            </div>
+            <div class="fin-kpi">
+              <div class="fin-kpi-label">Tarjeta</div>
+              <div class="fin-kpi-value" id="finKpiTarjeta">0,00 €</div>
+            </div>
+            <div class="fin-kpi">
+              <div class="fin-kpi-label">Transferencia</div>
+              <div class="fin-kpi-value" id="finKpiTransferencia">0,00 €</div>
+            </div>
+          </div>
+          <div class="fin-analytics">
+            <div class="card">
+              <div class="card-label">Últimos 14 días</div>
+              <div class="fin-chart" id="finChartBars" aria-hidden="true"></div>
+            </div>
+            <div class="card">
+              <div class="card-label">Bonos vs Tienda (mes)</div>
+              <div class="fin-breakdown" id="finBreakdown"></div>
+            </div>
+            <div class="card">
+              <div class="card-label">Top 5 conceptos (mes)</div>
+              <div class="fin-top-list" id="finTopList"></div>
+            </div>
+            <div class="card">
+              <div class="card-label">Desglose por método (mes)</div>
+              <div class="fin-breakdown" id="finBreakdownMetodo"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="card caja-dia-card" style="margin-bottom:1rem;">
           <div class="caja-dia" id="cajaResumen">
             <div class="caja-dia-total-row">
@@ -264,12 +325,17 @@
                 <span class="caja-dia-cell-label">Transferencia</span>
                 <span class="caja-dia-cell-value" id="cajaTransferencia">0,00 €</span>
               </div>
+              <div class="caja-dia-cell" role="listitem">
+                <span class="caja-dia-cell-label">Ticket regalo</span>
+                <span class="caja-dia-cell-value" id="cajaValesHoy">0,00 €</span>
+              </div>
             </div>
           </div>
         </div>
-        <div class="card">
+
+        <div class="card" style="margin-bottom:1rem;">
           <div class="card-label">Todas las transacciones</div>
-          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Historial completo. Filtra por fecha, cliente o bono. Para corregir un cobro por error usa <strong>Anular</strong>.</p>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Historial completo. Filtra por fecha, cliente o bono. Emite la factura de cada cobro, o corrige un cobro erróneo con <strong>Anular</strong>.</p>
           <div class="finanzas-filters">
             <div class="form-group">
               <label class="form-label" for="finanzasFiltroDesde">Desde</label>
@@ -296,10 +362,58 @@
               <button type="button" class="btn btn-ghost btn-sm" id="finanzasFiltroLimpiar">Limpiar</button>
             </div>
           </div>
+          <div class="fin-toolbar">
+            <span id="finanzasTxCount" class="clases-hint" style="margin:0;"></span>
+            <span class="fin-toolbar-spacer"></span>
+            <button type="button" class="btn btn-outline btn-sm" id="exportFinanzasCsvBtn">Exportar CSV</button>
+          </div>
           <div class="table-wrap finanzas-tx-wrap">
             <table><thead><tr><th>Cliente</th><th>Tipo</th><th>Concepto</th><th>Importe</th><th>Método</th><th>Vendido por</th><th>Fecha</th><th style="white-space:nowrap;">Acción</th></tr></thead><tbody id="rowsFinanzas"></tbody></table>
           </div>
-          <p id="finanzasTxCount" class="clases-hint" style="margin:.6rem 0 0;"></p>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label">Facturas emitidas</div>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Cada factura agrupa las líneas de un mismo cobro y se numera de forma secuencial por año.</p>
+          <div class="table-wrap fin-subtable-wrap">
+            <table><thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Base</th><th>IVA</th><th>Total</th><th>Pago</th><th>Estado</th><th style="white-space:nowrap;">Acción</th></tr></thead><tbody id="rowsFacturas"></tbody></table>
+          </div>
+          <p id="finFacturasCount" class="clases-hint" style="margin:.6rem 0 0;"></p>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-label">Devoluciones y tickets regalo</div>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Devoluciones de cobros y tickets regalo canjeables. Un cobro devuelto queda fuera de caja y su factura se anula automáticamente.</p>
+
+          <div class="finanzas-filters" style="margin-bottom:.6rem;">
+            <div class="form-group finanzas-filter-grow">
+              <label class="form-label" for="valeBuscarCodigo">Consultar ticket regalo por código</label>
+              <input class="form-input" id="valeBuscarCodigo" type="search" placeholder="NV-XXXX-XXXX" autocomplete="off" style="text-transform:uppercase;" />
+            </div>
+            <div class="form-group finanzas-filter-actions">
+              <label class="form-label" aria-hidden="true">&nbsp;</label>
+              <button type="button" class="btn btn-outline btn-sm" id="valeBuscarBtn">Comprobar</button>
+            </div>
+          </div>
+          <p class="tpv-caja-hint" id="valeBuscarInfo" hidden></p>
+
+          <div class="table-wrap fin-subtable-wrap" style="margin-bottom:.8rem;">
+            <table><thead><tr><th>Código</th><th>Cliente</th><th>Saldo</th><th>Estado</th><th>Válido hasta</th><th style="white-space:nowrap;">Acción</th></tr></thead><tbody id="rowsValesRegalo"></tbody></table>
+          </div>
+
+          <div class="card-label" style="margin-top:.4rem;">Devoluciones recientes</div>
+          <div class="table-wrap fin-subtable-wrap">
+            <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Importe</th><th>Reembolso</th><th>Motivo</th></tr></thead><tbody id="rowsDevoluciones"></tbody></table>
+          </div>
+          <p id="finDevolucionesCount" class="clases-hint" style="margin:.6rem 0 0;"></p>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Histórico de cajas</div>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Cierres de caja anteriores: fondo inicial, contado por el sistema, efectivo declarado y diferencia.</p>
+          <div class="table-wrap fin-subtable-wrap">
+            <table><thead><tr><th>Fecha</th><th>Abrida por</th><th>Fondo inicial</th><th>Efectivo sistema</th><th>Declarado</th><th>Diferencia</th><th>Fondo mañana</th><th>Notas</th></tr></thead><tbody id="rowsCajasHistorial"></tbody></table>
+          </div>
         </div>
       </section>
 
@@ -349,6 +463,51 @@
             <button class="btn btn-primary" id="guardarPoliticaBtn">Guardar política</button>
           </div>
           <p style="margin-top:.6rem;font-size:.75rem;color:var(--color-muted);">Ejemplo: si pones 2, solo se podrá reservar o cancelar con al menos 2 días de antelación.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">Datos de facturación</div>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .9rem;">Estos datos aparecen como emisor en las facturas. Solo administración.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="facNombreEmisor">Nombre del emisor</label>
+              <input class="form-input" id="facNombreEmisor" value="NŌVA Pilates Studio" autocomplete="off" />
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="facCif">CIF / NIF</label>
+              <input class="form-input" id="facCif" placeholder="Pendiente de publicar" autocomplete="off" />
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="facDireccion">Dirección</label>
+              <input class="form-input" id="facDireccion" autocomplete="off" />
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="facCiudad">Ciudad</label>
+              <input class="form-input" id="facCiudad" value="Sevilla" autocomplete="off" />
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="facCodigoPostal">Código postal</label>
+              <input class="form-input" id="facCodigoPostal" autocomplete="off" />
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="facTelefono">Teléfono</label>
+              <input class="form-input" id="facTelefono" autocomplete="off" />
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="facEmail">Email de facturación</label>
+              <input class="form-input" id="facEmail" type="email" autocomplete="off" />
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="facIva">IVA aplicado (%)</label>
+              <input class="form-input" id="facIva" type="number" min="0" max="100" step="0.01" value="21" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:.8rem;">
+            <label class="form-label" for="facPie">Pie de factura</label>
+            <input class="form-input" id="facPie" value="Desconecta de lo de fuera. Conecta contigo." autocomplete="off" />
+          </div>
+          <div style="margin-top:.9rem;display:flex;justify-content:flex-end;">
+            <button class="btn btn-primary" id="guardarFacturacionBtn">Guardar datos de facturación</button>
+          </div>
         </div>
       </section>
 
@@ -1069,6 +1228,57 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="devolverCobroModal">
+    <div class="modal tpv-cobro-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Devolver cobro</h2>
+        <button class="modal-close" id="closeDevolverCobroModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <div class="tpv-cobro-body">
+        <p class="tpv-cobro-lead" id="devolverCobroLead">¿Devolver este cobro?</p>
+        <dl class="tpv-cobro-summary" id="devolverCobroSummary">
+          <div>
+            <dt>Cliente</dt>
+            <dd id="devolverCobroCliente">—</dd>
+          </div>
+          <div>
+            <dt>Cobro</dt>
+            <dd id="devolverCobroConcepto">—</dd>
+          </div>
+          <div>
+            <dt>Importe</dt>
+            <dd id="devolverCobroImporte">—</dd>
+          </div>
+          <div>
+            <dt>Pago original</dt>
+            <dd id="devolverCobroMetodoOriginal">—</dd>
+          </div>
+        </dl>
+        <p class="tpv-cobro-warn" id="devolverCobroWarn" hidden>
+          El bono asociado se desactivará (solo si no tiene sesiones usadas ni reservas activas) y la factura del cobro quedará anulada.
+        </p>
+        <div class="form-group">
+          <label class="form-label" for="devolverCobroMetodo">Método de reembolso</label>
+          <select class="form-input" id="devolverCobroMetodo">
+            <option value="efectivo">Efectivo (en caja)</option>
+            <option value="vale">Ticket regalo (vale canjeable)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="devolverCobroMotivo">Motivo (opcional)</label>
+          <input class="form-input" id="devolverCobroMotivo" type="text" placeholder="P. ej. no le gustó el producto / cambio de opinión" autocomplete="off" />
+        </div>
+        <p class="tpv-caja-hint" id="devolverCobroHint" hidden>
+          Se emitirá un ticket regalo por el importe completo con código único, válido 180 días.
+        </p>
+      </div>
+      <div class="tpv-cobro-actions">
+        <button class="btn btn-outline" type="button" id="cancelDevolverCobroBtn">Cancelar</button>
+        <button class="btn btn-danger" type="button" id="confirmDevolverCobroBtn">Devolver cobro</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="tpvCobroConfirmModal">
     <div class="modal tpv-cobro-modal">
       <div class="modal-header">
@@ -1093,6 +1303,10 @@
           <div class="tpv-cobro-total-row">
             <dt>Total</dt>
             <dd id="tpvCobroConfirmTotal">—</dd>
+          </div>
+          <div id="tpvCobroConfirmValeRow" hidden>
+            <dt>Ticket regalo</dt>
+            <dd id="tpvCobroConfirmValeInfo">—</dd>
           </div>
         </dl>
         <p class="tpv-cobro-warn" id="tpvCobroConfirmWarn" hidden>La caja de hoy no está abierta. Puedes cobrar igualmente, pero conviene abrir caja en Finanzas.</p>
@@ -1205,6 +1419,19 @@
     }
 
     const TPV_BONO_LOGO_DEFAULT = '/assets/branding/logo-bono-tile.jpg?v=4';
+    const TPV_LOGO_PRINT = '/assets/branding/logo-isotipo.png';
+    const FACTURACION_PATCH = 'supabase_patch_facturacion.sql';
+    const FACTURACION_DEFAULTS = {
+      nombre_emisor: 'NŌVA Pilates Studio',
+      cif: '[pendiente de publicar]',
+      direccion: '',
+      ciudad: 'Sevilla',
+      codigo_postal: '',
+      telefono: '',
+      email: '',
+      iva_porcentaje: 21,
+      pie_factura: 'Desconecta de lo de fuera. Conecta contigo.'
+    };
 
     const TAB_LABELS = {
       tpv: 'TPV',
@@ -1240,6 +1467,7 @@
       if (tab === 'tpv') tpvRefreshCajaHint();
       if (tab === 'finanzas') loadFinanzas();
       if (tab === 'productos') renderProductosAdminRows();
+      if (tab === 'ajustes') loadFacturacionConfig();
     }
 
     function fmtEuroCaja(n) {
@@ -1376,7 +1604,15 @@
       finanzasTxAll: [],
       cajaSugeridoFondo: 0,
       cajaEfectivoEsperado: 0,
-      cajaFondoHoy: 0
+      cajaFondoHoy: 0,
+      facturacionConfig: null,
+      facturasAll: [],
+      facturasCobroMap: {},
+      devolucionesAll: [],
+      valesRegaloAll: [],
+      devolucionCobroMap: {},
+      finanzasConDevoluciones: true,
+      cajasHistorial: []
     };
 
     const BONO_PRESETS = {
@@ -2141,7 +2377,7 @@
       if (resolve) resolve(Boolean(result));
     }
 
-    function openTpvCobroConfirmModal({ clienteNombre, metodo, totalFmt, lineasCount, cajaCerrada }) {
+    function openTpvCobroConfirmModal({ clienteNombre, metodo, totalFmt, lineasCount, cajaCerrada, valeInfo }) {
       return new Promise((resolve) => {
         tpvCobroConfirmResolver = resolve;
         const lead = document.getElementById('tpvCobroConfirmLead');
@@ -2150,6 +2386,8 @@
         const elLineas = document.getElementById('tpvCobroConfirmLineas');
         const elTotal = document.getElementById('tpvCobroConfirmTotal');
         const elWarn = document.getElementById('tpvCobroConfirmWarn');
+        const valeRow = document.getElementById('tpvCobroConfirmValeRow');
+        const valeInfoEl = document.getElementById('tpvCobroConfirmValeInfo');
         const confirmBtn = document.getElementById('confirmTpvCobroConfirmBtn');
         if (lead) lead.textContent = `¿Cobrar ${totalFmt} en ${metodo}?`;
         if (elCliente) elCliente.textContent = clienteNombre || '—';
@@ -2157,10 +2395,91 @@
         if (elLineas) elLineas.textContent = `${lineasCount} línea(s) en el ticket`;
         if (elTotal) elTotal.textContent = totalFmt || '—';
         if (elWarn) elWarn.hidden = !cajaCerrada;
+        if (valeRow) valeRow.hidden = !valeInfo;
+        if (valeInfoEl) valeInfoEl.textContent = valeInfo || '—';
         if (confirmBtn) confirmBtn.textContent = cajaCerrada ? 'Cobrar de todas formas' : 'Cobrar';
         document.getElementById('tpvCobroConfirmModal')?.classList.add('open');
         confirmBtn?.focus();
       });
+    }
+
+    let devolverCobroResolver = null;
+    let devolverCobroData = null;
+
+    function closeDevolverCobroModal(result = false) {
+      document.getElementById('devolverCobroModal')?.classList.remove('open');
+      const resolve = devolverCobroResolver;
+      devolverCobroResolver = null;
+      devolverCobroData = null;
+      if (resolve) resolve(Boolean(result));
+    }
+
+    function openDevolverCobroModal({ cobroId, cliente, concepto, importe, metodoOriginal, esBono } = {}) {
+      return new Promise((resolve) => {
+        devolverCobroResolver = resolve;
+        devolverCobroData = { cobroId };
+        const leadEl = document.getElementById('devolverCobroLead');
+        const warnEl = document.getElementById('devolverCobroWarn');
+        const hintEl = document.getElementById('devolverCobroHint');
+        const metodoSel = document.getElementById('devolverCobroMetodo');
+        const motivoInput = document.getElementById('devolverCobroMotivo');
+        const confirmBtn = document.getElementById('confirmDevolverCobroBtn');
+        if (leadEl) leadEl.textContent = `¿Devolver ${importe} al cliente?`;
+        if (warnEl) warnEl.hidden = !esBono;
+        if (metodoSel) metodoSel.value = 'efectivo';
+        if (motivoInput) motivoInput.value = '';
+        if (hintEl) hintEl.hidden = true;
+        if (confirmBtn) {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Devolver cobro';
+        }
+        const elCliente = document.getElementById('devolverCobroCliente');
+        const elConcepto = document.getElementById('devolverCobroConcepto');
+        const elImporte = document.getElementById('devolverCobroImporte');
+        const elMetodoOriginal = document.getElementById('devolverCobroMetodoOriginal');
+        if (elCliente) elCliente.textContent = cliente || '—';
+        if (elConcepto) elConcepto.textContent = concepto || '—';
+        if (elImporte) elImporte.textContent = importe || '—';
+        if (elMetodoOriginal) elMetodoOriginal.textContent = metodoOriginal || '—';
+        document.getElementById('devolverCobroModal')?.classList.add('open');
+        confirmBtn?.focus();
+      });
+    }
+
+    async function confirmDevolucionCobro() {
+      const data = devolverCobroData;
+      if (!data?.cobroId) return;
+      const metodo = document.getElementById('devolverCobroMetodo')?.value || 'efectivo';
+      const motivo = (document.getElementById('devolverCobroMotivo')?.value || '').trim() || null;
+      const btn = document.getElementById('confirmDevolverCobroBtn');
+      if (btn) btn.disabled = true;
+      try {
+        const { data: res, error } = await novaSupabase.rpc('devolver_cobro', {
+          p_cobro_id: data.cobroId,
+          p_metodo_reembolso: metodo,
+          p_motivo: motivo
+        });
+        if (error) {
+          const m = error.message || '';
+          if (/function.*devolver_cobro|does not exist/i.test(m)) {
+            toast('Falta ejecutar en Supabase el SQL supabase_patch_devoluciones.sql', 'error');
+            return;
+          }
+          throw error;
+        }
+        closeDevolverCobroModal(true);
+        if (res?.vale) {
+          const hasta = new Date(`${res.vale.valido_hasta}T12:00:00`);
+          toast(`Devolución registrada. Ticket regalo ${res.vale.codigo} · saldo ${tpvFmtEur(res.vale.saldo)} · válido hasta ${Number.isNaN(hasta.getTime()) ? '' : hasta.toLocaleDateString('es-ES')}`, 'success');
+        } else {
+          toast(`Devolución registrada en efectivo (${tpvFmtEur(res?.importe)}).`, 'success');
+        }
+        await Promise.all([loadFinanzas(), loadBonos()]);
+      } catch (err) {
+        toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo devolver el cobro')), 'error');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     }
 
     function applyStaffSidebarUi() {
@@ -2509,7 +2828,7 @@
     }
 
     function tpvSetPayButtonsDisabled(disabled) {
-      ['tpvCobrarEfectivo', 'tpvCobrarTarjeta', 'tpvCobrarTransferencia', 'tpvVaciarCarrito'].forEach((id) => {
+      ['tpvCobrarEfectivo', 'tpvCobrarTarjeta', 'tpvCobrarTransferencia', 'tpvCobrarVale', 'tpvVaciarCarrito'].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.disabled = !!disabled;
       });
@@ -2588,7 +2907,67 @@
       if (metodo === 'efectivo') return 'efectivo';
       if (metodo === 'tarjeta') return 'tarjeta';
       if (metodo === 'transferencia') return 'transferencia';
+      if (metodo === 'vale') return 'ticket regalo';
       return metodo;
+    }
+
+    function tpvShowValeRow() {
+      const row = document.getElementById('tpvValeRow');
+      if (row) row.hidden = false;
+      const btn = document.getElementById('tpvCobrarVale');
+      if (btn) btn.classList.add('is-active');
+    }
+
+    function tpvHideValeRow() {
+      const row = document.getElementById('tpvValeRow');
+      if (row) row.hidden = true;
+      const info = document.getElementById('tpvValeInfo');
+      if (info) {
+        info.hidden = true;
+        info.textContent = '';
+      }
+      const btn = document.getElementById('tpvCobrarVale');
+      if (btn) btn.classList.remove('is-active');
+    }
+
+    function tpvResetValeRow() {
+      const input = document.getElementById('tpvValeCodigo');
+      if (input) input.value = '';
+      tpvHideValeRow();
+    }
+
+    async function tpvConsultarVale(codigo) {
+      const info = document.getElementById('tpvValeInfo');
+      try {
+        const { data, error } = await novaSupabase.rpc('consultar_vale_regalo', { p_codigo: codigo });
+        if (error) {
+          const m = error.message || '';
+          if (/function.*consultar_vale_regalo|does not exist/i.test(m)) {
+            toast('Falta ejecutar en Supabase el SQL supabase_patch_devoluciones.sql', 'error');
+            return null;
+          }
+          throw error;
+        }
+        if (info) {
+          info.hidden = false;
+          if (data.estado === 'activo' && !data.caducado) {
+            info.textContent = `${data.codigo} · Saldo ${tpvFmtEur(data.saldo)}${data.cliente ? ` · ${data.cliente}` : ''} · Válido hasta ${new Date(`${data.valido_hasta}T12:00:00`).toLocaleDateString('es-ES')}`;
+            info.style.color = '';
+          } else {
+            info.textContent = `Este ticket regalo no es canjeable (${data.estado}${data.caducado ? ', caducado' : ''}).`;
+            info.style.color = 'var(--color-danger, #e5484d)';
+          }
+        }
+        return data;
+      } catch (err) {
+        if (info) {
+          info.hidden = false;
+          info.textContent = err.message || 'No se pudo comprobar el ticket regalo.';
+          info.style.color = 'var(--color-danger, #e5484d)';
+        }
+        toast(err.message || 'No se pudo comprobar el ticket regalo', 'error');
+        return null;
+      }
     }
 
     async function tpvEjecutarCobro(metodoPago) {
@@ -2614,12 +2993,31 @@
       const cajaCerrada = appState.cajaHoyAbierta === false;
       const total = tpvCartTotal();
       const totalFmt = `${total.toFixed(2).replace('.', ',')} €`;
+      let valeInfo = null;
+      let valeCodigo = null;
+      if (metodoPago === 'vale') {
+        valeCodigo = (document.getElementById('tpvValeCodigo')?.value || '').trim().toUpperCase();
+        if (!valeCodigo) {
+          tpvShowValeRow();
+          document.getElementById('tpvValeCodigo')?.focus();
+          toast('Introduce el código del ticket regalo.', 'error');
+          return;
+        }
+        const consulta = await tpvConsultarVale(valeCodigo);
+        if (!consulta) return;
+        if (consulta.saldo < total) {
+          toast(`Saldo insuficiente: quedan ${tpvFmtEur(consulta.saldo)} para un total de ${totalFmt}.`, 'error');
+          return;
+        }
+        valeInfo = `Código ${consulta.codigo} · Saldo ${tpvFmtEur(consulta.saldo)}`;
+      }
       const okPay = await openTpvCobroConfirmModal({
         clienteNombre: nombreClienteDisplay(cliente),
         metodo: tpvMetodoLabel(metodoPago),
         totalFmt,
         lineasCount: cart.length,
-        cajaCerrada
+        cajaCerrada,
+        valeInfo
       });
       if (!okPay) return;
 
@@ -2646,18 +3044,18 @@
           p_cliente_id: cliente.id,
           p_metodo_pago: metodoPago,
           p_nota: notaGlobal,
-          p_lineas: lineasRpc
+          p_lineas: lineasRpc,
+          p_vale_codigo: valeCodigo
         });
         if (error) {
           const m = error.message || '';
           if (/function.*tpv_cobrar_ticket|does not exist/i.test(m)) {
-            toast('Falta ejecutar en Supabase el SQL supabase_patch_tpv_cobrar_ticket.sql', 'error');
+            toast('Falta ejecutar en Supabase el SQL supabase_patch_devoluciones.sql', 'error');
             return;
           }
           throw error;
         }
         const totalDone = Number(data?.total || 0);
-        const resumen = Array.isArray(data?.lineas) ? data.lineas : [];
         let txIds = Array.isArray(data?.transaccion_ids)
           ? data.transaccion_ids.filter(Boolean)
           : [];
@@ -2680,21 +3078,47 @@
         renderTpvCart();
         renderTpvBonos();
         renderTpvProductos();
+        const txRef = (txIds[0] || '').replace(/-/g, '').slice(0, 6).toUpperCase() || '000000';
+        const now = new Date();
+        const fechaNum = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
         appState.lastTicket = {
           subtipo: 'mixto',
           concepto: `Ticket (${cartSnapshot.length} línea(s))`,
           bonoNombre: 'Varias líneas',
+          clienteId: cliente.id,
           clienteNombre: nombreClienteDisplay(cliente),
           clienteEmail: cliente.email || '',
           importe: totalDone,
           metodoPago,
-          nota: resumen.join(' · '),
-          createdAt: new Date().toISOString(),
+          nota: notaGlobal || '',
+          lineas: cartSnapshot.map((l) => ({
+            kind: l.kind,
+            nombre: l.nombre,
+            qty: Math.max(1, Number(l.qty) || 1),
+            unitPrice: Number(l.unitPrice != null ? l.unitPrice : l.importe) || 0,
+            sesiones: l.sesiones != null ? l.sesiones : null,
+            dias: l.dias != null ? l.dias : null
+          })),
+          vendedor: nombreClienteDisplay(staffProfile),
+          vendedorEmail: staffProfile.email || '',
+          vendedorRol: staffProfile.rol || '',
+          createdAt: now.toISOString(),
+          numeroTicket: `T-${fechaNum}-${txRef}`,
+          numeroFactura: `F-${fechaNum}-${txRef}`,
+          cobroId: data?.cobro_id || null,
           transaccionIds: txIds,
+          valeCodigo: metodoPago === 'vale' ? valeCodigo : null,
+          valeRestante: metodoPago === 'vale' ? Number(data?.vale_restante ?? 0) : null,
           esBono: cartSnapshot.some((l) => l.kind === 'bono')
         };
         renderLastTicket();
-        toast('Cobro registrado correctamente. Puedes imprimir o anular el ticket si fue un error.', 'success');
+        if (metodoPago === 'vale') {
+          const restante = Number(data?.vale_restante ?? 0);
+          toast(`Cobro con ticket regalo registrado. Saldo restante: ${tpvFmtEur(restante)}`, 'success');
+          tpvResetValeRow();
+        } else {
+          toast('Cobro registrado correctamente. Puedes imprimir o anular el ticket si fue un error.', 'success');
+        }
         await Promise.all([loadBonos(), loadFinanzas(), tpvRefreshCajaHint()]);
       } catch (err) {
         toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo completar el cobro')), 'error');
@@ -2785,6 +3209,8 @@
       const box = document.getElementById('tpvLastTicket');
       const printBtn = document.getElementById('tpvPrintTicketBtn');
       const printCartBtn = document.getElementById('tpvPrintTicketCartBtn');
+      const printFacturaBtn = document.getElementById('tpvPrintFacturaBtn');
+      const printFacturaCartBtn = document.getElementById('tpvPrintFacturaCartBtn');
       const anularBtn = document.getElementById('tpvAnularUltimoBtn');
       const t = appState.lastTicket;
       if (!t) {
@@ -2792,6 +3218,8 @@
         box.innerHTML = '<p>Aún no hay cobros en esta sesión.</p>';
         if (printBtn) printBtn.disabled = true;
         if (printCartBtn) printCartBtn.hidden = true;
+        if (printFacturaBtn) printFacturaBtn.disabled = true;
+        if (printFacturaCartBtn) printFacturaCartBtn.hidden = true;
         if (anularBtn) anularBtn.disabled = true;
         return;
       }
@@ -2800,16 +3228,20 @@
       const etiqueta = t.subtipo === 'producto' ? 'Producto' : t.subtipo === 'mixto' ? 'Ticket' : 'Bono';
       const canAnular = Array.isArray(t.transaccionIds) && t.transaccionIds.length > 0;
       if (printCartBtn) printCartBtn.hidden = false;
+      if (printFacturaCartBtn) printFacturaCartBtn.hidden = false;
       box.innerHTML = `
         <div style="display:grid;gap:.25rem;">
-          <div style="font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--color-muted);">${etiqueta}</div>
+          <div style="font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--color-muted);">${etiqueta} · ${escHtml(t.numeroTicket || '')}</div>
           <div style="font-size:1rem;color:var(--color-cream);">${escHtml(concepto)}</div>
           <div style="font-size:.8rem;color:var(--color-cream-dim);">Cliente: ${escHtml(t.clienteNombre)} · ${escHtml(t.clienteEmail || '')}</div>
-          <div style="font-size:.75rem;color:var(--color-muted);">Importe: ${t.importe.toFixed(2)} € · ${escHtml(t.metodoPago)} · ${new Date(t.createdAt).toLocaleString('es-ES')}</div>
+          <div style="font-size:.75rem;color:var(--color-muted);">Atendido por: ${escHtml(t.vendedor || '—')}${t.vendedorRol ? ` (${escHtml(t.vendedorRol)})` : ''}</div>
+          <div style="font-size:.75rem;color:var(--color-muted);">Importe: ${t.importe.toFixed(2)} € · ${escHtml(tpvMetodoPagoLabel(t.metodoPago))} · ${new Date(t.createdAt).toLocaleString('es-ES')}</div>
+          ${t.valeCodigo ? `<div style="font-size:.75rem;color:var(--color-muted);">Ticket regalo ${escHtml(t.valeCodigo)} · Restante ${tpvFmtEur(t.valeRestante)}</div>` : ''}
           ${t.nota ? `<div style="font-size:.75rem;color:var(--color-muted);">Nota: ${escHtml(t.nota)}</div>` : ''}
         </div>
       `;
       if (printBtn) printBtn.disabled = false;
+      if (printFacturaBtn) printFacturaBtn.disabled = false;
       if (anularBtn) anularBtn.disabled = !canAnular;
     }
 
@@ -2853,41 +3285,811 @@
       }
     }
 
+    function tpvAbrirVentanaImpresion(html) {
+      const w = window.open('', '_blank', 'width=480,height=760');
+      if (!w) {
+        toast('Bloqueador de ventanas impide imprimir. Permite ventanas emergentes para el TPV.', 'error');
+        return null;
+      }
+      w.document.write(html);
+      w.document.close();
+      w.focus();
+      return w;
+    }
+
+    function tpvImprimirVentana(w) {
+      if (!w) return;
+      const imprimir = () => {
+        try {
+          w.focus();
+          w.print();
+        } catch (_) {}
+      };
+      if (w.document.readyState === 'complete') {
+        setTimeout(imprimir, 150);
+      } else {
+        w.onload = () => setTimeout(imprimir, 150);
+      }
+    }
+
+    function tpvFmtEur(n) {
+      return `${Number(n || 0).toFixed(2).replace('.', ',')} €`;
+    }
+
+    function tpvMetodoPagoLabel(m) {
+      const map = {
+        efectivo: 'Efectivo',
+        tarjeta: 'Tarjeta',
+        transferencia: 'Transferencia',
+        vale: 'Ticket regalo'
+      };
+      return map[m] || String(m || '').replace(/^\w/, (c) => c.toUpperCase()) || '—';
+    }
+
+    function tpvFacturaDesglose(total) {
+      const importe = Math.max(0, Number(total || 0));
+      const iva = importe / 1.21 * 0.21;
+      return { base: importe - iva, iva, total: importe };
+    }
+
+    function tpvTicketHtml(t) {
+      const fecha = new Date(t.createdAt).toLocaleString('es-ES', {
+        dateStyle: 'short',
+        timeStyle: 'short'
+      });
+      const metodo = tpvMetodoPagoLabel(t.metodoPago);
+      const lineas = Array.isArray(t.lineas) && t.lineas.length
+        ? t.lineas
+        : [{ nombre: t.concepto || 'Venta', qty: 1, unitPrice: t.importe, kind: 'bono' }];
+      const filas = lineas.map((l) => {
+        const qty = Math.max(1, Number(l.qty) || 1);
+        const unit = Number(l.unitPrice) || 0;
+        const sub = unit * qty;
+        const detalle = l.kind === 'bono'
+          ? (l.sesiones != null ? `${l.sesiones} sesión(es)` : '')
+          : (qty > 1 ? `${qty} × ${unit.toFixed(2).replace('.', ',')}` : '');
+        return `
+          <tr>
+            <td class="item">${escHtml(l.nombre)}${detalle ? `<div class="item-sub">${escHtml(detalle)}</div>` : ''}</td>
+            <td class="right">${tpvFmtEur(sub)}</td>
+          </tr>`;
+      }).join('');
+
+      return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Ticket ${escHtml(t.numeroTicket || 'NŌVA')}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    width: 80mm;
+    margin: 0 auto;
+    padding: 10mm 4mm;
+    color: #1a1f1c;
+    font-size: 11px;
+    line-height: 1.45;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .logo { display: block; margin: 0 auto 2mm; text-align: center; }
+  .logo img { width: 42px; height: auto; }
+  .brand { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .brand-sub { text-align: center; font-size: 9px; color: #5c3d8a; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 1mm; }
+  .tagline { text-align: center; font-size: 9px; color: #6b726d; margin-bottom: 3mm; }
+  .sep { border-top: 1px dashed #9aa39a; margin: 2.5mm 0; }
+  .sep-solid { border-top: 1px solid #1a1f1c; margin: 2.5mm 0; }
+  .row { display: flex; justify-content: space-between; gap: 2mm; }
+  .row .k { color: #6b726d; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 1mm 0; vertical-align: top; }
+  td.right { text-align: right; white-space: nowrap; }
+  .item { font-weight: 600; }
+  .item-sub { font-weight: 400; font-size: 9px; color: #6b726d; }
+  .ticket-no { text-align: center; font-size: 9px; color: #5c3d8a; font-weight: 600; margin-bottom: 1mm; }
+  .total-row td { font-size: 14px; font-weight: 700; }
+  .footer { text-align: center; font-size: 9px; color: #6b726d; margin-top: 2mm; }
+  @media print {
+    @page { size: 80mm auto; margin: 0; }
+    body { padding: 6mm 4mm; }
+  }
+</style>
+</head>
+<body>
+  <div class="logo"><img src="${escHtml(TPV_LOGO_PRINT || '/assets/branding/logo-isotipo.png')}" alt="NŌVA Pilates" /></div>
+  <div class="brand">NŌVA Pilates Studio</div>
+  <div class="brand-sub">Sevilla</div>
+  <div class="ticket-no">${escHtml(t.numeroTicket || 'TICKET')}</div>
+  <p class="tagline">Desconecta de lo de fuera. Conecta contigo.</p>
+  <div class="sep"></div>
+  <div class="row"><span class="k">Fecha y hora</span><span>${escHtml(fecha)}</span></div>
+  <div class="row"><span class="k">Atendido por</span><span>${escHtml(t.vendedor || '—')}</span></div>
+  ${t.vendedorRol ? `<div class="row"><span class="k">Puesto</span><span>${escHtml(t.vendedorRol)}</span></div>` : ''}
+  <div class="row"><span class="k">Cliente</span><span>${escHtml(t.clienteNombre || '—')}</span></div>
+  ${t.clienteEmail ? `<div class="row"><span class="k">Email</span><span>${escHtml(t.clienteEmail)}</span></div>` : ''}
+  <div class="sep"></div>
+  <table>
+    ${filas}
+  </table>
+  <div class="sep"></div>
+  <table>
+    <tr class="total-row"><td>Total</td><td class="right">${tpvFmtEur(t.importe)}</td></tr>
+  </table>
+  <div class="sep-solid"></div>
+  <div class="row"><span class="k">Pago</span><span>${escHtml(metodo)}</span></div>
+  ${t.nota ? `<div class="row"><span class="k">Nota</span><span>${escHtml(t.nota)}</span></div>` : ''}
+  <div class="sep"></div>
+  <p class="footer">¡Gracias por confiar en NŌVA!<br />Pilates Reformer · Suelo · Yoga · Barre</p>
+</body>
+</html>`;
+    }
+
     function printTicket() {
       const t = appState.lastTicket;
       if (!t) {
         toast('No hay ticket para imprimir todavía.', 'info');
         return;
       }
-      const concepto = escHtml(t.concepto || t.bonoNombre || 'Venta');
-      const etiquetaTipo = t.subtipo === 'producto' ? 'Producto' : t.subtipo === 'mixto' ? 'Ticket' : 'Bono';
-      const html = `
-        <html><head><title>Ticket TPV NŌVA</title><style>
-          body { font-family: Arial, sans-serif; padding: 24px; color: #2b2b2b; }
-          h1 { font-size: 18px; margin: 0 0 12px; }
-          p { margin: 4px 0; font-size: 13px; }
-          .line { border-top: 1px dashed #aaa; margin: 12px 0; }
-        </style></head><body>
-          <h1>NŌVA PILATES STUDIO · Ticket TPV</h1>
-          <p><strong>Fecha:</strong> ${new Date(t.createdAt).toLocaleString('es-ES')}</p>
-          <p><strong>Cliente:</strong> ${escHtml(t.clienteNombre)} (${escHtml(t.clienteEmail || '')})</p>
-          <p><strong>${etiquetaTipo}:</strong> ${concepto}</p>
-          <p><strong>Importe:</strong> ${t.importe.toFixed(2)} EUR</p>
-          <p><strong>Método:</strong> ${escHtml(t.metodoPago)}</p>
-          ${t.nota ? `<p><strong>Nota:</strong> ${escHtml(t.nota)}</p>` : ''}
-          <div class="line"></div>
-          <p>Gracias por confiar en NŌVA.</p>
-</body></html>
-      `;
-      const w = window.open('', '_blank', 'width=520,height=640');
-      if (!w) {
-        toast('Bloqueador de ventanas impide imprimir ticket.', 'error');
+      const w = tpvAbrirVentanaImpresion(tpvTicketHtml(t));
+      tpvImprimirVentana(w);
+    }
+
+    function round2(n) {
+      return Math.round((Number(n) || 0) * 100) / 100;
+    }
+
+    function finFmtEuro(n) {
+      return `${Number(n || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+    }
+
+    function facturacionEmisor() {
+      const c = appState.facturacionConfig || {};
+      return {
+        nombre: c.nombre_emisor || FACTURACION_DEFAULTS.nombre_emisor,
+        cif: c.cif || FACTURACION_DEFAULTS.cif,
+        direccion: c.direccion || FACTURACION_DEFAULTS.direccion,
+        ciudad: c.ciudad || FACTURACION_DEFAULTS.ciudad,
+        codigo_postal: c.codigo_postal || FACTURACION_DEFAULTS.codigo_postal,
+        telefono: c.telefono || FACTURACION_DEFAULTS.telefono,
+        email: c.email || FACTURACION_DEFAULTS.email,
+        iva: Number(c.iva_porcentaje != null ? c.iva_porcentaje : FACTURACION_DEFAULTS.iva_porcentaje) || 21,
+        pie: c.pie_factura || FACTURACION_DEFAULTS.pie_factura
+      };
+    }
+
+    function normalizarLineaFactura(l) {
+      return {
+        kind: l.kind || 'bono',
+        nombre: l.nombre || 'Venta',
+        qty: Math.max(1, Number(l.qty) || 1),
+        unit: Number(l.unit != null ? l.unit : l.unitPrice) || 0,
+        sesiones: l.sesiones != null ? l.sesiones : null
+      };
+    }
+
+    function normalizarFacturaImpresion(d) {
+      if (!d || typeof d !== 'object') return d;
+      const esFilaDb = d.importe_total != null || d.created_at != null || d.cobro_id != null;
+      if (!esFilaDb) return d;
+      const emisor = d.emisor || null;
+      const nombreDe = (p) =>
+        p ? ([p.nombre, p.apellidos].filter(Boolean).join(' ').trim() || p.email || '') : '';
+      const vendedor = emisor ? (nombreDe(emisor) || '—') : '';
+      return {
+        numero: d.numero || '',
+        fecha: d.created_at,
+        clienteNombre: d.cliente_nombre || nombreDe(d.perfil) || '',
+        clienteEmail: d.cliente_email || d.perfil?.email || '',
+        vendedor,
+        vendedorRol: emisor?.rol || '',
+        lineas: d.lineas || [],
+        importeTotal: d.importe_total,
+        base: d.importe_base,
+        iva: d.importe_iva,
+        ivaPorcentaje: d.iva_porcentaje,
+        metodoPago: d.metodo_pago,
+        nota: d.nota,
+        anulada: String(d.estado || '').toLowerCase() === 'anulada',
+        motivoAnulacion: d.motivo_anulacion
+      };
+    }
+
+    function construirFacturaHtml(d) {
+      d = normalizarFacturaImpresion(d);
+      const emisor = d.emisor || facturacionEmisor();
+      const ivaPct = Number(d.ivaPorcentaje != null ? d.ivaPorcentaje : emisor.iva) || 21;
+      const lineas = (Array.isArray(d.lineas) && d.lineas.length ? d.lineas : [d]).map(normalizarLineaFactura);
+      const total = Number(d.importeTotal != null ? d.importeTotal : lineas.reduce((s, l) => s + l.qty * l.unit, 0)) || 0;
+      const base = d.base != null ? Number(d.base) : round2(total / (1 + ivaPct / 100));
+      const iva = d.iva != null ? Number(d.iva) : round2(total - base);
+      const fecha = new Date(d.fecha || Date.now()).toLocaleString('es-ES', {
+        dateStyle: 'long',
+        timeStyle: 'short'
+      });
+      const metodo = tpvMetodoPagoLabel(d.metodoPago);
+      const anulada = Boolean(d.anulada);
+      const motivo = (d.motivoAnulacion || '').trim();
+      const direccionEmisor = [
+        emisor.direccion,
+        [emisor.ciudad, emisor.codigo_postal].filter(Boolean).join(', '),
+        'España'
+      ].filter(Boolean).join(', ');
+      const contactoEmisor = [emisor.telefono, emisor.email].filter(Boolean).join(' · ');
+      const cifPendiente = !emisor.cif || String(emisor.cif).includes('pendiente');
+
+      const filas = lineas.map((l) => {
+        const sub = l.qty * l.unit;
+        return `
+          <tr>
+            <td>${escHtml(l.nombre)}${l.kind === 'bono' && l.sesiones != null ? ` <span class="dim">(${l.sesiones} sesiones)</span>` : ''}</td>
+            <td class="right">${l.qty}</td>
+            <td class="right">${l.unit.toFixed(2).replace('.', ',')} €</td>
+            <td class="right">${finFmtEuro(sub)}</td>
+          </tr>`;
+      }).join('');
+
+      return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Factura ${escHtml(d.numero || 'NŌVA')}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #1a1f1c;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 16mm;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8mm; margin-bottom: 10mm; }
+  .head .left img { height: 46px; width: auto; }
+  .head .brand { font-size: 20px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+  .head .brand-sub { color: #5c3d8a; letter-spacing: .14em; text-transform: uppercase; font-size: 10px; }
+  .head .right { text-align: right; }
+  .head .right .doc-type { font-size: 22px; font-weight: 800; color: #5c3d8a; }
+  .head .right .doc-no { font-size: 14px; font-weight: 700; }
+  .head .right .estado-anulada { display: inline-block; margin-top: 2mm; padding: 1mm 3mm; border: 2px solid #b33a3a; color: #b33a3a; font-size: 12px; font-weight: 800; letter-spacing: .2em; }
+  .watermark {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    transform: rotate(-24deg); font-size: 46px; letter-spacing: .28em; font-weight: 800;
+    color: rgba(179,58,58,.12); border: 3px solid rgba(179,58,58,.22);
+    pointer-events: none; z-index: 5; text-indent: .28em;
+  }
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-bottom: 10mm; }
+  .meta h3 { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #6b726d; margin-bottom: 2mm; }
+  .meta p { margin-bottom: 1mm; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8mm; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #6b726d; border-bottom: 1px solid #9aa39a; padding: 2mm 1mm; }
+  td { padding: 2mm 1mm; border-bottom: 1px dashed #c5cbc4; vertical-align: top; }
+  td.right { text-align: right; white-space: nowrap; }
+  .dim { color: #6b726d; font-size: 11px; }
+  .totals { width: 55mm; margin-left: auto; }
+  .totals .row { display: flex; justify-content: space-between; padding: 1mm 0; }
+  .totals .row.total { border-top: 2px solid #1a1f1c; font-weight: 800; font-size: 14px; margin-top: 1mm; }
+  .pay { margin-bottom: 6mm; font-size: 11px; }
+  .foot { margin-top: 10mm; padding-top: 4mm; border-top: 1px solid #9aa39a; font-size: 9px; color: #6b726d; }
+  .foot p { margin-bottom: 1mm; }
+  @media print {
+    @page { size: A4; margin: 0; }
+  }
+</style>
+</head>
+<body>
+  ${anulada ? '<div class="watermark">ANULADA</div>' : ''}
+  <div class="head">
+    <div class="left">
+      <img src="${escHtml(TPV_LOGO_PRINT || '/assets/branding/logo-isotipo.png')}" alt="NŌVA Pilates" />
+      <div class="brand">${escHtml(emisor.nombre)}</div>
+      <div class="brand-sub">Reformer · Suelo · Yoga · Barre · ${escHtml(emisor.ciudad || 'Sevilla')}</div>
+    </div>
+    <div class="right">
+      <div class="doc-type">FACTURA</div>
+      <div class="doc-no">${escHtml(d.numero || '')}</div>
+      ${anulada ? '<div class="estado-anulada">ANULADA</div>' : ''}
+      <p style="font-size:10px;color:#6b726d;margin-top:2mm;">Emitida: ${escHtml(fecha)}</p>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div>
+      <h3>Emisor</h3>
+      <p><strong>${escHtml(emisor.nombre)}</strong></p>
+      ${direccionEmisor ? `<p>${escHtml(direccionEmisor)}</p>` : ''}
+      <p>CIF: ${escHtml(emisor.cif || '—')}</p>
+      ${contactoEmisor ? `<p>${escHtml(contactoEmisor)}</p>` : ''}
+    </div>
+    <div>
+      <h3>Cliente</h3>
+      <p><strong>${escHtml(d.clienteNombre || '—')}</strong></p>
+      <p>${escHtml(d.clienteEmail || '')}</p>
+      <p><strong>Atendido por:</strong> ${escHtml(d.vendedor || '—')}${d.vendedorRol ? ` (${escHtml(d.vendedorRol)})` : ''}</p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Concepto</th><th class="right">Cant.</th><th class="right">Precio</th><th class="right">Importe</th></tr>
+    </thead>
+    <tbody>${filas}</tbody>
+  </table>
+
+  <div class="totals">
+    <div class="row"><span>Base imponible</span><span>${finFmtEuro(base)}</span></div>
+    <div class="row"><span>IVA ${String(ivaPct).replace('.', ',')}%</span><span>${finFmtEuro(iva)}</span></div>
+    <div class="row total"><span>Total</span><span>${finFmtEuro(total)}</span></div>
+  </div>
+
+  <div class="pay">
+    <strong>Forma de pago:</strong> ${escHtml(metodo)}
+    ${d.nota ? `<br /><strong>Nota:</strong> ${escHtml(d.nota)}` : ''}
+  </div>
+
+  <div class="foot">
+    <p>Documento emitido por ${escHtml(emisor.nombre)}${direccionEmisor ? ` (${escHtml(direccionEmisor)})` : ''}.${cifPendiente ? ' Completar el CIF del emisor antes de su uso oficial.' : ''}</p>
+    ${anulada && motivo ? `<p><strong>Motivo de anulación:</strong> ${escHtml(motivo)}</p>` : ''}
+    <p>Gracias por tu confianza. ${escHtml(emisor.pie || 'Desconecta de lo de fuera. Conecta contigo.')}</p>
+  </div>
+</body>
+</html>`;
+    }
+
+    function imprimirFactura(d) {
+      const w = tpvAbrirVentanaImpresion(construirFacturaHtml(d));
+      tpvImprimirVentana(w);
+    }
+
+    async function fetchFactura(id) {
+      if (!id) return null;
+      const { data, error } = await novaSupabase
+        .from('facturas')
+        .select('*,perfil:perfil_id(nombre,apellidos,email),emisor:emitida_por(nombre,apellidos,email,rol)')
+        .eq('id', id)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) {
+        appState.facturasCobroMap[data.cobro_id] = data;
+        if (!appState.facturasAll.some((x) => x.id === data.id)) appState.facturasAll.unshift(data);
+      }
+      return data;
+    }
+
+    async function emitirFacturaCobro(cobroId, opts) {
+      const { toastOnNew = true } = opts || {};
+      if (!cobroId) throw new Error('El cobro no tiene identificador para facturar.');
+      const { data, error } = await novaSupabase.rpc('facturar_cobro', { p_cobro_id: cobroId });
+      if (error) {
+        const m = error.message || '';
+        if (/function.*facturar_cobro|does not exist/i.test(m)) {
+          throw new Error('Falta ejecutar en Supabase el SQL ' + FACTURACION_PATCH);
+        }
+        throw error;
+      }
+      await loadFacturas();
+      const f = appState.facturasCobroMap[cobroId] || await fetchFactura(data);
+      if (toastOnNew) toast(`Factura ${f.numero} emitida correctamente`, 'success');
+      return f;
+    }
+
+    async function loadFacturas() {
+      try {
+        const { data, error } = await novaSupabase
+          .from('facturas')
+          .select('*,perfil:perfil_id(nombre,apellidos,email),emisor:emitida_por(nombre,apellidos,email,rol)')
+          .order('created_at', { ascending: false })
+          .limit(200);
+        if (error) {
+          if (/relation .*facturas.* does not exist|does not exist/i.test(error.message || '')) {
+            console.warn('Facturas: falta ejecutar ' + FACTURACION_PATCH);
+          } else {
+            console.warn('Facturas:', error.message);
+          }
+          appState.facturasAll = [];
+        } else {
+          appState.facturasAll = data || [];
+        }
+      } catch (err) {
+        console.warn('Facturas:', err.message || err);
+        appState.facturasAll = [];
+      }
+      appState.facturasCobroMap = {};
+      for (const f of appState.facturasAll) {
+        if (f.cobro_id) appState.facturasCobroMap[f.cobro_id] = f;
+      }
+      renderFacturas();
+      renderFinanzasRows();
+    }
+
+    function renderFacturas() {
+      const rows = document.getElementById('rowsFacturas');
+      const count = document.getElementById('finFacturasCount');
+      if (!rows) return;
+      const list = appState.facturasAll || [];
+      rows.innerHTML = list.map((f) => {
+        const anulada = f.estado === 'anulada';
+        const cliente = f.cliente_nombre || f.perfil?.nombre || f.perfil?.email || '-';
+        const estadoBadge = anulada
+          ? '<span class="badge badge-danger">Anulada</span>'
+          : '<span class="badge badge-success">Emitida</span>';
+        return `<tr class="${anulada ? 'fin-row-anulada' : ''}">
+          <td class="fin-badge-num">${escHtml(f.numero)}</td>
+          <td style="white-space:nowrap;font-size:.8rem;">${new Date(f.created_at).toLocaleDateString('es-ES')}</td>
+          <td style="font-size:.82rem;">${escHtml(cliente)}</td>
+          <td>${finFmtEuro(f.importe_base)}</td>
+          <td>${finFmtEuro(f.importe_iva)}</td>
+          <td><strong>${finFmtEuro(f.importe_total)}</strong></td>
+          <td style="font-size:.8rem;">${escHtml(f.metodo_pago || '-')}</td>
+          <td>${estadoBadge}</td>
+          <td>
+            <div class="fin-actions">
+              <button type="button" class="btn btn-outline btn-sm js-ver-factura" data-factura-id="${f.id}">Ver</button>
+              ${anulada ? '' : `<button type="button" class="btn btn-ghost btn-sm js-anular-factura" data-factura-id="${f.id}">Anular</button>`}
+            </div>
+          </td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="9"><div class="fin-empty">Aún no hay facturas. Usa el botón <strong>Factura</strong> en las transacciones.</div></td></tr>';
+      if (count) count.textContent = list.length ? `${list.length} factura${list.length === 1 ? '' : 's'}` : '';
+    }
+
+    async function anularFacturaFlow(f) {
+      if (!f) return;
+      const cliente = f.cliente_nombre || f.perfil?.nombre || f.perfil?.email || '—';
+      const ok = await openAnularVentaModal({
+        title: 'Anular factura',
+        lead: `¿Anular la factura ${f.numero}? Quedará marcada como ANULADA y podrás reimprimirla con esa marca. El cobro no se modifica.`,
+        esBono: false,
+        cliente,
+        concepto: f.numero,
+        importe: finFmtEuro(f.importe_total),
+        confirmLabel: 'Anular factura'
+      });
+      if (!ok) return;
+      try {
+        const { error } = await novaSupabase.rpc('anular_factura', { p_factura_id: f.id });
+        if (error) {
+          const m = error.message || '';
+          if (/does not exist|function/i.test(m)) {
+            toast('Falta ejecutar en Supabase el parche ' + FACTURACION_PATCH, 'error');
+            return;
+          }
+          throw error;
+        }
+        toast(`Factura ${f.numero} anulada`, 'success');
+        await loadFacturas();
+      } catch (err) {
+        toast(err.message || 'No se pudo anular la factura', 'error');
+      }
+    }
+
+    async function loadFacturacionConfig() {
+      try {
+        const { data, error } = await novaSupabase.rpc('obtener_facturacion_config');
+        if (error) throw error;
+        appState.facturacionConfig = data || null;
+      } catch (err) {
+        const m = err.message || '';
+        if (/function.*obtener_facturacion_config|does not exist/i.test(m)) console.warn('Facturación: falta ' + FACTURACION_PATCH);
+        else console.warn('Facturación config:', err.message || err);
+      }
+      rellenarFormFacturacion();
+    }
+
+    function rellenarFormFacturacion() {
+      if (!document.getElementById('facNombreEmisor')) return;
+      const c = appState.facturacionConfig || {};
+      const set = (id, v) => {
+        const el = document.getElementById(id);
+        if (el && v != null) el.value = v;
+      };
+      set('facNombreEmisor', c.nombre_emisor ?? FACTURACION_DEFAULTS.nombre_emisor);
+      set('facCif', c.cif ?? FACTURACION_DEFAULTS.cif);
+      set('facDireccion', c.direccion ?? '');
+      set('facCiudad', c.ciudad ?? FACTURACION_DEFAULTS.ciudad);
+      set('facCodigoPostal', c.codigo_postal ?? '');
+      set('facTelefono', c.telefono ?? '');
+      set('facEmail', c.email ?? '');
+      set('facIva', c.iva_porcentaje ?? FACTURACION_DEFAULTS.iva_porcentaje);
+      set('facPie', c.pie_factura ?? FACTURACION_DEFAULTS.pie_factura);
+    }
+
+    async function guardarFacturacionForm() {
+      if (!staffProfile || staffProfile.rol !== 'admin') {
+        toast('Solo administración puede editar la facturación.', 'error');
         return;
       }
-      w.document.write(html);
-      w.document.close();
-      w.focus();
-      w.print();
+      const val = (id) => document.getElementById(id)?.value.trim() ?? '';
+      const iva = Number(document.getElementById('facIva')?.value || 0);
+      if (Number.isNaN(iva) || iva < 0 || iva > 100) {
+        toast('IVA no válido (0–100).', 'error');
+        return;
+      }
+      try {
+        const { error } = await novaSupabase.rpc('guardar_facturacion_config', {
+          p_nombre_emisor: val('facNombreEmisor'),
+          p_cif: val('facCif'),
+          p_direccion: val('facDireccion') || null,
+          p_ciudad: val('facCiudad') || null,
+          p_codigo_postal: val('facCodigoPostal') || null,
+          p_telefono: val('facTelefono') || null,
+          p_email: val('facEmail') || null,
+          p_iva_porcentaje: iva,
+          p_pie_factura: val('facPie') || null
+        });
+        if (error) {
+          const m = error.message || '';
+          if (/does not exist|function/i.test(m)) {
+            toast('Falta ejecutar en Supabase el parche ' + FACTURACION_PATCH, 'error');
+            return;
+          }
+          throw error;
+        }
+        await loadFacturacionConfig();
+        toast('Datos de facturación guardados', 'success');
+      } catch (err) {
+        toast(err.message || 'No se pudieron guardar los datos de facturación', 'error');
+      }
+    }
+
+    function renderFinanzasDashboard() {
+      const all = appState.finanzasTxAll || [];
+      const now = new Date();
+      const a = now.getFullYear();
+      const m = now.getMonth();
+      const curStart = new Date(a, m, 1);
+      const nextStart = new Date(a, m + 1, 1);
+      const prevStart = new Date(a, m - 1, 1);
+      const inR = (t, s, e) => {
+        const d = new Date(t.created_at);
+        return d >= s && d < e;
+      };
+      const cur = all.filter((t) => inR(t, curStart, nextStart));
+      const prev = all.filter((t) => inR(t, prevStart, curStart));
+      const suma = (arr) => arr.reduce((s, t) => s + Number(t.importe || 0), 0);
+      const curTotal = suma(cur);
+      const prevTotal = suma(prev);
+      const delta = prevTotal > 0 ? ((curTotal - prevTotal) / prevTotal) * 100 : (curTotal > 0 ? 100 : 0);
+      const vDelta = prev.length > 0 ? ((cur.length - prev.length) / prev.length) * 100 : (cur.length > 0 ? 100 : 0);
+      const ticketMedio = cur.length ? curTotal / cur.length : 0;
+      const porMetodo = (mm) => suma(cur.filter((t) => (t.metodo_pago || 'efectivo') === mm));
+
+      const setTxt = (id, v) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = v;
+      };
+      const title = document.getElementById('finDashboardTitulo');
+      if (title) title.textContent = `Panel financiero · ${curStart.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`;
+      setTxt('finKpiIngresos', finFmtEuro(curTotal));
+      setTxt('finKpiVentas', String(cur.length));
+      setTxt('finKpiTicketMedio', finFmtEuro(ticketMedio));
+      setTxt('finKpiEfectivo', finFmtEuro(porMetodo('efectivo')));
+      setTxt('finKpiTarjeta', finFmtEuro(porMetodo('tarjeta')));
+      setTxt('finKpiTransferencia', finFmtEuro(porMetodo('transferencia')));
+      renderFinanzasDelta('finKpiDelta', delta);
+      renderFinanzasDelta('finKpiVentasDelta', vDelta);
+      renderFinanzasChart(all);
+      renderFinanzasBreakdownTipo(cur);
+      renderFinanzasBreakdownMetodo(cur);
+      renderFinanzasTop(cur);
+    }
+
+    function renderFinanzasDelta(id, pct) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('is-up', 'is-down', 'is-flat');
+      if (Math.abs(pct) < 0.05) {
+        el.classList.add('is-flat');
+        el.textContent = 'Sin cambios';
+      } else {
+        const up = pct > 0;
+        el.classList.add(up ? 'is-up' : 'is-down');
+        el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(1)}% vs mes anterior`;
+      }
+    }
+
+    function renderFinanzasChart(all) {
+      const wrap = document.getElementById('finChartBars');
+      if (!wrap) return;
+      const suma = (arr) => arr.reduce((s, t) => s + Number(t.importe || 0), 0);
+      const days = [];
+      const hoy = new Date();
+      for (let i = 13; i >= 0; i--) {
+        days.push(new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - i));
+      }
+      const totals = days.map((d) => {
+        const e = new Date(d);
+        e.setDate(e.getDate() + 1);
+        return suma(all.filter((t) => {
+          const c = new Date(t.created_at);
+          return c >= d && c < e;
+        }));
+      });
+      const max = Math.max(1, ...totals);
+      wrap.innerHTML = days.map((d, i) => {
+        const h = Math.max(2, Math.round((totals[i] / max) * 100));
+        const hoyCol = i === days.length - 1;
+        const tip = `${d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })} · ${finFmtEuro(totals[i])}`;
+        return `<div class="fin-chart-col ${hoyCol ? 'is-max' : ''}">
+          <div class="fin-chart-tip">${escHtml(tip)}</div>
+          <div class="fin-chart-bar" style="height:${h}%;"></div>
+          <div class="fin-chart-day ${hoyCol ? 'is-today' : ''}">${d.getDate()}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderFinanzasBreakdownTipo(cur) {
+      const el = document.getElementById('finBreakdown');
+      if (!el) return;
+      const suma = (arr) => arr.reduce((s, t) => s + Number(t.importe || 0), 0);
+      const bonos = suma(cur.filter((t) => !finanzasEsTienda(t)));
+      const tienda = suma(cur.filter((t) => finanzasEsTienda(t)));
+      const total = (bonos + tienda) || 1;
+      const row = (label, v, cls) => {
+        const pct = (v / total) * 100;
+        return `<div class="fin-breakdown-row">
+          <span class="fin-breakdown-label">${label}</span>
+          <span class="fin-breakdown-value">${finFmtEuro(v)} <span style="color:var(--color-muted);font-weight:400;">(${pct.toFixed(0)}%)</span></span>
+          <div class="fin-breakdown-track"><div class="fin-breakdown-fill ${cls}" style="width:${pct.toFixed(1)}%;"></div></div>
+        </div>`;
+      };
+      if (!bonos && !tienda) {
+        el.innerHTML = '<div class="fin-empty" style="padding:.5rem;">Sin ventas este mes.</div>';
+        return;
+      }
+      el.innerHTML = row('Bonos', bonos, 'fill-bono') + row('Tienda', tienda, 'fill-tienda');
+    }
+
+    function renderFinanzasBreakdownMetodo(cur) {
+      const el = document.getElementById('finBreakdownMetodo');
+      if (!el) return;
+      const suma = (arr) => arr.reduce((s, t) => s + Number(t.importe || 0), 0);
+      const total = suma(cur);
+      if (!total) {
+        el.innerHTML = '<div class="fin-empty" style="padding:.5rem;">Sin cobros este mes.</div>';
+        return;
+      }
+      const methods = [
+        ['efectivo', 'Efectivo', 'fill-efectivo'],
+        ['tarjeta', 'Tarjeta', 'fill-tarjeta'],
+        ['transferencia', 'Transferencia', 'fill-transf'],
+        ['vale', 'Ticket regalo', 'fill-bono']
+      ];
+      el.innerHTML = methods.map(([key, label, cls]) => {
+        const v = suma(cur.filter((t) => (t.metodo_pago || 'efectivo') === key));
+        const pct = (v / total) * 100;
+        return `<div class="fin-breakdown-row">
+          <span class="fin-breakdown-label">${label}</span>
+          <span class="fin-breakdown-value">${finFmtEuro(v)} <span style="color:var(--color-muted);font-weight:400;">(${pct.toFixed(0)}%)</span></span>
+          <div class="fin-breakdown-track"><div class="fin-breakdown-fill ${cls}" style="width:${pct.toFixed(1)}%;"></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderFinanzasTop(cur) {
+      const el = document.getElementById('finTopList');
+      if (!el) return;
+      const map = new Map();
+      for (const t of cur) {
+        const k = finanzasConceptoLinea(t);
+        const e = map.get(k) || { suma: 0, n: 0 };
+        e.suma += Number(t.importe || 0);
+        e.n += 1;
+        map.set(k, e);
+      }
+      const top = [...map.entries()].sort((a, b) => b[1].suma - a[1].suma).slice(0, 5);
+      if (!top.length) {
+        el.innerHTML = '<div class="fin-empty" style="padding:.5rem;">Sin ventas este mes.</div>';
+        return;
+      }
+      el.innerHTML = top.map(([k, v], i) => `
+        <div class="fin-top-row">
+          <span class="fin-top-pos">${String(i + 1).padStart(2, '0')}</span>
+          <span class="fin-top-name" title="${escHtml(k)}">${escHtml(k)}</span>
+          <span class="fin-top-val">${finFmtEuro(v.suma)} <span style="color:var(--color-muted);font-weight:400;">· ${v.n} ud.</span></span>
+        </div>`).join('');
+    }
+
+    async function loadCajasHistorial() {
+      try {
+        const { data, error } = await novaSupabase
+          .from('caja_diaria')
+          .select('fecha,fondo_inicial,cierre_efectivo_declarado,cierre_efectivo_sistema,diferencia_efectivo,fondo_siguiente,notas_apertura,notas_cierre,abierta_por:abierta_por(nombre,email),cerrada_por:cerrada_por(nombre,email)')
+          .eq('estado', 'cerrada')
+          .order('fecha', { ascending: false })
+          .limit(30);
+        if (error) throw error;
+        appState.cajasHistorial = data || [];
+      } catch (err) {
+        console.warn('Cajas historial:', err.message || err);
+        appState.cajasHistorial = [];
+      }
+      renderCajasHistorial();
+    }
+
+    function renderCajasHistorial() {
+      const rows = document.getElementById('rowsCajasHistorial');
+      if (!rows) return;
+      const list = appState.cajasHistorial || [];
+      rows.innerHTML = list.map((c) => `
+        <tr>
+          <td style="white-space:nowrap;">${new Date(c.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+          <td style="font-size:.8rem;">${escHtml(nombreClienteDisplay(c.abierta_por) || c.abierta_por?.email || '—')}</td>
+          <td>${finFmtEuro(c.fondo_inicial)}</td>
+          <td>${finFmtEuro(c.cierre_efectivo_sistema)}</td>
+          <td>${finFmtEuro(c.cierre_efectivo_declarado)}</td>
+          <td>${finFmtEuro(c.diferencia_efectivo)}</td>
+          <td>${c.fondo_siguiente != null ? finFmtEuro(c.fondo_siguiente) : '—'}</td>
+          <td style="font-size:.75rem;color:var(--color-muted);max-width:12rem;">${escHtml(c.notas_cierre || c.notas_apertura || '')}</td>
+        </tr>`).join('') || '<tr><td colspan="8"><div class="fin-empty">Aún no hay cajas cerradas.</div></td></tr>';
+    }
+
+    function exportarFinanzasCsv() {
+      const all = appState.finanzasTxAll || [];
+      const list = filtrarTransaccionesFinanzas(all);
+      if (!list.length) {
+        toast('No hay transacciones para exportar con los filtros actuales.', 'info');
+        return;
+      }
+      const head = ['Fecha', 'Cliente', 'Email', 'Tipo', 'Concepto', 'Importe (€)', 'Método', 'Vendedor', 'Factura'];
+      const filas = list.map((t) => [
+        new Date(t.created_at).toLocaleString('es-ES'),
+        nombreClienteDisplay(t.perfil) || t.perfil?.email || '',
+        t.perfil?.email || '',
+        finanzasEsTienda(t) ? 'Tienda' : 'Bono',
+        finanzasConceptoLinea(t),
+        Number(t.importe || 0).toFixed(2),
+        t.metodo_pago || '',
+        nombreClienteDisplay(t.vendedor) || t.vendedor?.email || '',
+        appState.facturasCobroMap[t.cobro_id]?.numero || ''
+      ]);
+      const esc = (s) => `"${String(s ?? '').replace(/"/g, '""')}"`;
+      const csv = '\uFEFF' + [head, ...filas].map((r) => r.map(esc).join(';')).join('\r\n');
+      const hoy = new Date().toISOString().slice(0, 10);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `transacciones_nova_${hoy}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      toast(`Exportadas ${filas.length} transacciones a CSV`, 'success');
+    }
+
+    async function printFactura() {
+      const t = appState.lastTicket;
+      if (!t) {
+        toast('No hay factura para imprimir todavía.', 'info');
+        return;
+      }
+      const cobroId = t.cobroId || t.cobro_id;
+      if (cobroId) {
+        try {
+          const f = await emitirFacturaCobro(cobroId, { toastOnNew: false });
+          if (f) {
+            imprimirFactura(f);
+            return;
+          }
+        } catch (err) {
+          toast(err.message || 'No se pudo emitir la factura', 'error');
+          return;
+        }
+      }
+      imprimirFactura({
+        numero: t.numeroFactura || '',
+        fecha: t.createdAt,
+        clienteNombre: t.clienteNombre,
+        clienteEmail: t.clienteEmail,
+        vendedor: t.vendedor,
+        vendedorRol: t.vendedorRol,
+        lineas: t.lineas || [{ nombre: t.concepto || 'Venta', qty: 1, unitPrice: t.importe, kind: 'bono' }],
+        importeTotal: t.importe,
+        metodoPago: t.metodoPago,
+        nota: t.nota
+      });
     }
 
     async function loadClases() {
@@ -3092,19 +4294,29 @@
       const pageSize = 1000;
       const all = [];
       let from = 0;
+      const colsBase = 'id,registrado_por,cobro_id,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,apellidos,email),vendedor:registrado_por(nombre,apellidos,email,rol)';
+      const colsDevol = 'id,registrado_por,cobro_id,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_movimiento,devolucion_id,vale_regalo_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,apellidos,email),vendedor:registrado_por(nombre,apellidos,email,rol)';
+      let cols = colsDevol;
       for (;;) {
         const { data, error } = await novaSupabase
           .from('transacciones')
-          .select('id,registrado_por,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,apellidos,email),vendedor:registrado_por(nombre,apellidos,email,rol)')
+          .select(cols)
           .order('created_at', { ascending: false })
           .range(from, from + pageSize - 1);
-        if (error) throw error;
+        if (error) {
+          if (cols === colsDevol && /column .*tipo_movimiento|does not exist/i.test(error.message || '')) {
+            cols = colsBase;
+            continue;
+          }
+          throw error;
+        }
         const batch = data || [];
         all.push(...batch);
         if (batch.length < pageSize) break;
         from += pageSize;
         if (from > 50000) break;
       }
+      appState.finanzasConDevoluciones = cols === colsDevol;
       return all;
     }
 
@@ -3177,27 +4389,47 @@
           ? ` <span style="font-size:.68rem;color:var(--color-muted);">(${escHtml(vendedorRol)})</span>`
           : '';
         const esTienda = finanzasEsTienda(t);
-        const tipoBadge = esTienda
-          ? '<span class="badge badge-neutral">Tienda</span>'
-          : '<span class="badge badge-accent">Bono</span>';
+        const esReembolso = t.tipo_movimiento === 'reembolso' || t.devolucion_id != null;
+        const estaDevuelto = Boolean(t.cobro_id && appState.devolucionCobroMap[t.cobro_id]);
+        const tipoBadge = esReembolso
+          ? '<span class="badge badge-danger">Devolución</span>'
+          : (esTienda
+            ? '<span class="badge badge-neutral">Tienda</span>'
+            : '<span class="badge badge-accent">Bono</span>');
         const concepto = escHtml(finanzasConceptoLinea(t));
         const imp = Number(t.importe || 0).toFixed(2);
+        const impHtml = esReembolso
+          ? `<span style="color:var(--color-danger, #e5484d);">−${imp.replace('-', '')} €</span>`
+          : `${imp} €`;
         const puedeAnular =
           staffProfile &&
           (staffProfile.rol === 'admin' ||
             (staffProfile.rol === 'empleado' && t.registrado_por === staffProfile.id));
-        const btnAnular = puedeAnular
+        const btnAnular = (!esReembolso && puedeAnular && !estaDevuelto)
           ? `<button type="button" class="btn btn-ghost btn-sm js-anular-transaccion" data-id="${t.id}" data-es-bono="${esTienda ? '0' : '1'}" data-cliente="${escHtml(cliente)}" data-concepto="${concepto}" data-importe="${imp} €">Anular</button>`
-          : '<span style="color:var(--color-muted);">—</span>';
+          : '';
+        const facturaDeCobro = t.cobro_id ? appState.facturasCobroMap[t.cobro_id] : null;
+        const btnFactura = (t.cobro_id && !esReembolso && !estaDevuelto && appState.finanzasConDevoluciones)
+          ? (facturaDeCobro
+              ? `<button type="button" class="btn btn-outline btn-sm js-ver-factura" data-factura-id="${facturaDeCobro.id}" title="Reimprimir factura ${escHtml(facturaDeCobro.numero)}">Factura ${escHtml(facturaDeCobro.numero)}</button>`
+              : `<button type="button" class="btn btn-outline btn-sm js-facturar-cobro" data-cobro-id="${t.cobro_id}" title="Emitir factura de este cobro">Factura</button>`)
+          : '';
+        const btnDevolver = (t.cobro_id && !esReembolso && !estaDevuelto && appState.finanzasConDevoluciones)
+          ? `<button type="button" class="btn btn-ghost btn-sm js-devolver-cobro" data-cobro-id="${t.cobro_id}" data-cliente="${escHtml(cliente)}" data-concepto="${concepto}" data-importe="${imp} €" data-metodo="${escHtml(t.metodo_pago || '')}" data-es-bono="${esTienda ? '0' : '1'}">Devolver</button>`
+          : '';
+        const btnDevuelto = (estaDevuelto && !esReembolso)
+          ? '<span class="badge badge-danger">Devuelto</span>'
+          : '';
+        const acciones = [btnFactura, btnDevolver, btnAnular, btnDevuelto].filter(Boolean).join(' ') || (esReembolso ? '<span style="color:var(--color-muted);">—</span>' : '<span style="color:var(--color-muted);">—</span>');
         return `<tr>
           <td>${escHtml(cliente)}</td>
           <td>${tipoBadge}</td>
           <td style="font-size:.82rem;max-width:14rem;">${concepto}</td>
-          <td>${imp} €</td>
-          <td>${escHtml(t.metodo_pago || '-')}</td>
+          <td>${impHtml}</td>
+          <td>${escHtml(tpvMetodoPagoLabel(t.metodo_pago))}</td>
           <td style="font-size:.82rem;">${escHtml(vendedor)}${vendedorMeta}</td>
           <td style="white-space:nowrap;font-size:.8rem;">${new Date(t.created_at).toLocaleString('es-ES')}</td>
-          <td style="white-space:nowrap;">${btnAnular}</td>
+          <td style="white-space:nowrap;">${acciones}</td>
         </tr>`;
       }).join('') || `<tr><td colspan="8">${filtrado ? 'Ninguna transacción con estos filtros.' : 'Sin transacciones'}</td></tr>`;
 
@@ -3209,6 +4441,158 @@
         } else {
           countEl.textContent = `${all.length} transacción${all.length === 1 ? '' : 'es'} en total`;
         }
+      }
+    }
+
+    async function loadDevoluciones() {
+      if (!appState.finanzasConDevoluciones) return;
+      try {
+        const { data, error } = await novaSupabase
+          .from('devoluciones')
+          .select('*,perfil:perfil_id(nombre,apellidos,email)')
+          .order('created_at', { ascending: false })
+          .limit(50);
+        if (error) {
+          if (/relation .*devoluciones.* does not exist|does not exist/i.test(error.message || '')) {
+            appState.finanzasConDevoluciones = false;
+            return;
+          }
+          throw error;
+        }
+        appState.devolucionesAll = data || [];
+        appState.devolucionCobroMap = {};
+        (appState.devolucionesAll || []).forEach((d) => {
+          if (d.cobro_id) appState.devolucionCobroMap[d.cobro_id] = d;
+        });
+        renderDevoluciones();
+      } catch (err) {
+        console.warn('Devoluciones:', err.message || err);
+      }
+    }
+
+    function renderDevoluciones() {
+      const rows = document.getElementById('rowsDevoluciones');
+      const countEl = document.getElementById('finDevolucionesCount');
+      if (!rows) return;
+      const list = appState.devolucionesAll || [];
+      rows.innerHTML = list.map((d) => {
+        const cliente = nombreClienteDisplay(d.perfil) || '—';
+        const motivo = d.motivo || '';
+        return `<tr>
+          <td style="white-space:nowrap;font-size:.8rem;">${new Date(d.created_at).toLocaleString('es-ES')}</td>
+          <td>${escHtml(cliente)}</td>
+          <td>−${Number(d.importe_total || 0).toFixed(2)} €</td>
+          <td>${d.metodo_reembolso === 'vale' ? 'Ticket regalo' : 'Efectivo'}</td>
+          <td style="font-size:.82rem;max-width:14rem;">${escHtml(motivo) || '<span style="color:var(--color-muted);">—</span>'}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="5"><div class="fin-empty">Aún no hay devoluciones.</div></td></tr>';
+      if (countEl) countEl.textContent = list.length ? `${list.length} devolución(es) reciente(s)` : '';
+    }
+
+    async function loadValesRegalo() {
+      if (!appState.finanzasConDevoluciones) return;
+      try {
+        const { data, error } = await novaSupabase
+          .from('vales_regalo')
+          .select('*,cliente:cliente_id(nombre,apellidos,email)')
+          .order('created_at', { ascending: false })
+          .limit(100);
+        if (error) {
+          if (/relation .*vales_regalo.* does not exist|does not exist/i.test(error.message || '')) {
+            appState.finanzasConDevoluciones = false;
+            return;
+          }
+          throw error;
+        }
+        appState.valesRegaloAll = data || [];
+        renderValesRegalo();
+      } catch (err) {
+        console.warn('Vales regalo:', err.message || err);
+      }
+    }
+
+    function valeEstadoInfo(v) {
+      if (v.estado === 'anulado') return { label: 'Anulado', cls: 'badge-danger' };
+      if (v.estado === 'canjeado') return { label: 'Canjeado', cls: 'badge-neutral' };
+      const caducado = v.valido_hasta && new Date(`${v.valido_hasta}T23:59:59`) < new Date();
+      if (caducado) return { label: 'Caducado', cls: 'badge-danger' };
+      return { label: 'Activo', cls: 'badge-success' };
+    }
+
+    function renderValesRegalo() {
+      const rows = document.getElementById('rowsValesRegalo');
+      if (!rows) return;
+      const list = appState.valesRegaloAll || [];
+      rows.innerHTML = list.map((v) => {
+        const cliente = nombreClienteDisplay(v.cliente) || '—';
+        const estado = valeEstadoInfo(v);
+        const puedeAnular = v.estado === 'activo';
+        const btnAnular = puedeAnular
+          ? `<button type="button" class="btn btn-ghost btn-sm js-anular-vale" data-id="${v.id}" data-codigo="${escHtml(v.codigo)}" data-saldo="${Number(v.saldo || 0).toFixed(2)} €">Anular</button>`
+          : '<span style="color:var(--color-muted);">—</span>';
+        return `<tr>
+          <td style="font-family:ui-monospace,monospace;font-size:.78rem;">${escHtml(v.codigo)}</td>
+          <td>${escHtml(cliente)}</td>
+          <td>${Number(v.saldo || 0).toFixed(2)} €</td>
+          <td><span class="badge ${estado.cls}">${estado.label}</span></td>
+          <td style="white-space:nowrap;font-size:.8rem;">${new Date(`${v.valido_hasta}T12:00:00`).toLocaleDateString('es-ES')}</td>
+          <td style="white-space:nowrap;">${btnAnular}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="6"><div class="fin-empty">Aún no hay tickets regalo.</div></td></tr>';
+    }
+
+    async function consultarValeStaff(codigo) {
+      const info = document.getElementById('valeBuscarInfo');
+      try {
+        const { data, error } = await novaSupabase.rpc('consultar_vale_regalo', { p_codigo: codigo });
+        if (error) {
+          const m = error.message || '';
+          if (/function.*consultar_vale_regalo|does not exist/i.test(m)) {
+            toast('Falta ejecutar en Supabase el SQL supabase_patch_devoluciones.sql', 'error');
+            return;
+          }
+          throw error;
+        }
+        if (info) {
+          info.hidden = false;
+          const estado = data.caducado ? 'caducado' : data.estado;
+          info.textContent = `${data.codigo} · ${estado} · Saldo ${Number(data.saldo || 0).toFixed(2)} €${data.cliente ? ` · Cliente: ${data.cliente}` : ''} · Válido hasta ${new Date(`${data.valido_hasta}T12:00:00`).toLocaleDateString('es-ES')}`;
+          info.style.color = data.estado === 'activo' && !data.caducado ? '' : 'var(--color-danger, #e5484d)';
+        }
+      } catch (err) {
+        if (info) {
+          info.hidden = false;
+          info.textContent = err.message || 'No se encontró el ticket regalo.';
+          info.style.color = 'var(--color-danger, #e5484d)';
+        }
+      }
+    }
+
+    async function anularValeFlow(v) {
+      const ok = await openAnularVentaModal({
+        title: 'Anular ticket regalo',
+        lead: `Se anulará el ticket ${v.codigo} con saldo de ${Number(v.saldo || 0).toFixed(2)} €. Ya no podrá canjearse.`,
+        esBono: false,
+        cliente: nombreClienteDisplay(v.cliente) || '',
+        concepto: v.codigo,
+        importe: `${Number(v.saldo || 0).toFixed(2)} €`,
+        confirmLabel: 'Anular ticket'
+      });
+      if (!ok) return;
+      try {
+        const { error } = await novaSupabase.rpc('anular_vale_regalo', { p_vale_id: v.id });
+        if (error) {
+          const m = error.message || '';
+          if (/function.*anular_vale_regalo|does not exist/i.test(m)) {
+            toast('Falta ejecutar en Supabase el SQL supabase_patch_devoluciones.sql', 'error');
+            return;
+          }
+          throw error;
+        }
+        toast('Ticket regalo anulado', 'success');
+        await loadValesRegalo();
+      } catch (err) {
+        toast(err.message || 'No se pudo anular el ticket regalo', 'error');
       }
     }
 
@@ -3247,6 +4631,7 @@
       const efectivo = suma(hoy.filter(x => (x.metodo_pago || 'efectivo') === 'efectivo'));
       const tarjeta = suma(hoy.filter(x => x.metodo_pago === 'tarjeta'));
       const transferencia = suma(hoy.filter(x => x.metodo_pago === 'transferencia'));
+      const vales = suma(hoy.filter(x => x.metodo_pago === 'vale'));
       const fmtEuro = (n) => `${Number(n || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
       document.getElementById('cajaTotalHoy').textContent = fmtEuro(total);
       const elBonos = document.getElementById('cajaBonosHoy');
@@ -3256,6 +4641,8 @@
       document.getElementById('cajaEfectivo').textContent = fmtEuro(efectivo);
       document.getElementById('cajaTarjeta').textContent = fmtEuro(tarjeta);
       document.getElementById('cajaTransferencia').textContent = fmtEuro(transferencia);
+      const elVales = document.getElementById('cajaValesHoy');
+      if (elVales) elVales.textContent = fmtEuro(vales);
 
       try {
         const hoyFecha = new Date().toISOString().slice(0, 10);
@@ -3318,6 +4705,9 @@
         if (abrirBtn) abrirBtn.disabled = true;
         if (cerrarBtn) cerrarBtn.disabled = true;
       }
+      await Promise.allSettled([loadFacturas(), loadCajasHistorial(), loadDevoluciones(), loadValesRegalo()]);
+      renderFinanzasRows();
+      renderFinanzasDashboard();
     }
 
     async function loadNotifs() {
@@ -3723,23 +5113,59 @@
     document.getElementById('tpvPrintTicketCartBtn')?.addEventListener('click', () => {
       printTicket();
     });
+    document.getElementById('tpvPrintFacturaBtn')?.addEventListener('click', () => {
+      printFactura();
+    });
+    document.getElementById('tpvPrintFacturaCartBtn')?.addEventListener('click', () => {
+      printFactura();
+    });
     document.getElementById('tpvAnularUltimoBtn')?.addEventListener('click', () => {
       anularUltimoCobroTpv();
     });
     document.getElementById('tpvCobrarEfectivo').addEventListener('click', () => tpvEjecutarCobro('efectivo'));
     document.getElementById('tpvCobrarTarjeta').addEventListener('click', () => tpvEjecutarCobro('tarjeta'));
     document.getElementById('tpvCobrarTransferencia').addEventListener('click', () => tpvEjecutarCobro('transferencia'));
+    document.getElementById('tpvCobrarVale')?.addEventListener('click', () => {
+      tpvShowValeRow();
+      document.getElementById('tpvValeCodigo')?.focus();
+      tpvEjecutarCobro('vale');
+    });
+    document.getElementById('tpvValeConsultar')?.addEventListener('click', () => {
+      const codigo = (document.getElementById('tpvValeCodigo')?.value || '').trim().toUpperCase();
+      if (!codigo) {
+        toast('Introduce el código del ticket regalo.', 'error');
+        return;
+      }
+      tpvConsultarVale(codigo);
+    });
+    document.getElementById('tpvValeCodigo')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('tpvValeConsultar')?.click();
+      }
+    });
     document.getElementById('closeTpvCobroConfirmModal')?.addEventListener('click', () => closeTpvCobroConfirmModal(false));
     document.getElementById('cancelTpvCobroConfirmBtn')?.addEventListener('click', () => closeTpvCobroConfirmModal(false));
     document.getElementById('confirmTpvCobroConfirmBtn')?.addEventListener('click', () => closeTpvCobroConfirmModal(true));
     document.getElementById('tpvCobroConfirmModal')?.addEventListener('click', (e) => {
       if (e.target.id === 'tpvCobroConfirmModal') closeTpvCobroConfirmModal(false);
     });
+    document.getElementById('closeDevolverCobroModal')?.addEventListener('click', () => closeDevolverCobroModal(false));
+    document.getElementById('cancelDevolverCobroBtn')?.addEventListener('click', () => closeDevolverCobroModal(false));
+    document.getElementById('confirmDevolverCobroBtn')?.addEventListener('click', () => confirmDevolucionCobro());
+    document.getElementById('devolverCobroModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'devolverCobroModal') closeDevolverCobroModal(false);
+    });
+    document.getElementById('devolverCobroMetodo')?.addEventListener('change', () => {
+      const hint = document.getElementById('devolverCobroHint');
+      if (hint) hint.hidden = document.getElementById('devolverCobroMetodo')?.value !== 'vale';
+    });
     document.getElementById('tpvVaciarCarrito').addEventListener('click', () => {
       if (!(appState.tpvCart || []).length) return;
       if (!window.confirm('¿Vaciar el ticket?')) return;
       appState.tpvCart = [];
       renderTpvCart();
+      tpvResetValeRow();
     });
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
@@ -3760,6 +5186,7 @@
       else if (open.id === 'cerrarCajaModal') closeCerrarCajaModal();
       else if (open.id === 'anularVentaModal') closeAnularVentaModal(false);
       else if (open.id === 'tpvCobroConfirmModal') closeTpvCobroConfirmModal(false);
+      else if (open.id === 'devolverCobroModal') closeDevolverCobroModal(false);
     });
     document.getElementById('closeAnularVentaModal')?.addEventListener('click', () => closeAnularVentaModal(false));
     document.getElementById('cancelAnularVentaBtn')?.addEventListener('click', () => closeAnularVentaModal(false));
@@ -4332,6 +5759,21 @@
       });
     }
     bindFinanzasFilters();
+    document.getElementById('exportFinanzasCsvBtn')?.addEventListener('click', () => exportarFinanzasCsv());
+    document.getElementById('valeBuscarBtn')?.addEventListener('click', () => {
+      const codigo = (document.getElementById('valeBuscarCodigo')?.value || '').trim().toUpperCase();
+      if (!codigo) {
+        toast('Introduce el código del ticket regalo.', 'error');
+        return;
+      }
+      consultarValeStaff(codigo);
+    });
+    document.getElementById('valeBuscarCodigo')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('valeBuscarBtn')?.click();
+      }
+    });
 
     document.getElementById('abrirCajaBtn')?.addEventListener('click', () => openAbrirCajaModal());
     document.getElementById('cerrarCajaBtn')?.addEventListener('click', () => openCerrarCajaModal());
@@ -4430,6 +5872,10 @@
       }
     });
 
+    document.getElementById('guardarFacturacionBtn').addEventListener('click', async () => {
+      await guardarFacturacionForm();
+    });
+
     document.getElementById('enviarNotifBtn').addEventListener('click', async () => {
       try {
         const perfilId = document.getElementById('notifDestino').value || null;
@@ -4462,6 +5908,55 @@
     });
 
     document.getElementById('tab-finanzas')?.addEventListener('click', async (e) => {
+      const btnFacturar = e.target.closest('.js-facturar-cobro');
+      if (btnFacturar) {
+        const cobroId = btnFacturar.getAttribute('data-cobro-id');
+        if (!cobroId) return;
+        try {
+          const f = await emitirFacturaCobro(cobroId);
+          if (f) imprimirFactura(f);
+        } catch (err) {
+          toast(err.message || 'No se pudo emitir la factura', 'error');
+        }
+        return;
+      }
+      const btnVer = e.target.closest('.js-ver-factura');
+      if (btnVer) {
+        const facturaId = btnVer.getAttribute('data-factura-id');
+        const f = (appState.facturasAll || []).find((x) => x.id === facturaId) || await fetchFactura(facturaId);
+        if (f) imprimirFactura(f);
+        return;
+      }
+      const btnAnularFactura = e.target.closest('.js-anular-factura');
+      if (btnAnularFactura) {
+        const facturaId = btnAnularFactura.getAttribute('data-factura-id');
+        const f = (appState.facturasAll || []).find((x) => x.id === facturaId);
+        if (f) await anularFacturaFlow(f);
+        return;
+      }
+      const btnDevolver = e.target.closest('.js-devolver-cobro');
+      if (btnDevolver) {
+        const cobroId = btnDevolver.getAttribute('data-cobro-id');
+        if (!cobroId) return;
+        const esBono = btnDevolver.getAttribute('data-es-bono') === '1';
+        const ok = await openDevolverCobroModal({
+          cobroId,
+          cliente: btnDevolver.getAttribute('data-cliente') || '',
+          concepto: btnDevolver.getAttribute('data-concepto') || '',
+          importe: btnDevolver.getAttribute('data-importe') || '',
+          metodoOriginal: btnDevolver.getAttribute('data-metodo') || '',
+          esBono
+        });
+        if (!ok) return;
+        return;
+      }
+      const btnAnularVale = e.target.closest('.js-anular-vale');
+      if (btnAnularVale) {
+        const valeId = btnAnularVale.getAttribute('data-id');
+        const v = (appState.valesRegaloAll || []).find((x) => String(x.id) === String(valeId));
+        if (v) await anularValeFlow(v);
+        return;
+      }
       const btn = e.target.closest('.js-anular-transaccion');
       if (!btn) return;
       const id = btn.getAttribute('data-id');

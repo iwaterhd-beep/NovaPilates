@@ -1,24 +1,31 @@
+<!--
+THESIS: NŌVA is a body pattern you choose and pin: views A/B/C for how you move, nested sizes for how often, dressmaker red for the commit.
+OWN-WORLD: Cool tissue ground, drafting charcoal, deep violet, dashed grain lines, sharp corners, Fraunces + Figtree.
+STORY: Visitor sees the studio in motion, picks a practice view, understands activation, selects a plan size, finds Sevilla, reserves.
+FIRST VIEWPORT: Full-bleed hero video under tissue scrim; brand wordmark left; headline and dual CTAs left-aligned; grain arrow motif.
+FORM: Sewing-pattern envelope (challenger fashion-folded-worlds-sewing-pattern-envelope wins weighing vs assigned breath-chart); seed d49a3a70.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
 <nav class="nav">
   <div class="container nav-inner">
-    <a href="index.html" class="nav-logo" aria-label="NŌVA PILATES STUDIO">
+            <a href="index.html" class="nav-logo" aria-label="NŌVA PILATES STUDIO">
       <img
         class="logo-main"
         src="/assets/branding/logo-isotipo.svg"
-        width="220"
-        height="52"
+        width="48"
+        height="56"
         alt=""
         role="presentation"
         loading="eager"
         fetchpriority="high"
         decoding="async"
-        onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';this.classList.add('logo-main--svg');"
       />
     </a>
-    <ul class="nav-links">
+<ul class="nav-links">
       <li><a href="#empezar">Empezar</a></li>
       <li><a href="/bonos">Bonos</a></li>
       <li><a href="/tienda">Tienda</a></li>
-      <li><a href="#donde">Dónde encontrarnos</a></li>
+      <li><a href="#donde">Ubicación</a></li>
       <li><a href="#contacto">Contacto</a></li>
     </ul>
     <a href="login.html" class="btn btn-outline">Acceder</a>
@@ -30,19 +37,20 @@
     <video
       class="hero-video"
       src="/assets/video/nova-hero.mp4"
+      poster="/assets/branding/logo-isotipo.svg"
       autoplay
       muted
       loop
       playsinline
       preload="metadata"
-      poster="/assets/branding/logo-isotipo.svg"
     ></video>
     <div class="hero-media-overlay"></div>
+    <div class="hero-pattern-marks"></div>
   </div>
   <div class="container hero-inner">
     <div class="hero-copy">
       <h1 class="hero-title">Desconecta de lo de fuera.<br>Conecta contigo.</h1>
-      <p class="hero-sub">Movimiento consciente, equilibrio real y una nueva forma de entender el bienestar.</p>
+      <p class="hero-sub">Pilates Reformer, suelo, yoga y barre en Sevilla. Elige tu ritmo y reserva online.</p>
       <div class="hero-actions">
         <a href="login.html" class="btn btn-primary">Reservar clase</a>
         <a href="#empezar" class="btn btn-outline">Cómo empezar</a>
@@ -55,36 +63,29 @@
   <div class="container">
     <div class="empezar-head">
       <div class="empezar-copy">
-        <p class="label">Cómo empezar</p>
-        <h2 class="empezar-title">Empieza donde estés. NŌVA se adapta a ti.</h2>
+        <h2 class="empezar-title">Elige tu vista. NŌVA se adapta a ti.</h2>
         <p class="empezar-lead">Tres formas de moverte. Un mismo propósito: sentirte mejor.</p>
       </div>
       <a href="login.html" class="btn btn-outline empezar-btn">Ver horarios</a>
     </div>
-    <div class="grid-3 pillars-grid">
-      <article class="card pillar-card">
-        <div class="pillar-meta"><span class="pillar-n">01</span><span class="pillar-rule" aria-hidden="true"></span></div>
-        <h3 class="pillar-title">Reformer</h3>
-        <p>Entrenamiento controlado y preciso en máquina: fuerza, alineación y fluidez en cada repetición.</p>
-        <div class="pillar-icon" aria-hidden="true">
-          <span class="pillar-icon-word">Core</span>
-        </div>
+    <div class="views-grid">
+      <article class="view-card">
+        <span class="view-letter" aria-hidden="true">A</span>
+        <h3 class="view-title">Reformer</h3>
+        <p>Entrenamiento controlado en máquina: fuerza, alineación y fluidez en cada repetición.</p>
+        <span class="view-grain" aria-hidden="true"></span>
       </article>
-      <article class="card pillar-card">
-        <div class="pillar-meta"><span class="pillar-n">02</span><span class="pillar-rule" aria-hidden="true"></span></div>
-        <h3 class="pillar-title">Suelo</h3>
+      <article class="view-card">
+        <span class="view-letter" aria-hidden="true">B</span>
+        <h3 class="view-title">Suelo</h3>
         <p>Conecta con tu cuerpo a través de la técnica, la respiración y la consciencia en el movimiento.</p>
-        <div class="pillar-icon" aria-hidden="true">
-          <span class="pillar-icon-word">Flow</span>
-        </div>
+        <span class="view-grain" aria-hidden="true"></span>
       </article>
-      <article class="card pillar-card">
-        <div class="pillar-meta"><span class="pillar-n">03</span><span class="pillar-rule" aria-hidden="true"></span></div>
-        <h3 class="pillar-title">Equilibrio</h3>
-        <p>Yoga, barre y trabajo de tonificación para un cuerpo fuerte, móvil y presente.</p>
-        <div class="pillar-icon" aria-hidden="true">
-          <span class="pillar-icon-word pillar-icon-word--wide">Balance</span>
-        </div>
+      <article class="view-card view-card--accent">
+        <span class="view-letter" aria-hidden="true">C</span>
+        <h3 class="view-title">Equilibrio</h3>
+        <p>Yoga, barre y tonificación para un cuerpo fuerte, móvil y presente.</p>
+        <span class="view-grain" aria-hidden="true"></span>
       </article>
     </div>
     <p class="pillars-foot">No necesitas experiencia. Solo empezar.</p>
@@ -93,44 +94,28 @@
 
 <section class="section section-process" id="como-funciona">
   <div class="container">
-    <header class="section-head-center">
-      <p class="label">Funcionamiento</p>
-      <h2>Simple y claro</h2>
+    <header class="process-head">
+      <h2>De la compra a la reserva</h2>
+      <p>Cuatro pasos claros para activar tu bono y entrenar con seguridad.</p>
     </header>
-    <div class="steps steps-pillars">
-      <article class="card pillar-card step-card">
-        <div class="pillar-meta"><span class="pillar-n">01</span><span class="pillar-rule" aria-hidden="true"></span></div>
-        <h3 class="pillar-title">Compra presencial</h3>
+    <ol class="process-rail">
+      <li class="process-step">
+        <h3>Compra presencial</h3>
         <p>El bono se activa en el centro.</p>
-        <div class="pillar-icon process-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 18h20l-2 18H16l-2-18z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M18 14h12l-1-4H19l-1 4z" stroke="currentColor" stroke-width="1.2"/></svg>
-        </div>
-      </article>
-      <article class="card pillar-card step-card">
-        <div class="pillar-meta"><span class="pillar-n">02</span><span class="pillar-rule" aria-hidden="true"></span></div>
-        <h3 class="pillar-title">Activación</h3>
+      </li>
+      <li class="process-step">
+        <h3>Activación</h3>
         <p>Tu perfil queda configurado por el equipo.</p>
-        <div class="pillar-icon process-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="16" r="7" stroke="currentColor" stroke-width="1.2"/><path d="M15 36c0-8 4.5-12 7-12s7 4 7 12" stroke="currentColor" stroke-width="1.2"/><path d="M30 14h10M35 9v10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        </div>
-      </article>
-      <article class="card pillar-card step-card">
-        <div class="pillar-meta"><span class="pillar-n">03</span><span class="pillar-rule" aria-hidden="true"></span></div>
-        <h3 class="pillar-title">Reserva segura</h3>
+      </li>
+      <li class="process-step">
+        <h3>Reserva segura</h3>
         <p>No podrás reservar más de lo contratado.</p>
-        <div class="pillar-icon process-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 8L8 14v8c0 10 6 18 16 22 10-4 16-12 16-22v-8L24 8z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M18 24l4 4 8-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        </div>
-      </article>
-      <article class="card pillar-card step-card">
-        <div class="pillar-meta"><span class="pillar-n">04</span><span class="pillar-rule" aria-hidden="true"></span></div>
-        <h3 class="pillar-title">Seguimiento</h3>
+      </li>
+      <li class="process-step">
+        <h3>Seguimiento</h3>
         <p>Calendario, historial y notificaciones en una sola vista.</p>
-        <div class="pillar-icon process-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="12" width="28" height="26" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M10 18h28M16 10v4M32 10v4" stroke="currentColor" stroke-width="1.2"/><path d="M18 28l4 4 8-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        </div>
-      </article>
-    </div>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -138,7 +123,7 @@
   <div class="container">
     <header class="plans-head">
       <h2 class="plans-title">Planes NŌVA</h2>
-      <p class="plans-lead">Elige el ritmo que mejor encaje contigo. Una experiencia diseñada para acompañarte, evolucionar contigo y formar parte de tu rutina.</p>
+      <p class="plans-lead">Elige el ritmo que mejor encaje contigo. Una experiencia para acompañarte y formar parte de tu rutina.</p>
     </header>
     <div class="plans-grid" id="plansGrid">
       <article class="card plan-card plan-card--loading">
@@ -157,9 +142,8 @@
 <section class="section section-merch" id="merch">
   <div class="container">
     <header class="merch-head">
-      <p class="label">Merchand</p>
       <h2 class="merch-title">Tienda NŌVA</h2>
-      <p class="merch-lead">Ropa, botellas y accesorios para el estudio y el día a día. Independiente del TPV del centro.</p>
+      <p class="merch-lead">Ropa, botellas y accesorios para el estudio y el día a día.</p>
     </header>
     <div class="shop-grid merch-home-grid" id="homeShopGrid" aria-live="polite">
       <article class="shop-card">
@@ -179,7 +163,6 @@
 
 <section class="section section-donde" id="donde">
   <div class="container section-donde-inner">
-    <p class="label">Dónde encontrarnos</p>
     <h2 class="donde-title">
       <a
         class="donde-link"
@@ -193,18 +176,28 @@
   </div>
 </section>
 
+<section class="section section-contacto" id="contacto">
+  <div class="container contacto-inner">
+    <h2 class="contacto-title">Contacto</h2>
+    <p class="contacto-text">Cuéntanos qué necesitas: primera clase, horarios o información del estudio.</p>
+    <div class="contacto-actions">
+      <a href="login.html" class="btn btn-primary">Reservar clase</a>
+      <a href="/bonos" class="btn btn-outline">Ver planes</a>
+    </div>
+  </div>
+</section>
+
 <footer class="footer">
   <div class="container footer-grid">
-    <div class="footer-brand">
+            <div class="footer-brand">
       <img
         class="footer-logo-main"
         src="/assets/branding/logo-isotipo.svg"
-        width="200"
-        height="46"
+        width="48"
+        height="56"
         alt="NŌVA PILATES STUDIO"
         loading="lazy"
         decoding="async"
-        onerror="this.onerror=null;this.src='/assets/branding/logo-isotipo.svg';this.classList.add('logo-main--svg');"
       />
     </div>
     <div><ul class="footer-links"><li><a href="#empezar">Prácticas</a></li><li><a href="/bonos">Bonos</a></li></ul></div>

@@ -8,7 +8,7 @@ Activo público base: `assets/branding/logo-isotipo.svg`.
 Vídeo hero local: `assets/video/nova-hero.mp4` con `poster="/assets/branding/logo-isotipo.svg"`.
 Logos PNG optimizados en `assets/branding/` (también hay SVG `logo-isotipo.svg` para UI ligera).
 
-> `home.css` y `styles.css` existen pero **no se usan** en las páginas actuales (landing = `zen.css`, app = `portal.css`).
+> `styles.css` existe pero **no se usa** en las páginas actuales (landing = `zen.css`, app = `portal.css`).
 
 ## 2) Variables / claves Supabase
 
@@ -60,6 +60,7 @@ Proyecto vacío:
    - `supabase_patch_caja_apertura_cierre.sql`
    - `supabase_patch_anular_transaccion_tpv.sql`
    - `supabase_patch_tpv_cobrar_ticket.sql` (cobro TPV atómico)
+   - `supabase_patch_facturacion.sql` (facturación por cobro: facturas secuenciales, config del emisor, CSV; **reemplaza** los dos parches TPV anteriores si se aplica: redefinir `tpv_cobrar_ticket` y `anular_transaccion_tpv`)
    - `supabase_patch_tipos_bono_web.sql` (planes en web + casilla visible_web)
    - `supabase_patch_eliminar_cliente.sql`
    - `supabase_patch_perfiles_*.sql` (si faltan columnas)

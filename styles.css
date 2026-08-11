@@ -2,25 +2,25 @@
    NŌVA PILATES STUDIO — Global Design System
    ============================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Figtree:wght@400;500;600&display=swap');
 
 :root {
-  --color-bg:        #0e0e0d;
-  --color-bg-soft:   #161614;
-  --color-bg-card:   #1a1a18;
-  --color-surface:   #222220;
-  --color-border:    rgba(255,255,255,0.08);
-  --color-border-md: rgba(255,255,255,0.14);
+  --color-bg:        #e4e7e2;
+  --color-bg-soft:   #dfe3dd;
+  --color-bg-card:   #f1f3f0;
+  --color-surface:   #f7f8f6;
+  --color-border:    #c5cbc4;
+  --color-border-md: #9aa39a;
 
-  --color-cream:     #f0ebe2;
-  --color-cream-dim: #b8b2a8;
-  --color-accent:    #c9a96e;
-  --color-accent-lt: #e2c898;
-  --color-accent-dk: #9e7d48;
-  --color-muted:     #6a6860;
+  --color-cream:     #1a1f1c;
+  --color-cream-dim: #4a524c;
+  --color-accent:    #5c3d8a;
+  --color-accent-lt: #7355a3;
+  --color-accent-dk: #4a3070;
+  --color-muted:     #8a938a;
 
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body:    'Jost', sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Figtree', system-ui, sans-serif;
 
   --max-w: 1200px;
   --nav-h: 72px;
