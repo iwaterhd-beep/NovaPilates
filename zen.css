@@ -20,7 +20,7 @@
   --khaki: #DFDACF;
   --white: #FFFFFF;
   --max-w: 1180px;
-  --nav-h: 70px;
+  --nav-h: 108px;
   --radius: 0;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
@@ -56,7 +56,8 @@ a { text-decoration: none; color: inherit; }
 .nav {
   position: fixed;
   inset: 0 0 auto 0;
-  height: var(--nav-h);
+  height: auto;
+  min-height: var(--nav-h);
   z-index: 40;
   background: rgba(250, 248, 245, 0.94);
   border-bottom: 1px solid var(--line);
@@ -68,19 +69,44 @@ a { text-decoration: none; color: inherit; }
   box-shadow: 0 4px 20px rgba(38, 38, 38, 0.05);
 }
 .nav-inner {
-  height: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "mark wordmark actions"
+    "links links links";
   align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
+  gap: .3rem 1rem;
+  padding: .55rem 0 .5rem;
 }
 .nav-logo {
+  grid-area: mark;
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
   color: var(--ink);
   line-height: 0;
 }
+.nav-wordmark {
+  grid-area: wordmark;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+.logo-wordmark {
+  display: block;
+  height: auto;
+  max-height: 48px;
+  width: auto;
+  max-width: min(220px, 42vw);
+  object-fit: contain;
+}
+.nav-actions,
+.nav-inner > .btn {
+  grid-area: actions;
+  justify-self: end;
+}
+.nav-links { grid-area: links; }
 .logo-main,
 .logo-mark {
   display: block;
@@ -220,9 +246,11 @@ a { text-decoration: none; color: inherit; }
 .hero-inner { position: relative; z-index: 1; width: 100%; }
 .hero-copy { max-width: min(36rem, 100%); }
 .js-motion .hero-copy:not(.is-ready) .hero-title,
+.js-motion .hero-copy:not(.is-ready) .hero-tagline,
 .js-motion .hero-copy:not(.is-ready) .hero-sub,
 .js-motion .hero-copy:not(.is-ready) .hero-actions { opacity: 0; }
 .hero--video .hero-copy .hero-title,
+.hero--video .hero-copy .hero-tagline,
 .hero--video .hero-copy .hero-sub,
 .hero--video .hero-copy .hero-kicker {
   text-shadow: 0 0 24px rgba(250,248,245,.95), 0 1px 2px rgba(255,255,255,.8);
@@ -240,8 +268,18 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: -0.03em;
   line-height: 1.06;
   color: var(--ink);
-  margin: 0 0 1rem;
+  margin: 0 0 .55rem;
   padding-bottom: .15rem;
+}
+.hero-tagline {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 2.2vw, 1.45rem);
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 1rem;
 }
 .hero-sub {
   max-width: 30rem;
@@ -252,11 +290,13 @@ a { text-decoration: none; color: inherit; }
 }
 .hero-actions { display: flex; gap: .85rem; flex-wrap: wrap; }
 .hero-copy.is-ready .hero-title,
+.hero-copy.is-ready .hero-tagline,
 .hero-copy.is-ready .hero-sub,
 .hero-copy.is-ready .hero-actions {
   animation: riseIn .95s var(--ease-out) both;
 }
 .hero-copy.is-ready .hero-title { animation-delay: .06s; }
+.hero-copy.is-ready .hero-tagline { animation-delay: .12s; }
 .hero-copy.is-ready .hero-sub { animation-delay: .18s; }
 .hero-copy.is-ready .hero-actions { animation-delay: .3s; }
 
@@ -342,29 +382,28 @@ a { text-decoration: none; color: inherit; }
 }
 .view-card {
   position: relative;
-  background: var(--panel);
-  border: 1px dashed rgba(77, 64, 58, .32);
+  background: #FFFFFF;
+  border: 1px solid rgba(77, 64, 58, .16);
   outline: none;
-  box-shadow: none;
+  box-shadow: 0 8px 22px rgba(77, 64, 58, 0.05);
   padding: 1.6rem 1.4rem 1.8rem;
   min-height: 100%;
   display: flex;
   flex-direction: column;
   gap: .75rem;
-  transition: border-color .25s ease, transform .25s var(--ease-soft), background .25s ease;
+  transition: border-color .25s ease, transform .25s var(--ease-soft), background .25s ease, box-shadow .25s ease;
 }
 .view-card:hover {
-  border-color: var(--accent);
-  border-style: dashed;
+  border-color: rgba(77, 64, 58, .28);
   transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(77, 64, 58, 0.08);
 }
 .view-card--accent {
-  background: linear-gradient(165deg, #FFFFFF 0%, #FAF8F5 60%, #F5F1EB 100%);
-  border: 1px dashed rgba(77, 64, 58, .32);
+  background: #FFFFFF;
+  border: 1px solid rgba(77, 64, 58, .16);
 }
 .view-card--accent:hover {
-  background: linear-gradient(165deg, #FFFFFF 0%, #F8F5F0 60%, #EFEBE4 100%);
-  border-style: dashed;
+  background: #FFFFFF;
 }
 .view-card-top {
   display: flex;
@@ -652,9 +691,9 @@ a { text-decoration: none; color: inherit; }
 }
 .merch-brand-logo {
   display: block;
-  max-height: 92px;
+  max-height: 140px;
   width: auto;
-  max-width: min(420px, 88vw);
+  max-width: min(560px, 92vw);
   object-fit: contain;
   object-position: center;
   margin: 0 auto;
@@ -702,9 +741,9 @@ a { text-decoration: none; color: inherit; }
 }
 .ritual-hero-logo {
   display: block;
-  max-height: 96px;
+  max-height: 140px;
   width: auto;
-  max-width: min(420px, 88vw);
+  max-width: min(560px, 92vw);
   object-fit: contain;
   object-position: center;
   margin: 0 auto 1.15rem;
@@ -1125,15 +1164,11 @@ a { text-decoration: none; color: inherit; }
 
 @media (max-width: 860px) {
   :root { --nav-h: auto; }
-  .nav { position: fixed; padding: .65rem 0; }
-  .nav-inner {
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: .6rem 1rem;
-  }
-  .nav-logo { order: 1; }
+  .nav { position: fixed; padding: .45rem 0 .35rem; }
+  .nav-inner { gap: .35rem .75rem; }
   .nav-logo .logo-main { max-height: 36px; max-width: 120px; }
-  .nav-logo .logo-isotipo { height: 36px; max-width: 40px; }
+  .nav-logo .logo-isotipo { height: 34px; max-width: 38px; }
+  .logo-wordmark { max-height: 36px; max-width: min(168px, 46vw); }
   .view-card-top {
     flex-direction: row;
     align-items: center;
@@ -1156,11 +1191,8 @@ a { text-decoration: none; color: inherit; }
     flex: 1;
   }
   .view-card { padding: 1.25rem 1.15rem 1.4rem; gap: .7rem; }
-  .nav-inner > .btn,
-  .nav-actions { order: 2; margin-left: auto; }
   .nav-inner > .btn { min-height: 36px; padding: .45rem .9rem; font-size: .7rem; }
   .nav-links {
-    order: 3;
     width: 100%;
     justify-content: flex-start;
     overflow-x: auto;
@@ -1177,7 +1209,7 @@ a { text-decoration: none; color: inherit; }
   .donde-map iframe { height: 280px; }
   .process-step { border-right: 0; border-bottom: 1px dashed var(--line); }
   .process-step:last-child { border-bottom: 0; }
-  .hero--video { min-height: auto; padding-top: 6.5rem; padding-bottom: 2.75rem; }
+  .hero--video { min-height: auto; padding-top: 7.75rem; padding-bottom: 2.75rem; }
   .hero-pattern-marks { display: none; }
   .product-modal-layout { grid-template-columns: 1fr; }
 }
@@ -1188,7 +1220,7 @@ a { text-decoration: none; color: inherit; }
   .hero-actions .btn { width: 100%; }
   .hero-title { font-size: clamp(2.15rem, 11vw, 3.1rem); }
   .merch-brand-logo,
-  .ritual-hero-logo { max-height: 78px; }
+  .ritual-hero-logo { max-height: 110px; }
   .shop-card-desc { display: none; }
   .section { padding: 3.25rem 0; }
 }

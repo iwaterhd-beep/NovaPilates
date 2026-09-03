@@ -51,7 +51,7 @@ const NOVA_MEMBERSHIPS = [
   },
   {
     id: 'priority-membership',
-    web_tag: 'HASTA 5 DÍAS · EXPERIENCIA COMPLETA',
+    web_tag: 'DÍAS ILIMITADOS · CONTRATO ANUAL',
     nombre: 'PRIORITY MEMBERSHIP',
     precio: 170,
     periodo_label: '/mes · contrato anual',
@@ -59,11 +59,11 @@ const NOVA_MEMBERSHIPS = [
     lema: 'La membresía más completa de NŌVA. Única con compromiso anual.',
     highlights: [
       'Contrato anual',
-      'Acceso hasta 5 días a la semana',
+      'Días ilimitados',
       'Todas las disciplinas',
-      'Prioridad de reserva y de acceso a clases',
+      'Prioridad en lista de espera',
+      'Recordatorio de clases 24 h antes',
       'Nutricionista incluido',
-      'Starter Bag',
       'Todos los talleres incluidos'
     ]
   }

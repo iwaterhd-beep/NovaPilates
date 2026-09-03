@@ -70,9 +70,9 @@ VALUES
   ),
   (
     'PRIORITY MEMBERSHIP',
-    'Contrato anual. Hasta 5 días a la semana, todas las disciplinas, prioridad de reserva, nutricionista, Starter Bag y talleres incluidos.',
-    20,
-    false,
+    'Contrato anual. Días ilimitados, todas las disciplinas, prioridad en lista de espera, recordatorio 24 h antes, nutricionista y talleres incluidos.',
+    null,
+    true,
     'mensual'::public.periodicidad_bono,
     28,
     170.00,
@@ -80,12 +80,13 @@ VALUES
     40,
     '#262626',
     true,
-    'HASTA 5 DÍAS · CONTRATO ANUAL',
-    'Hasta 5 días / semana · Prioridad · Contrato anual'
+    'DÍAS ILIMITADOS · CONTRATO ANUAL',
+    'Ilimitado · Prioridad · Contrato anual'
   )
 ON CONFLICT (nombre) DO UPDATE SET
   descripcion = EXCLUDED.descripcion,
   sesiones = EXCLUDED.sesiones,
+  ilimitado = EXCLUDED.ilimitado,
   duracion_dias = EXCLUDED.duracion_dias,
   precio = EXCLUDED.precio,
   activo = EXCLUDED.activo,
