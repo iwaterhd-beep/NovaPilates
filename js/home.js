@@ -62,7 +62,7 @@ function ensureStudioInviteModal() {
           Para garantizar una experiencia cuidada y personalizada, todos los pagos y activaciones de membresía se realizan directamente en el centro.
         </p>
         <div class="studio-modal-info-box">
-          <strong>📍 Estudio NŌVA:</strong> Dos Hermanas, Sevilla<br>
+          <strong>📍 Estudio NŌVA:</strong> Av. José Rodríguez de la Borbolla Camoyán, 10 · Dos Hermanas, Sevilla<br>
           <strong>Horario de recepción:</strong> Lunes a Viernes de 08:00 a 21:00
         </div>
         <div class="studio-modal-actions">
