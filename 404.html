@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Página no encontrada — NŌVA Pilates Studio</title>
+  <meta name="description" content="La página que buscas no existe o fue movida." />
+  <meta name="robots" content="noindex,follow" />
+  <meta property="og:title" content="Página no encontrada — NŌVA Pilates Studio" />
+  <meta property="og:description" content="La página que buscas no existe o fue movida." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/og-image.png" />
+  <link rel="icon" href="/assets/branding/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate icon" href="/assets/branding/logo-circulo-nova.png?v=2" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Figtree:wght@400;500;600&display=swap');
+    :root {
+      --bg: #e4e7e2;
+      --card: #f1f3f0;
+      --ink: #1a1f1c;
+      --muted: #4a524c;
+      --line: #c5cbc4;
+      --accent: #5c3d8a;
+      --accent-ink: #f7f4fc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100svh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Figtree, system-ui, sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 1.2rem;
+    }
+    .card {
+      width: min(560px, 100%);
+      background: var(--card);
+      border: 1px dashed #9aa39a;
+      padding: 2.2rem 1.8rem;
+      text-align: center;
+    }
+    .mark {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 1rem;
+      display: grid;
+      place-items: center;
+    }
+    .mark img { width: 48px; height: auto; display: block; }
+    h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 500;
+      letter-spacing: -0.03em;
+      margin-bottom: .3rem;
+    }
+    p { color: var(--muted); line-height: 1.7; margin-bottom: 1.3rem; }
+    .actions { display: flex; justify-content: center; gap: .7rem; flex-wrap: wrap; }
+    .btn {
+      text-decoration: none;
+      padding: .7rem 1.2rem;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      background: var(--card);
+    }
+    .btn.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--accent-ink);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="mark"><img src="/assets/branding/logo-circulo-nova.png?v=2" alt="" width="50" height="44" /></div>
+    <h1>404</h1>
+    <p>La página que buscas no está disponible. Puede que la ruta haya cambiado o el enlace no sea válido.</p>
+    <div class="actions">
+      <a class="btn primary" href="/">Volver al inicio</a>
+      <a class="btn" href="/login">Ir a acceso</a>
+    </div>
+  </main>
+</body>
+</html>

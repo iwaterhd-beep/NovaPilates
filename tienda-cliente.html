@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tienda — NŌVA Pilates Studio</title>
+  <meta name="description" content="Merchand NŌVA desde tu espacio de cliente." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta property="og:title" content="Tienda — NŌVA Pilates Studio" />
+  <meta property="og:description" content="Ropa, botellas y accesorios NŌVA." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/og-image.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
+  <link rel="stylesheet" href="portal.css?v=42" />
+</head>
+<body>
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><a href="index.html" class="sidebar-brand" aria-label="NŌVA PILATES STUDIO"><img class="sidebar-brand-mark" src="/assets/branding/logo-circulo-nova.png" width="36" height="42" alt="" /></a></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="userAvatar">C</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="userName">Cargando...</div>
+        <div class="sidebar-user-role">Cliente</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Mi espacio</div>
+      <a href="dashboard_cliente.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>Inicio</a>
+      <a href="calendario.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Reservar clase</a>
+      <a href="mis-clases.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Mis clases</a>
+      <a href="bono.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Mi bono</a>
+      <a href="tienda-cliente.html" class="sidebar-link active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 5h10l-1 8H4L3 5z"/><path d="M6 5V3.5a2 2 0 014 0V5"/></svg>Tienda</a>
+      <a href="notificaciones.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
+      <div class="sidebar-section-label">Cuenta</div>
+      <a href="perfil.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Mi perfil</a>
+    </nav>
+    <div class="sidebar-bottom"><button class="sidebar-link" id="logoutBtn" style="width:100%; text-align:left;">Cerrar sesión</button></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <span class="topbar-title">Tienda</span>
+      <button type="button" class="btn btn-outline btn-sm cart-trigger" id="cartOpenBtn" aria-haspopup="dialog" aria-controls="cartDrawer" aria-expanded="false">
+        Carrito
+        <span class="cart-badge" id="cartBadge" hidden>0</span>
+      </button>
+    </header>
+    <div class="content">
+      <div class="page-header panel-shop-head">
+        <div>
+          <h1 class="page-title">Merchand NŌVA</h1>
+          <p class="page-subtitle">Ropa, botellas y accesorios. Añade al carrito; el pago llegará con Medusa.</p>
+        </div>
+        <p id="shopStatus" class="panel-shop-status" role="status"></p>
+      </div>
+      <div id="shopGrid" class="panel-shop-grid" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <div class="cart-backdrop" id="cartBackdrop" hidden></div>
+  <aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartDrawerTitle" hidden>
+    <div class="cart-drawer-head">
+      <h2 id="cartDrawerTitle" class="cart-drawer-title">Tu carrito</h2>
+      <button type="button" class="cart-close" id="cartCloseBtn" aria-label="Cerrar carrito">×</button>
+    </div>
+    <div class="cart-drawer-body" id="cartLines"></div>
+    <div class="cart-drawer-foot">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <strong id="cartTotal">0 €</strong>
+      </div>
+      <p class="cart-checkout-note">El pago online se activará al conectar Medusa.</p>
+      <button type="button" class="btn btn-primary cart-checkout" id="cartCheckoutBtn" disabled>Finalizar compra</button>
+      <button type="button" class="btn btn-outline cart-clear" id="cartClearBtn">Vaciar</button>
+    </div>
+  </aside>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
+  <script src="/supabase.js?v=20260716c"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/cookies-consent.js"></script>
+  <script src="js/medusa.js"></script>
+  <script src="js/cart.js?v=2"></script>
+  <script src="js/tienda.js?v=8"></script>
+  <script>
+    const sidebarEl = document.getElementById('sidebar');
+    document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+      if (!sidebarEl.contains(e.target) && !e.target.closest('#sidebarToggle')) sidebarEl.classList.remove('open');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut());
+
+    async function initPanel() {
+      const session = await getSession();
+      if (!session) { window.location.href = 'login.html'; return; }
+      const perfil = await getUserProfile(session.user.id);
+      document.getElementById('userName').textContent = perfil.nombre || perfil.email;
+      document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
+    }
+    initPanel().catch((e) => console.error(e));
+  </script>
+</body>
+</html>
+
