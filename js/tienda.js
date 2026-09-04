@@ -85,7 +85,7 @@ function ensureProductModal() {
           <ul id="modalProdDetails" style="list-style:none; padding:0; margin:0 0 1rem; display:flex; flex-direction:column; gap:.35rem; font-size:.85rem; color:var(--ink-soft);"></ul>
           <div style="margin-top:auto; padding-top:1rem; border-top:1px dashed var(--line);">
             <p style="font-size:.85rem; color:var(--dash); margin-bottom:.75rem;">
-              ✨ Puedes consultar, probarte o adquirir este producto directamente en la recepción del centro durante tu visita.
+              Puedes consultar, probarte o adquirir este producto directamente en la recepción del centro durante tu visita.
             </p>
             <button type="button" class="btn btn-primary" style="width:100%;" onclick="closeProductModal()">
               Cerrar detalle
