@@ -22,7 +22,8 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2',
   '.ttf': 'font/ttf',
   '.xml': 'application/xml',
-  '.txt': 'text/plain'
+  '.txt': 'text/plain',
+  '.webmanifest': 'application/manifest+json'
 };
 
 const server = http.createServer((req, res) => {

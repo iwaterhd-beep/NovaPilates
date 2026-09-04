@@ -229,6 +229,134 @@ function bindInstagramLinks() {
   });
 }
 
+function novaIsStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+}
+
+function novaIsIos() {
+  const ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+let novaInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  novaInstallPrompt = event;
+});
+
+window.addEventListener('appinstalled', () => {
+  novaInstallPrompt = null;
+  closeAddHomeAppModal();
+  document.querySelectorAll('.js-add-home-app').forEach((btn) => {
+    btn.hidden = true;
+  });
+});
+
+function registerNovaPwa() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+function ensureAddHomeAppModal() {
+  if (document.getElementById('addHomeAppModal')) return;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="studio-modal-backdrop" id="addHomeAppModalBackdrop"></div>
+    <div class="studio-modal" id="addHomeAppModal" role="dialog" aria-modal="true" aria-labelledby="addHomeAppTitle" hidden>
+      <div class="studio-modal-box">
+        <button type="button" class="studio-modal-close" data-close-a2hs aria-label="Cerrar">×</button>
+        <span class="studio-modal-tag">Acceso directo</span>
+        <h2 class="studio-modal-title" id="addHomeAppTitle">Añade NŌVA a tu móvil</h2>
+        <p class="studio-modal-desc" id="addHomeAppDesc"></p>
+        <div class="studio-modal-info-box">
+          <ol class="a2hs-steps" id="addHomeAppSteps"></ol>
+        </div>
+        <div class="studio-modal-actions">
+          <button type="button" class="btn btn-primary" data-close-a2hs>Entendido</button>
+        </div>
+      </div>
+    </div>`;
+  while (wrap.firstChild) document.body.appendChild(wrap.firstChild);
+  const close = () => closeAddHomeAppModal();
+  document.getElementById('addHomeAppModalBackdrop')?.addEventListener('click', close);
+  document.querySelectorAll('[data-close-a2hs]').forEach((el) => el.addEventListener('click', close));
+}
+
+function openAddHomeAppModal() {
+  ensureAddHomeAppModal();
+  const desc = document.getElementById('addHomeAppDesc');
+  const steps = document.getElementById('addHomeAppSteps');
+  if (novaIsIos()) {
+    if (desc) desc.textContent = 'En iPhone y iPad hay que hacerlo desde Safari. En unos toques NŌVA queda junto al resto de apps.';
+    if (steps) {
+      steps.innerHTML = `
+        <li>Abre esta página en <strong>Safari</strong> (no en Instagram ni Chrome).</li>
+        <li>Pulsa el botón <strong>Compartir</strong> (cuadrado con flecha hacia arriba).</li>
+        <li>Elige <strong>Añadir a pantalla de inicio</strong>.</li>
+        <li>Confirma <strong>Añadir</strong>. El icono de NŌVA aparecerá en tu pantalla.</li>`;
+    }
+  } else if (/Android/i.test(navigator.userAgent || '')) {
+    if (desc) desc.textContent = 'Así queda NŌVA como un acceso directo en tu pantalla de inicio o en el cajón de apps.';
+    if (steps) {
+      steps.innerHTML = `
+        <li>Abre el menú del navegador <strong>(⋮)</strong> arriba a la derecha.</li>
+        <li>Pulsa <strong>Añadir a la pantalla de inicio</strong> o <strong>Instalar aplicación</strong>.</li>
+        <li>Confirma. El icono de NŌVA quedará junto a tus otras apps.</li>`;
+    }
+  } else {
+    if (desc) desc.textContent = 'Puedes instalar NŌVA como aplicación en este ordenador. En el móvil, el mismo botón deja el icono en la pantalla de inicio.';
+    if (steps) {
+      steps.innerHTML = `
+        <li>En Chrome o Edge, abre el menú <strong>(⋮)</strong>.</li>
+        <li>Elige <strong>Instalar NŌVA</strong> o <strong>Instalar aplicación</strong>.</li>
+        <li>En el móvil: Safari (iPhone) o el menú del navegador (Android) → <strong>Añadir a pantalla de inicio</strong>.</li>`;
+    }
+  }
+  const modal = document.getElementById('addHomeAppModal');
+  const backdrop = document.getElementById('addHomeAppModalBackdrop');
+  if (!modal || !backdrop) return;
+  modal.hidden = false;
+  requestAnimationFrame(() => {
+    modal.classList.add('is-open');
+    backdrop.classList.add('is-open');
+  });
+}
+
+function closeAddHomeAppModal() {
+  const modal = document.getElementById('addHomeAppModal');
+  const backdrop = document.getElementById('addHomeAppModalBackdrop');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  if (backdrop) backdrop.classList.remove('is-open');
+  setTimeout(() => {
+    modal.hidden = true;
+  }, 250);
+}
+
+async function onAddHomeAppClick() {
+  if (novaIsStandalone()) return;
+  if (novaInstallPrompt) {
+    novaInstallPrompt.prompt();
+    try {
+      await novaInstallPrompt.userChoice;
+    } catch (_) {}
+    novaInstallPrompt = null;
+    return;
+  }
+  openAddHomeAppModal();
+}
+
+function bindAddHomeAppButtons() {
+  const installed = novaIsStandalone();
+  document.querySelectorAll('.js-add-home-app').forEach((btn) => {
+    btn.hidden = installed;
+    btn.addEventListener('click', onAddHomeAppClick);
+  });
+}
+
 function initRevealMotion() {
   const root = document.getElementById('page-root');
   if (!root) return;
@@ -248,10 +376,12 @@ async function loadHomeSections() {
     initHeroMotion();
     initHeroVideo();
     bindInstagramLinks();
+    bindAddHomeAppButtons();
     initRevealMotion();
   } catch (error) {
     console.error('Error cargando portada:', error);
   }
 }
 
+registerNovaPwa();
 loadHomeSections();

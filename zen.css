@@ -1058,6 +1058,16 @@ a { text-decoration: none; color: inherit; }
   gap: .65rem;
   margin-top: .5rem;
 }
+.a2hs-steps {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: .55rem;
+}
+.a2hs-steps li {
+  color: var(--ink);
+  line-height: 1.45;
+}
 
 /* ── MODAL PLAN / PRODUCTO ── */
 .product-modal-backdrop {

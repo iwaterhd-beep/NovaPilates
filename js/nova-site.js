@@ -1,6 +1,6 @@
 /** Datos públicos compartidos de NŌVA (fácil de ajustar). */
-const NOVA_INSTAGRAM_URL = 'https://www.instagram.com/novapilatesestudio/';
-const NOVA_INSTAGRAM_DM_URL = 'https://ig.me/m/novapilatesestudio';
+const NOVA_INSTAGRAM_URL = 'https://www.instagram.com/novapilatestudios/';
+const NOVA_INSTAGRAM_DM_URL = 'https://ig.me/m/novapilatestudios';
 
 const NOVA_MEMBERSHIPS = [
   {

@@ -905,6 +905,47 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="generadorSemanalModal">
+    <div class="modal" style="max-width:580px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Generador semanal de clases</h2>
+        <button class="modal-close" id="closeGeneradorSemanalModal" type="button" aria-label="Cerrar">×</button>
+      </div>
+      <form id="generadorSemanalForm" style="display:grid; gap:1.1rem;">
+        <p class="clases-hint" style="margin:0; line-height:1.5;">
+          Genera automáticamente las <strong>24 clases diarias</strong> de la semana: 12 clases de Reformer en Sala Reformer y 12 clases rotativas en Sala Suelo (Pilates Suelo, Yoga, Barre, Sculpt).
+        </p>
+        <div class="form-group">
+          <label class="form-label" for="genSemanaLunes">Lunes de inicio de la semana</label>
+          <input class="form-input" id="genSemanaLunes" type="date" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="genSemanaDias">Días a generar</label>
+          <select class="form-input" id="genSemanaDias">
+            <option value="5" selected>Lunes a Viernes (5 días · 120 clases)</option>
+            <option value="6">Lunes a Sábado (6 días · 144 clases)</option>
+          </select>
+        </div>
+        <div class="form-group" style="background:var(--color-bg-soft); border:1px dashed var(--color-border); padding:.85rem 1rem;">
+          <strong style="display:block; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:var(--color-accent); margin-bottom:.4rem;">
+            Estructura de las 24 clases diarias:
+          </strong>
+          <ul style="font-size:.82rem; color:var(--color-cream-dim); padding-left:1.1rem; line-height:1.5;">
+            <li><strong>Sala Reformer (12 clases):</strong> 08:00, 09:00, 10:00, 11:00, 12:00, 13:00, 16:00, 17:00, 18:00, 19:00, 20:00, 21:00 (Aforo: 12 plazas, 55 min).</li>
+            <li><strong>Sala Suelo (12 clases rotativas):</strong> 08:00 a 21:00 intercalando Pilates Suelo, Yoga, Barre y Sculpt (Aforo: 15 plazas, 55 min).</li>
+          </ul>
+        </div>
+        <div id="genSemanaProgress" style="display:none; font-size:.85rem; color:var(--color-accent); font-weight:600; text-align:center;">
+          Generando sesiones en el calendario... por favor espera.
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:.65rem; margin-top:.4rem;">
+          <button class="btn btn-outline" type="button" id="cancelGeneradorSemanalBtn">Cancelar</button>
+          <button class="btn btn-primary" type="submit" id="ejecutarGeneradorSemanalBtn">Generar semana completa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="nuevaDisciplinaModal">
     <div class="modal">
       <div class="modal-header">
@@ -1420,7 +1461,7 @@
     }
 
     const TPV_BONO_LOGO_DEFAULT = '/assets/branding/logo-bono-tile.jpg?v=4';
-    const TPV_LOGO_PRINT = '/assets/branding/logo-circulo-nova.png?v=2';
+    const TPV_LOGO_PRINT = `${location.origin}/assets/branding/logo-isotipo.svg`;
     const FACTURACION_PATCH = 'supabase_patch_facturacion.sql';
     const FACTURACION_DEFAULTS = {
       nombre_emisor: 'NŌVA Pilates Studio',
@@ -3286,8 +3327,11 @@
       }
     }
 
-    function tpvAbrirVentanaImpresion(html) {
-      const w = window.open('', '_blank', 'width=480,height=760');
+    function tpvAbrirVentanaImpresion(html, opts) {
+      const features = opts && opts.wide
+        ? 'width=920,height=1100'
+        : 'width=420,height=760';
+      const w = window.open('', '_blank', features);
       if (!w) {
         toast('Bloqueador de ventanas impide imprimir. Permite ventanas emergentes para el TPV.', 'error');
         return null;
@@ -3306,11 +3350,20 @@
           w.print();
         } catch (_) {}
       };
-      if (w.document.readyState === 'complete') {
-        setTimeout(imprimir, 150);
-      } else {
-        w.onload = () => setTimeout(imprimir, 150);
-      }
+      const waitImages = () => {
+        const imgs = Array.from(w.document.images || []);
+        const pending = imgs.filter((img) => !img.complete);
+        if (!pending.length) {
+          setTimeout(imprimir, 80);
+          return;
+        }
+        Promise.all(pending.map((img) => new Promise((resolve) => {
+          img.addEventListener('load', resolve, { once: true });
+          img.addEventListener('error', resolve, { once: true });
+        }))).then(() => setTimeout(imprimir, 80));
+      };
+      if (w.document.readyState === 'complete') waitImages();
+      else w.onload = waitImages;
     }
 
     function tpvFmtEur(n) {
@@ -3334,6 +3387,7 @@
     }
 
     function tpvTicketHtml(t) {
+      const emisor = facturacionEmisor();
       const fecha = new Date(t.createdAt).toLocaleString('es-ES', {
         dateStyle: 'short',
         timeStyle: 'short'
@@ -3346,15 +3400,17 @@
         const qty = Math.max(1, Number(l.qty) || 1);
         const unit = Number(l.unitPrice) || 0;
         const sub = unit * qty;
-        const detalle = l.kind === 'bono'
-          ? (l.sesiones != null ? `${l.sesiones} sesión(es)` : '')
-          : (qty > 1 ? `${qty} × ${unit.toFixed(2).replace('.', ',')}` : '');
+        const extra = [];
+        if (qty > 1) extra.push(`${qty} × ${unit.toFixed(2).replace('.', ',')} €`);
+        if (l.kind === 'bono' && l.sesiones != null) extra.push(`${l.sesiones} sesión(es)`);
         return `
           <tr>
-            <td class="item">${escHtml(l.nombre)}${detalle ? `<div class="item-sub">${escHtml(detalle)}</div>` : ''}</td>
+            <td class="item">${escHtml(l.nombre)}${extra.length ? `<div class="item-sub">${escHtml(extra.join(' · '))}</div>` : ''}</td>
             <td class="right">${tpvFmtEur(sub)}</td>
           </tr>`;
       }).join('');
+      const direccion = [emisor.direccion, [emisor.codigo_postal, emisor.ciudad].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
+      const cifOk = emisor.cif && !String(emisor.cif).includes('pendiente');
 
       return `<!DOCTYPE html>
 <html lang="es">
@@ -3364,109 +3420,82 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-family: Georgia, 'Times New Roman', serif;
     width: 80mm;
+    max-width: 80mm;
     margin: 0 auto;
-    padding: 10mm 4mm;
-    color: #1a1f1c;
+    padding: 8mm 5mm 10mm;
+    color: #262626;
+    background: #fff;
     font-size: 11px;
-    line-height: 1.45;
+    line-height: 1.4;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .logo { display: block; margin: 0 auto 2mm; text-align: center; }
-  .logo img { width: 42px; height: auto; }
-  .brand { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-  .brand-sub { text-align: center; font-size: 9px; color: #5c3d8a; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 1mm; }
-  .tagline { text-align: center; font-size: 9px; color: #6b726d; margin-bottom: 3mm; }
-  .sep { border-top: 1px dashed #9aa39a; margin: 2.5mm 0; }
-  .sep-solid { border-top: 1px solid #1a1f1c; margin: 2.5mm 0; }
-  .row { display: flex; justify-content: space-between; gap: 2mm; }
-  .row .k { color: #6b726d; }
-  table { width: 100%; border-collapse: collapse; }
-  td { padding: 1mm 0; vertical-align: top; }
+  .logo { text-align: center; margin-bottom: 2.5mm; }
+  .logo img { width: 38px; height: auto; display: inline-block; }
+  .brand { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+  .brand-sub { text-align: center; font-size: 8.5px; color: #4D403A; letter-spacing: .16em; text-transform: uppercase; margin-top: 0.6mm; }
+  .legal { text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 8px; color: #59524C; margin-top: 1.4mm; line-height: 1.35; }
+  .ticket-no {
+    text-align: center; font-family: Arial, Helvetica, sans-serif;
+    font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+    color: #4D403A; font-weight: 700; margin: 3mm 0 1mm;
+  }
+  .tagline { text-align: center; font-size: 8.5px; font-style: italic; color: #59524C; margin-bottom: 1mm; }
+  .sep { border-top: 1px dashed #C4BEB2; margin: 2.8mm 0; }
+  .sep-solid { border-top: 1.5px solid #262626; margin: 2.8mm 0; }
+  .row { display: flex; justify-content: space-between; gap: 3mm; font-family: Arial, Helvetica, sans-serif; font-size: 10px; }
+  .row + .row { margin-top: 1mm; }
+  .row .k { color: #59524C; flex-shrink: 0; }
+  .row span:last-child { text-align: right; word-break: break-word; }
+  table { width: 100%; border-collapse: collapse; font-family: Arial, Helvetica, sans-serif; }
+  td { padding: 1.4mm 0; vertical-align: top; }
   td.right { text-align: right; white-space: nowrap; }
-  .item { font-weight: 600; }
-  .item-sub { font-weight: 400; font-size: 9px; color: #6b726d; }
-  .ticket-no { text-align: center; font-size: 9px; color: #5c3d8a; font-weight: 600; margin-bottom: 1mm; }
-  .total-row td { font-size: 14px; font-weight: 700; }
-  .footer { text-align: center; font-size: 9px; color: #6b726d; margin-top: 2mm; }
+  .item { font-weight: 700; font-size: 10.5px; }
+  .item-sub { font-weight: 400; font-size: 8.5px; color: #59524C; margin-top: 0.4mm; }
+  .total-row td { font-size: 13px; font-weight: 700; padding-top: 1.6mm; }
+  .iva { text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 8px; color: #59524C; margin-top: 1.5mm; }
+  .footer { text-align: center; font-size: 9px; color: #59524C; margin-top: 2.5mm; }
+  .footer strong { display: block; color: #262626; font-size: 10px; margin-bottom: 1mm; }
   @media print {
     @page { size: 80mm auto; margin: 0; }
-    body { padding: 6mm 4mm; }
+    html, body { width: 80mm; }
+    body { padding: 5mm 4mm 8mm; }
   }
 </style>
 </head>
 <body>
-  <div class="logo"><img src="${escHtml(TPV_LOGO_PRINT || '/assets/branding/logo-circulo-nova.png?v=2')}" alt="NŌVA Pilates" /></div>
-  <div class="brand">NŌVA Pilates Studio</div>
-  <div class="brand-sub">Sevilla</div>
+  <div class="logo"><img src="${escHtml(TPV_LOGO_PRINT)}" alt="NŌVA Pilates" /></div>
+  <div class="brand">${escHtml(emisor.nombre || 'NŌVA Pilates Studio')}</div>
+  <div class="brand-sub">${escHtml(emisor.ciudad || 'Sevilla')}</div>
+  <div class="legal">
+    ${cifOk ? `CIF ${escHtml(emisor.cif)}<br />` : ''}
+    ${direccion ? `${escHtml(direccion)}<br />` : ''}
+    ${[emisor.telefono, emisor.email].filter(Boolean).map((x) => escHtml(x)).join(' · ')}
+  </div>
   <div class="ticket-no">${escHtml(t.numeroTicket || 'TICKET')}</div>
-  <p class="tagline">Desconecta de lo de fuera. Conecta contigo.</p>
+  <p class="tagline">${escHtml(emisor.pie || 'Desconecta de lo de fuera. Conecta contigo.')}</p>
   <div class="sep"></div>
-  <div class="row"><span class="k">Fecha y hora</span><span>${escHtml(fecha)}</span></div>
-  <div class="row"><span class="k">Atendido por</span><span>${escHtml(t.vendedor || '—')}</span></div>
-  ${t.vendedorRol ? `<div class="row"><span class="k">Puesto</span><span>${escHtml(t.vendedorRol)}</span></div>` : ''}
+  <div class="row"><span class="k">Fecha</span><span>${escHtml(fecha)}</span></div>
+  <div class="row"><span class="k">Atendido por</span><span>${escHtml(t.vendedor || '—')}${t.vendedorRol ? ` · ${escHtml(t.vendedorRol)}` : ''}</span></div>
   <div class="row"><span class="k">Cliente</span><span>${escHtml(t.clienteNombre || '—')}</span></div>
   ${t.clienteEmail ? `<div class="row"><span class="k">Email</span><span>${escHtml(t.clienteEmail)}</span></div>` : ''}
   <div class="sep"></div>
   <table>
     ${filas}
   </table>
-  <div class="sep"></div>
+  <div class="sep-solid"></div>
   <table>
     <tr class="total-row"><td>Total</td><td class="right">${tpvFmtEur(t.importe)}</td></tr>
   </table>
-  <div class="sep-solid"></div>
+  <p class="iva">IVA incluido</p>
+  <div class="sep"></div>
   <div class="row"><span class="k">Pago</span><span>${escHtml(metodo)}</span></div>
+  ${t.valeCodigo ? `<div class="row"><span class="k">Ticket regalo</span><span>${escHtml(t.valeCodigo)} · resto ${tpvFmtEur(t.valeRestante)}</span></div>` : ''}
   ${t.nota ? `<div class="row"><span class="k">Nota</span><span>${escHtml(t.nota)}</span></div>` : ''}
   <div class="sep"></div>
-  <p class="footer">¡Gracias por confiar en NŌVA!<br />Pilates Reformer · Suelo · Yoga · Barre</p>
-  <div class="modal-overlay" id="generadorSemanalModal">
-    <div class="modal" style="max-width:580px;">
-      <div class="modal-header">
-        <h2 class="modal-title">⚡ Generador Semanal Automático de Clases</h2>
-        <button class="modal-close" id="closeGeneradorSemanalModal" type="button" aria-label="Cerrar">×</button>
-      </div>
-      <form id="generadorSemanalForm" style="display:grid; gap:1.1rem;">
-        <p class="clases-hint" style="margin:0; line-height:1.5;">
-          Genera automáticamente las <strong>24 clases diarias</strong> de la semana: 12 clases de Reformer en Sala Reformer y 12 clases rotativas en Sala Suelo (Pilates Suelo, Yoga, Barre, Sculpt).
-        </p>
-
-        <div class="form-group">
-          <label class="form-label" for="genSemanaLunes">Lunes de inicio de la semana</label>
-          <input class="form-input" id="genSemanaLunes" type="date" required />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="genSemanaDias">Días a generar</label>
-          <select class="form-input" id="genSemanaDias">
-            <option value="5" selected>Lunes a Viernes (5 días · 120 clases)</option>
-            <option value="6">Lunes a Sábado (6 días · 144 clases)</option>
-          </select>
-        </div>
-
-        <div class="form-group" style="background:var(--color-bg-soft); border:1px dashed var(--color-border); padding:.85rem 1rem;">
-          <strong style="display:block; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:var(--color-accent); margin-bottom:.4rem;">
-            Estructura de las 24 clases diarias:
-          </strong>
-          <ul style="font-size:.82rem; color:var(--color-cream-dim); padding-left:1.1rem; line-height:1.5;">
-            <li><strong>Sala Reformer (12 clases):</strong> 08:00, 09:00, 10:00, 11:00, 12:00, 13:00, 16:00, 17:00, 18:00, 19:00, 20:00, 21:00 (Aforo: 12 plazas, 55 min).</li>
-            <li><strong>Sala Suelo (12 clases rotativas):</strong> 08:00 a 21:00 intercalando Pilates Suelo, Yoga, Barre y Sculpt (Aforo: 15 plazas, 55 min).</li>
-          </ul>
-        </div>
-
-        <div id="genSemanaProgress" style="display:none; font-size:.85rem; color:var(--color-accent); font-weight:600; text-align:center;">
-          Generando sesiones en el calendario... por favor espera.
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; gap:.65rem; margin-top:.4rem;">
-          <button class="btn btn-outline" type="button" id="cancelGeneradorSemanalBtn">Cancelar</button>
-          <button class="btn btn-primary" type="submit" id="ejecutarGeneradorSemanalBtn">⚡ Generar semana completa</button>
-        </div>
-      </form>
-    </div>
-  </div>
+  <p class="footer"><strong>Gracias por confiar en NŌVA</strong>Reformer · Suelo · Yoga · Barre</p>
 </body>
 </html>`;
     }
@@ -3583,108 +3612,121 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    color: #1a1f1c;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #262626;
+    background: #fff;
     font-size: 12px;
     line-height: 1.5;
-    padding: 16mm;
+    padding: 16mm 18mm 18mm;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8mm; margin-bottom: 10mm; }
-  .head .left img { height: 46px; width: auto; }
-  .head .brand { font-size: 20px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-  .head .brand-sub { color: #5c3d8a; letter-spacing: .14em; text-transform: uppercase; font-size: 10px; }
+  .sheet { max-width: 180mm; margin: 0 auto; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10mm; padding-bottom: 7mm; border-bottom: 2px solid #4D403A; margin-bottom: 8mm; }
+  .brand-block { display: flex; gap: 4mm; align-items: center; }
+  .brand-block img { height: 48px; width: auto; }
+  .brand { font-family: Georgia, 'Times New Roman', serif; font-size: 18px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .brand-sub { color: #4D403A; letter-spacing: .12em; text-transform: uppercase; font-size: 9px; margin-top: 1mm; }
   .head .right { text-align: right; }
-  .head .right .doc-type { font-size: 22px; font-weight: 800; color: #5c3d8a; }
-  .head .right .doc-no { font-size: 14px; font-weight: 700; }
-  .head .right .estado-anulada { display: inline-block; margin-top: 2mm; padding: 1mm 3mm; border: 2px solid #b33a3a; color: #b33a3a; font-size: 12px; font-weight: 800; letter-spacing: .2em; }
+  .doc-type { font-family: Georgia, 'Times New Roman', serif; font-size: 22px; font-weight: 700; color: #4D403A; letter-spacing: .08em; }
+  .doc-no { font-size: 13px; font-weight: 700; margin-top: 1mm; }
+  .doc-date { font-size: 10px; color: #59524C; margin-top: 2mm; }
+  .estado-anulada { display: inline-block; margin-top: 2.5mm; padding: 1mm 3mm; border: 1.5px solid #b33a3a; color: #b33a3a; font-size: 11px; font-weight: 800; letter-spacing: .18em; }
   .watermark {
-    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-    transform: rotate(-24deg); font-size: 46px; letter-spacing: .28em; font-weight: 800;
-    color: rgba(179,58,58,.12); border: 3px solid rgba(179,58,58,.22);
-    pointer-events: none; z-index: 5; text-indent: .28em;
+    position: fixed; inset: 18%; display: flex; align-items: center; justify-content: center;
+    transform: rotate(-22deg); font-size: 52px; letter-spacing: .32em; font-weight: 800;
+    color: rgba(179,58,58,.14); pointer-events: none; z-index: 5;
   }
-  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-bottom: 10mm; }
-  .meta h3 { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #6b726d; margin-bottom: 2mm; }
-  .meta p { margin-bottom: 1mm; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 8mm; }
-  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #6b726d; border-bottom: 1px solid #9aa39a; padding: 2mm 1mm; }
-  td { padding: 2mm 1mm; border-bottom: 1px dashed #c5cbc4; vertical-align: top; }
-  td.right { text-align: right; white-space: nowrap; }
-  .dim { color: #6b726d; font-size: 11px; }
-  .totals { width: 55mm; margin-left: auto; }
-  .totals .row { display: flex; justify-content: space-between; padding: 1mm 0; }
-  .totals .row.total { border-top: 2px solid #1a1f1c; font-weight: 800; font-size: 14px; margin-top: 1mm; }
-  .pay { margin-bottom: 6mm; font-size: 11px; }
-  .foot { margin-top: 10mm; padding-top: 4mm; border-top: 1px solid #9aa39a; font-size: 9px; color: #6b726d; }
-  .foot p { margin-bottom: 1mm; }
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-bottom: 9mm; }
+  .box { background: #FAF8F5; border: 1px solid #DFDACF; padding: 4.5mm 5mm; }
+  .box h3 { font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: #A3968D; margin-bottom: 2.2mm; }
+  .box p { margin-bottom: 0.8mm; }
+  table.items { width: 100%; border-collapse: collapse; margin-bottom: 7mm; }
+  table.items th {
+    text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: .1em;
+    color: #FAF8F5; background: #4D403A; padding: 2.4mm 2.2mm; font-weight: 600;
+  }
+  table.items th.right, table.items td.right { text-align: right; }
+  table.items td { padding: 2.6mm 2.2mm; border-bottom: 1px solid #DFDACF; vertical-align: top; }
+  .dim { color: #59524C; font-size: 11px; }
+  .totals { width: 62mm; margin-left: auto; margin-bottom: 8mm; }
+  .totals .row { display: flex; justify-content: space-between; padding: 1.4mm 0; color: #59524C; }
+  .totals .row.total { border-top: 2px solid #262626; color: #262626; font-weight: 800; font-size: 14px; margin-top: 1.5mm; padding-top: 2.4mm; }
+  .pay { margin-bottom: 10mm; font-size: 11px; padding: 3.5mm 4.5mm; background: #F5F1EB; border-left: 3px solid #4D403A; }
+  .foot { padding-top: 4mm; border-top: 1px solid #DFDACF; font-size: 9px; color: #59524C; }
+  .foot p { margin-bottom: 1.2mm; }
+  .foot .pie { font-family: Georgia, 'Times New Roman', serif; font-style: italic; color: #4D403A; margin-top: 2mm; }
   @media print {
-    @page { size: A4; margin: 0; }
+    @page { size: A4; margin: 12mm; }
+    body { padding: 0; }
   }
 </style>
 </head>
 <body>
   ${anulada ? '<div class="watermark">ANULADA</div>' : ''}
-  <div class="head">
-    <div class="left">
-      <img src="${escHtml(TPV_LOGO_PRINT || '/assets/branding/logo-circulo-nova.png?v=2')}" alt="NŌVA Pilates" />
-      <div class="brand">${escHtml(emisor.nombre)}</div>
-      <div class="brand-sub">Reformer · Suelo · Yoga · Barre · ${escHtml(emisor.ciudad || 'Sevilla')}</div>
+  <div class="sheet">
+    <div class="head">
+      <div class="brand-block">
+        <img src="${escHtml(TPV_LOGO_PRINT)}" alt="NŌVA Pilates" />
+        <div>
+          <div class="brand">${escHtml(emisor.nombre)}</div>
+          <div class="brand-sub">Reformer · Suelo · Yoga · Barre</div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="doc-type">Factura</div>
+        <div class="doc-no">${escHtml(d.numero || '')}</div>
+        ${anulada ? '<div class="estado-anulada">ANULADA</div>' : ''}
+        <p class="doc-date">Emitida: ${escHtml(fecha)}</p>
+      </div>
     </div>
-    <div class="right">
-      <div class="doc-type">FACTURA</div>
-      <div class="doc-no">${escHtml(d.numero || '')}</div>
-      ${anulada ? '<div class="estado-anulada">ANULADA</div>' : ''}
-      <p style="font-size:10px;color:#6b726d;margin-top:2mm;">Emitida: ${escHtml(fecha)}</p>
+
+    <div class="meta">
+      <div class="box">
+        <h3>Emisor</h3>
+        <p><strong>${escHtml(emisor.nombre)}</strong></p>
+        ${direccionEmisor ? `<p>${escHtml(direccionEmisor)}</p>` : ''}
+        <p>CIF: ${escHtml(emisor.cif || '—')}</p>
+        ${contactoEmisor ? `<p>${escHtml(contactoEmisor)}</p>` : ''}
+      </div>
+      <div class="box">
+        <h3>Cliente</h3>
+        <p><strong>${escHtml(d.clienteNombre || '—')}</strong></p>
+        ${d.clienteEmail ? `<p>${escHtml(d.clienteEmail)}</p>` : ''}
+        <p>Atendido por: ${escHtml(d.vendedor || '—')}${d.vendedorRol ? ` (${escHtml(d.vendedorRol)})` : ''}</p>
+      </div>
     </div>
-  </div>
 
-  <div class="meta">
-    <div>
-      <h3>Emisor</h3>
-      <p><strong>${escHtml(emisor.nombre)}</strong></p>
-      ${direccionEmisor ? `<p>${escHtml(direccionEmisor)}</p>` : ''}
-      <p>CIF: ${escHtml(emisor.cif || '—')}</p>
-      ${contactoEmisor ? `<p>${escHtml(contactoEmisor)}</p>` : ''}
+    <table class="items">
+      <thead>
+        <tr><th>Concepto</th><th class="right">Cant.</th><th class="right">Precio</th><th class="right">Importe</th></tr>
+      </thead>
+      <tbody>${filas}</tbody>
+    </table>
+
+    <div class="totals">
+      <div class="row"><span>Base imponible</span><span>${finFmtEuro(base)}</span></div>
+      <div class="row"><span>IVA ${String(ivaPct).replace('.', ',')}%</span><span>${finFmtEuro(iva)}</span></div>
+      <div class="row total"><span>Total</span><span>${finFmtEuro(total)}</span></div>
     </div>
-    <div>
-      <h3>Cliente</h3>
-      <p><strong>${escHtml(d.clienteNombre || '—')}</strong></p>
-      <p>${escHtml(d.clienteEmail || '')}</p>
-      <p><strong>Atendido por:</strong> ${escHtml(d.vendedor || '—')}${d.vendedorRol ? ` (${escHtml(d.vendedorRol)})` : ''}</p>
+
+    <div class="pay">
+      <strong>Forma de pago:</strong> ${escHtml(metodo)}
+      ${d.nota ? `<br /><strong>Nota:</strong> ${escHtml(d.nota)}` : ''}
     </div>
-  </div>
 
-  <table>
-    <thead>
-      <tr><th>Concepto</th><th class="right">Cant.</th><th class="right">Precio</th><th class="right">Importe</th></tr>
-    </thead>
-    <tbody>${filas}</tbody>
-  </table>
-
-  <div class="totals">
-    <div class="row"><span>Base imponible</span><span>${finFmtEuro(base)}</span></div>
-    <div class="row"><span>IVA ${String(ivaPct).replace('.', ',')}%</span><span>${finFmtEuro(iva)}</span></div>
-    <div class="row total"><span>Total</span><span>${finFmtEuro(total)}</span></div>
-  </div>
-
-  <div class="pay">
-    <strong>Forma de pago:</strong> ${escHtml(metodo)}
-    ${d.nota ? `<br /><strong>Nota:</strong> ${escHtml(d.nota)}` : ''}
-  </div>
-
-  <div class="foot">
-    <p>Documento emitido por ${escHtml(emisor.nombre)}${direccionEmisor ? ` (${escHtml(direccionEmisor)})` : ''}.${cifPendiente ? ' Completar el CIF del emisor antes de su uso oficial.' : ''}</p>
-    ${anulada && motivo ? `<p><strong>Motivo de anulación:</strong> ${escHtml(motivo)}</p>` : ''}
-    <p>Gracias por tu confianza. ${escHtml(emisor.pie || 'Desconecta de lo de fuera. Conecta contigo.')}</p>
+    <div class="foot">
+      <p>Documento emitido por ${escHtml(emisor.nombre)}${direccionEmisor ? ` (${escHtml(direccionEmisor)})` : ''}.${cifPendiente ? ' Completa el CIF del emisor en Ajustes antes de su uso oficial.' : ''}</p>
+      ${anulada && motivo ? `<p><strong>Motivo de anulación:</strong> ${escHtml(motivo)}</p>` : ''}
+      <p class="pie">${escHtml(emisor.pie || 'Desconecta de lo de fuera. Conecta contigo.')}</p>
+    </div>
   </div>
 </body>
 </html>`;
     }
 
     function imprimirFactura(d) {
-      const w = tpvAbrirVentanaImpresion(construirFacturaHtml(d));
+      const w = tpvAbrirVentanaImpresion(construirFacturaHtml(d), { wide: true });
       tpvImprimirVentana(w);
     }
 

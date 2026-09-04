@@ -32,7 +32,7 @@ function escapeHtml(value: string): string {
 function buildWelcomeHtml(nombre: string): string {
   const safeName = escapeHtml(nombre);
   const instagram =
-    Deno.env.get("EMAIL_INSTAGRAM_URL") || "https://www.instagram.com/";
+    Deno.env.get("EMAIL_INSTAGRAM_URL") || "https://www.instagram.com/novapilatestudios/";
   const whatsapp = Deno.env.get("EMAIL_WHATSAPP_URL") || "https://wa.me/";
   const maps = Deno.env.get("EMAIL_MAPS_URL") || MAPS_URL;
   const studioImg = Deno.env.get("EMAIL_STUDIO_IMAGE_URL") || STUDIO_IMG_URL;
