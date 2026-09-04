@@ -68,3 +68,38 @@ const NOVA_MEMBERSHIPS = [
     ]
   }
 ];
+
+function closeNovaNav() {
+  const nav = document.querySelector('.nav');
+  const toggle = document.querySelector('.nav-toggle');
+  if (!nav) return;
+  nav.classList.remove('is-open');
+  document.body.classList.remove('nav-lock');
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Abrir menú');
+  }
+}
+
+function initNovaNav() {
+  const nav = document.querySelector('.nav');
+  const toggle = document.querySelector('.nav-toggle');
+  if (!nav || !toggle || toggle.dataset.bound === '1') return;
+  toggle.dataset.bound = '1';
+  toggle.addEventListener('click', () => {
+    const open = !nav.classList.contains('is-open');
+    nav.classList.toggle('is-open', open);
+    document.body.classList.toggle('nav-lock', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+  });
+  nav.querySelectorAll('.nav-links a').forEach((link) => {
+    link.addEventListener('click', closeNovaNav);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeNovaNav();
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 960) closeNovaNav();
+  });
+}

@@ -106,6 +106,7 @@ async function loadBonosSections() {
     document.querySelectorAll('.js-instagram-link').forEach((el) => {
       el.href = NOVA_INSTAGRAM_DM_URL;
     });
+    if (typeof initNovaNav === 'function') initNovaNav();
   } catch (err) {
     console.error(err);
   }

@@ -149,6 +149,7 @@ async function loadTiendaSections() {
     if (!res.ok) throw new Error('No se pudo cargar la vista de NŌVA Ritual.');
     root.innerHTML = await res.text();
     renderShopGrid();
+    if (typeof initNovaNav === 'function') initNovaNav();
   } catch (err) {
     console.error(err);
   }

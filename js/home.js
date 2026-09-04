@@ -377,6 +377,7 @@ async function loadHomeSections() {
     initHeroVideo();
     bindInstagramLinks();
     bindAddHomeAppButtons();
+    if (typeof initNovaNav === 'function') initNovaNav();
     initRevealMotion();
   } catch (error) {
     console.error('Error cargando portada:', error);
