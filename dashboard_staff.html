@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
   <link rel="stylesheet" href="portal.css?v=44" />
 </head>
-<body data-panel-build="2026-04-18-clases-modal">
+<body data-panel-build="2026-09-05-holded-export">
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><a href="index.html" class="sidebar-brand" aria-label="NŌVA PILATES STUDIO"><img class="sidebar-brand-mark" src="/assets/branding/logo-circulo-nova.png" width="36" height="42" alt="" /></a></div>
@@ -376,7 +376,11 @@
 
         <div class="card" style="margin-bottom:1rem;">
           <div class="card-label">Facturas emitidas</div>
-          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Cada factura agrupa las líneas de un mismo cobro y se numera de forma secuencial por año.</p>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Cada factura agrupa las líneas de un mismo cobro y se numera de forma secuencial por año. Para Holded (u otra gestoría), exporta el CSV de ventas: se importa en Holded desde <strong>Ventas → Facturas → Acciones → Importar</strong> (o Menú → Importar → Ventas). Las facturas entran como borrador. Usa los filtros de fecha de arriba para acotar el periodo. Holded exige NIF del cliente: conviene tener el DNI en la ficha.</p>
+          <div class="fin-toolbar" style="margin-bottom:.65rem;">
+            <span class="fin-toolbar-spacer"></span>
+            <button type="button" class="btn btn-outline btn-sm" id="exportHoldedFacturasBtn">Exportar para Holded</button>
+          </div>
           <div class="table-wrap fin-subtable-wrap">
             <table><thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Base</th><th>IVA</th><th>Total</th><th>Pago</th><th>Estado</th><th style="white-space:nowrap;">Acción</th></tr></thead><tbody id="rowsFacturas"></tbody></table>
           </div>
@@ -468,7 +472,7 @@
         </div>
         <div class="card">
           <div class="card-label">Datos de facturación</div>
-          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .9rem;">Estos datos aparecen como emisor en las facturas. Solo administración.</p>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .9rem;">Estos datos aparecen como emisor en las facturas. Solo administración. La gestoría puede llevar Holded (u otro programa) aparte: el TPV sigue emitiendo las facturas aquí y en Finanzas hay un botón <strong>Exportar para Holded</strong> con el formato de importación de ventas.</p>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;">
             <div class="form-group" style="margin:0;">
               <label class="form-label" for="facNombreEmisor">Nombre del emisor</label>
@@ -3880,7 +3884,7 @@
       try {
         const { data, error } = await novaSupabase
           .from('facturas')
-          .select('*,perfil:perfil_id(nombre,apellidos,email),emisor:emitida_por(nombre,apellidos,email,rol)')
+          .select('*,perfil:perfil_id(nombre,apellidos,email,dni,direccion,ciudad,cp,telefono),emisor:emitida_por(nombre,apellidos,email,rol)')
           .order('created_at', { ascending: false })
           .limit(200);
         if (error) {
@@ -4259,6 +4263,187 @@
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 3000);
       toast(`Exportadas ${filas.length} transacciones a CSV`, 'success');
+    }
+
+    function descargarCsvUtf8(filename, head, filas) {
+      const esc = (s) => `"${String(s ?? '').replace(/"/g, '""')}"`;
+      const csv = '\uFEFF' + [head, ...filas].map((r) => r.map(esc).join(';')).join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+
+    function holdedFechaDdMmYyyy(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      return `${dd}/${mm}/${d.getFullYear()}`;
+    }
+
+    function holdedIvaKey(pct) {
+      const n = Math.round(Number(pct) || 0);
+      return `s_iva_${n}`;
+    }
+
+    function holdedNifCliente(f) {
+      return String(f?.perfil?.dni || '').replace(/\s+/g, '').toUpperCase();
+    }
+
+    function holdedNombreCliente(f) {
+      const p = f?.perfil;
+      const dePerfil = p ? [p.nombre, p.apellidos].filter(Boolean).join(' ').trim() : '';
+      return (f?.cliente_nombre || dePerfil || f?.cliente_email || p?.email || 'Cliente').trim();
+    }
+
+    function facturasEnRangoFinanzas(list) {
+      const desde = document.getElementById('finanzasFiltroDesde')?.value || '';
+      const hasta = document.getElementById('finanzasFiltroHasta')?.value || '';
+      return (list || []).filter((f) => {
+        const t = new Date(f.created_at).getTime();
+        if (Number.isNaN(t)) return false;
+        if (desde) {
+          const a = new Date(`${desde}T00:00:00`).getTime();
+          if (t < a) return false;
+        }
+        if (hasta) {
+          const b = new Date(`${hasta}T23:59:59.999`).getTime();
+          if (t > b) return false;
+        }
+        return true;
+      });
+    }
+
+    function exportarFacturasHolded() {
+      const emitidas = facturasEnRangoFinanzas(appState.facturasAll || [])
+        .filter((f) => String(f.estado || '').toLowerCase() !== 'anulada');
+      if (!emitidas.length) {
+        toast('No hay facturas emitidas en el periodo filtrado. Las anuladas no se exportan (en Holded van como rectificativas).', 'info');
+        return;
+      }
+      const headVentas = [
+        'Núm. Factura',
+        'Formato de numeración',
+        'Fecha',
+        'Fecha de vencimiento',
+        'Fecha de operación',
+        'Descripción',
+        'Nombre del contacto',
+        'NIF',
+        'Dirección',
+        'Población',
+        'Código postal',
+        'Provincia',
+        'País',
+        'Concepto',
+        'Descripción producto',
+        'SKU',
+        'Precio unidad',
+        'Unidades',
+        'Descuento',
+        'IVA%',
+        'Retención',
+        'Rec. de eq.',
+        'Operación',
+        'Forma de pago',
+        'Cantidad cobrada',
+        'Fecha de cobro',
+        'Cuenta de pago',
+        'Tags',
+        'Nombre canal de venta',
+        'Cuenta canal de venta',
+        'Moneda',
+        'Cambio de moneda'
+      ];
+      const filasVentas = [];
+      const contactosMap = new Map();
+      let sinNif = 0;
+      for (const f of emitidas) {
+        const ivaPct = Number(f.iva_porcentaje != null ? f.iva_porcentaje : 21) || 21;
+        const ivaKey = holdedIvaKey(ivaPct);
+        const fecha = holdedFechaDdMmYyyy(f.created_at);
+        const nombre = holdedNombreCliente(f);
+        const nif = holdedNifCliente(f);
+        if (!nif) sinNif += 1;
+        const p = f.perfil || {};
+        const dir = p.direccion || '';
+        const pob = p.ciudad || '';
+        const cp = p.cp || '';
+        const metodo = String(f.metodo_pago || 'otro').toLowerCase();
+        const tags = ['TPV', metodo].join('-');
+        const lineasRaw = Array.isArray(f.lineas) && f.lineas.length
+          ? f.lineas
+          : [{ nombre: 'Venta', qty: 1, unit: Number(f.importe_total) || 0 }];
+        const lineas = lineasRaw.map(normalizarLineaFactura);
+        const total = Number(f.importe_total) || 0;
+        lineas.forEach((l, idx) => {
+          const unitNet = round2(l.unit / (1 + ivaPct / 100));
+          filasVentas.push([
+            f.numero || '',
+            '',
+            fecha,
+            fecha,
+            fecha,
+            `Cobro TPV ${f.numero || ''}`.trim(),
+            nombre,
+            nif,
+            dir,
+            pob,
+            cp,
+            '',
+            'España',
+            l.nombre,
+            l.kind === 'bono' && l.sesiones != null ? `${l.sesiones} sesiones` : '',
+            '',
+            unitNet.toFixed(2).replace('.', ','),
+            l.qty,
+            '',
+            ivaKey,
+            '',
+            '',
+            '',
+            '',
+            idx === 0 ? total.toFixed(2).replace('.', ',') : '',
+            idx === 0 ? fecha : '',
+            '',
+            tags,
+            'NŌVA TPV',
+            '',
+            'EUR',
+            ''
+          ]);
+        });
+        const ck = nif || (f.cliente_email || p.email || nombre);
+        if (!contactosMap.has(ck)) {
+          contactosMap.set(ck, [
+            nif,
+            nombre,
+            f.cliente_email || p.email || '',
+            p.telefono || '',
+            dir,
+            pob,
+            cp,
+            'España',
+            'client'
+          ]);
+        }
+      }
+      const hoy = new Date().toISOString().slice(0, 10);
+      descargarCsvUtf8(`holded_facturas_venta_${hoy}.csv`, headVentas, filasVentas);
+      const headContactos = ['NIF', 'Nombre', 'Email', 'Teléfono', 'Dirección', 'Población', 'Código postal', 'País', 'Tipo'];
+      setTimeout(() => {
+        descargarCsvUtf8(`holded_contactos_${hoy}.csv`, headContactos, [...contactosMap.values()]);
+      }, 350);
+      const avisoNif = sinNif
+        ? ` ${sinNif} factura(s) van sin NIF: Holded lo pide obligatorio; completa el DNI en Usuarios y vuelve a exportar, o rellénalo en el Excel.`
+        : '';
+      toast(`Exportadas ${emitidas.length} facturas (${filasVentas.length} líneas) para Holded.${avisoNif} En Holded: Ventas → Facturas → Acciones → Importar. Entran como borrador.`, 'success');
     }
 
     async function printFactura() {
@@ -6004,6 +6189,7 @@
     }
     bindFinanzasFilters();
     document.getElementById('exportFinanzasCsvBtn')?.addEventListener('click', () => exportarFinanzasCsv());
+    document.getElementById('exportHoldedFacturasBtn')?.addEventListener('click', () => exportarFacturasHolded());
     document.getElementById('valeBuscarBtn')?.addEventListener('click', () => {
       const codigo = (document.getElementById('valeBuscarCodigo')?.value || '').trim().toUpperCase();
       if (!codigo) {
