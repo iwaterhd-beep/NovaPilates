@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
-  <link rel="stylesheet" href="portal.css?v=43" />
+  <link rel="stylesheet" href="portal.css?v=44" />
 </head>
 <body data-panel-build="2026-04-18-clases-modal">
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -159,10 +159,11 @@
             </div>
 
             <div class="tpv-zone tpv-zone-last">
-              <div class="card-label">Último cobro</div>
-              <div id="tpvLastTicket" class="empty-state"><p>Aún no hay cobros en esta sesión.</p></div>
+              <div class="card-label">Últimos cobros</div>
+              <p class="tpv-hint">Los 10 cobros más recientes. Se mantienen al recargar.</p>
+              <div id="tpvLastTicket" class="empty-state"><p>Aún no hay cobros.</p></div>
               <div class="tpv-last-actions">
-                <button class="btn btn-ghost btn-sm" type="button" id="tpvAnularUltimoBtn" disabled>Anular cobro</button>
+                <button class="btn btn-ghost btn-sm" type="button" id="tpvAnularUltimoBtn" disabled>Anular último</button>
                 <button class="btn btn-outline btn-sm" type="button" id="tpvPrintTicketBtn" disabled>Imprimir ticket</button>
                 <button class="btn btn-outline btn-sm" type="button" id="tpvPrintFacturaBtn" disabled>Factura</button>
               </div>
@@ -336,7 +337,7 @@
 
         <div class="card" style="margin-bottom:1rem;">
           <div class="card-label">Todas las transacciones</div>
-          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Historial completo. Filtra por fecha, cliente o bono. Emite la factura de cada cobro, o corrige un cobro erróneo con <strong>Anular</strong>.</p>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .75rem;">Historial completo. Filtra por fecha, cliente o bono. Reimprime el ticket o la factura de cada cobro, o corrige un cobro erróneo con <strong>Anular</strong>.</p>
           <div class="finanzas-filters">
             <div class="form-group">
               <label class="form-label" for="finanzasFiltroDesde">Desde</label>
@@ -3153,7 +3154,6 @@
           valeRestante: metodoPago === 'vale' ? Number(data?.vale_restante ?? 0) : null,
           esBono: cartSnapshot.some((l) => l.kind === 'bono')
         };
-        renderLastTicket();
         if (metodoPago === 'vale') {
           const restante = Number(data?.vale_restante ?? 0);
           toast(`Cobro con ticket regalo registrado. Saldo restante: ${tpvFmtEur(restante)}`, 'success');
@@ -3247,6 +3247,21 @@
       }).join('');
     }
 
+    function tpvCobrosRecientes(limit) {
+      const all = appState.finanzasTxAll || [];
+      const seen = new Set();
+      const out = [];
+      for (const t of all) {
+        if (t.tipo_movimiento === 'reembolso') continue;
+        const key = t.cobro_id ? `c:${t.cobro_id}` : `t:${t.id}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(t);
+        if (out.length >= (limit || 10)) break;
+      }
+      return out;
+    }
+
     function renderLastTicket() {
       const box = document.getElementById('tpvLastTicket');
       const printBtn = document.getElementById('tpvPrintTicketBtn');
@@ -3254,10 +3269,13 @@
       const printFacturaBtn = document.getElementById('tpvPrintFacturaBtn');
       const printFacturaCartBtn = document.getElementById('tpvPrintFacturaCartBtn');
       const anularBtn = document.getElementById('tpvAnularUltimoBtn');
-      const t = appState.lastTicket;
-      if (!t) {
-        box.className = 'empty-state';
-        box.innerHTML = '<p>Aún no hay cobros en esta sesión.</p>';
+      const recientes = tpvCobrosRecientes(10);
+      if (!recientes.length) {
+        appState.lastTicket = null;
+        if (box) {
+          box.className = 'empty-state';
+          box.innerHTML = '<p>Aún no hay cobros.</p>';
+        }
         if (printBtn) printBtn.disabled = true;
         if (printCartBtn) printCartBtn.hidden = true;
         if (printFacturaBtn) printFacturaBtn.disabled = true;
@@ -3265,26 +3283,37 @@
         if (anularBtn) anularBtn.disabled = true;
         return;
       }
-      box.className = '';
-      const concepto = t.concepto || t.bonoNombre || 'Venta';
-      const etiqueta = t.subtipo === 'producto' ? 'Producto' : t.subtipo === 'mixto' ? 'Ticket' : 'Bono';
-      const canAnular = Array.isArray(t.transaccionIds) && t.transaccionIds.length > 0;
+      const tickets = recientes.map((tx) => ({ tx, ticket: ticketDesdeTransaccion(tx) })).filter((x) => x.ticket);
+      appState.lastTicket = tickets[0]?.ticket || null;
       if (printCartBtn) printCartBtn.hidden = false;
       if (printFacturaCartBtn) printFacturaCartBtn.hidden = false;
-      box.innerHTML = `
-        <div style="display:grid;gap:.25rem;">
-          <div style="font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--color-muted);">${etiqueta} · ${escHtml(t.numeroTicket || '')}</div>
-          <div style="font-size:1rem;color:var(--color-cream);">${escHtml(concepto)}</div>
-          <div style="font-size:.8rem;color:var(--color-cream-dim);">Cliente: ${escHtml(t.clienteNombre)} · ${escHtml(t.clienteEmail || '')}</div>
-          <div style="font-size:.75rem;color:var(--color-muted);">Atendido por: ${escHtml(t.vendedor || '—')}${t.vendedorRol ? ` (${escHtml(t.vendedorRol)})` : ''}</div>
-          <div style="font-size:.75rem;color:var(--color-muted);">Importe: ${t.importe.toFixed(2)} € · ${escHtml(tpvMetodoPagoLabel(t.metodoPago))} · ${new Date(t.createdAt).toLocaleString('es-ES')}</div>
-          ${t.valeCodigo ? `<div style="font-size:.75rem;color:var(--color-muted);">Ticket regalo ${escHtml(t.valeCodigo)} · Restante ${tpvFmtEur(t.valeRestante)}</div>` : ''}
-          ${t.nota ? `<div style="font-size:.75rem;color:var(--color-muted);">Nota: ${escHtml(t.nota)}</div>` : ''}
-        </div>
-      `;
       if (printBtn) printBtn.disabled = false;
       if (printFacturaBtn) printFacturaBtn.disabled = false;
-      if (anularBtn) anularBtn.disabled = !canAnular;
+      if (anularBtn) {
+        const t0 = appState.lastTicket;
+        const canAnular = Array.isArray(t0?.transaccionIds) && t0.transaccionIds.length > 0;
+        anularBtn.disabled = !canAnular;
+      }
+      if (!box) return;
+      box.className = 'tpv-cobros-list';
+      box.innerHTML = tickets.map(({ tx, ticket }, i) => {
+        const etiqueta = ticket.subtipo === 'producto' ? 'Producto' : ticket.subtipo === 'mixto' ? 'Ticket' : 'Bono';
+        const estaDevuelto = Boolean(tx.cobro_id && appState.devolucionCobroMap[tx.cobro_id]);
+        const puedeAnular = staffProfile && (staffProfile.rol === 'admin' || tx.registrado_por === staffProfile.id)
+          && Array.isArray(ticket.transaccionIds) && ticket.transaccionIds.length && !estaDevuelto;
+        return `
+          <article class="tpv-cobro-item${i === 0 ? ' is-latest' : ''}">
+            <div class="tpv-cobro-item-meta">${escHtml(etiqueta)} · ${escHtml(ticket.numeroTicket || '')}${estaDevuelto ? ' · Devuelto' : ''}</div>
+            <div class="tpv-cobro-item-title">${escHtml(ticket.concepto)}</div>
+            <div class="tpv-cobro-item-line">${escHtml(ticket.clienteNombre)}${ticket.clienteEmail ? ` · ${escHtml(ticket.clienteEmail)}` : ''}</div>
+            <div class="tpv-cobro-item-line">${tpvFmtEur(ticket.importe)} · ${escHtml(tpvMetodoPagoLabel(ticket.metodoPago))} · ${new Date(ticket.createdAt).toLocaleString('es-ES')}</div>
+            <div class="tpv-cobro-item-actions">
+              <button type="button" class="btn btn-outline btn-sm js-tpv-ver-ticket" data-tx-id="${escHtml(tx.id)}">Ticket</button>
+              ${tx.cobro_id ? `<button type="button" class="btn btn-outline btn-sm js-tpv-ver-factura" data-tx-id="${escHtml(tx.id)}" data-cobro-id="${escHtml(tx.cobro_id)}">Factura</button>` : ''}
+              ${puedeAnular ? `<button type="button" class="btn btn-ghost btn-sm js-tpv-anular-cobro" data-tx-id="${escHtml(tx.id)}">Anular</button>` : ''}
+            </div>
+          </article>`;
+      }).join('');
     }
 
     async function anularUltimoCobroTpv() {
@@ -3318,8 +3347,6 @@
             throw error;
           }
         }
-        appState.lastTicket = null;
-        renderLastTicket();
         toast('Cobro anulado', 'success');
         await Promise.all([loadBonos(), loadFinanzas(), tpvRefreshCajaHint()]);
       } catch (err) {
@@ -3507,6 +3534,93 @@
         return;
       }
       const w = tpvAbrirVentanaImpresion(tpvTicketHtml(t));
+      tpvImprimirVentana(w);
+    }
+
+    function lineasDesdeDetalleTx(tx) {
+      const raw = tx?.detalle?.lineas;
+      if (!Array.isArray(raw) || !raw.length) return [];
+      return raw.map((l) => ({
+        kind: l.kind || (finanzasEsTienda(tx) ? 'producto' : 'bono'),
+        nombre: l.nombre || finanzasConceptoLinea(tx),
+        qty: Math.max(1, Number(l.qty) || 1),
+        unitPrice: Number(l.unit != null ? l.unit : l.unitPrice) || 0,
+        sesiones: l.sesiones != null ? l.sesiones : null
+      }));
+    }
+
+    function ticketDesdeTransaccion(t) {
+      if (!t) return null;
+      const all = appState.finanzasTxAll || [];
+      const grupo = t.cobro_id
+        ? all.filter((x) => x.cobro_id === t.cobro_id && x.tipo_movimiento !== 'reembolso')
+        : [t];
+      const txs = grupo.length ? grupo.slice().sort((a, b) => String(a.created_at).localeCompare(String(b.created_at))) : [t];
+      const principal = txs[0] || t;
+      let lineas = [];
+      const factura = t.cobro_id ? appState.facturasCobroMap[t.cobro_id] : null;
+      if (factura && Array.isArray(factura.lineas) && factura.lineas.length) {
+        lineas = factura.lineas.map((l) => ({
+          kind: l.kind || 'bono',
+          nombre: l.nombre || 'Venta',
+          qty: Math.max(1, Number(l.qty) || 1),
+          unitPrice: Number(l.unit != null ? l.unit : l.unitPrice) || 0,
+          sesiones: l.sesiones != null ? l.sesiones : null
+        }));
+      } else {
+        txs.forEach((tx) => {
+          const fromDet = lineasDesdeDetalleTx(tx);
+          if (fromDet.length) lineas.push(...fromDet);
+          else {
+            lineas.push({
+              kind: finanzasEsTienda(tx) ? 'producto' : 'bono',
+              nombre: finanzasConceptoLinea(tx),
+              qty: 1,
+              unitPrice: Number(tx.importe) || 0,
+              sesiones: tx.tipo_bono?.sesiones != null ? tx.tipo_bono.sesiones : null
+            });
+          }
+        });
+      }
+      const importe = txs.reduce((s, x) => s + Number(x.importe || 0), 0);
+      const created = principal.created_at || t.created_at;
+      const d = new Date(created);
+      const fechaNum = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+      const txRef = String(principal.id || t.id || '').replace(/-/g, '').slice(0, 6).toUpperCase() || '000000';
+      const notas = txs
+        .map((x) => (x.nota || '').trim())
+        .filter((n) => n && !/^Tienda ·/i.test(n));
+      const nota = [...new Set(notas)].join(' · ');
+      const cliente = principal.perfil || t.perfil;
+      const vendedor = principal.vendedor || t.vendedor;
+      return {
+        subtipo: txs.some((x) => !finanzasEsTienda(x)) && txs.some((x) => finanzasEsTienda(x))
+          ? 'mixto'
+          : (finanzasEsTienda(principal) ? 'producto' : 'bono'),
+        concepto: lineas.length > 1 ? `Ticket (${lineas.length} línea(s))` : (lineas[0]?.nombre || finanzasConceptoLinea(t)),
+        clienteNombre: nombreClienteDisplay(cliente) || cliente?.email || '—',
+        clienteEmail: cliente?.email || '',
+        importe,
+        metodoPago: principal.metodo_pago || t.metodo_pago,
+        nota,
+        lineas,
+        vendedor: nombreClienteDisplay(vendedor) || vendedor?.email || '—',
+        vendedorRol: vendedor?.rol || '',
+        createdAt: created,
+        numeroTicket: `T-${fechaNum}-${txRef}`,
+        cobroId: t.cobro_id || null,
+        transaccionIds: txs.map((x) => x.id).filter(Boolean),
+        esBono: txs.some((x) => !finanzasEsTienda(x))
+      };
+    }
+
+    function printTicketTransaccion(t) {
+      const ticket = ticketDesdeTransaccion(t);
+      if (!ticket) {
+        toast('No se pudo reconstruir el ticket.', 'error');
+        return;
+      }
+      const w = tpvAbrirVentanaImpresion(tpvTicketHtml(ticket));
       tpvImprimirVentana(w);
     }
 
@@ -4382,8 +4496,8 @@
       const pageSize = 1000;
       const all = [];
       let from = 0;
-      const colsBase = 'id,registrado_por,cobro_id,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,apellidos,email),vendedor:registrado_por(nombre,apellidos,email,rol)';
-      const colsDevol = 'id,registrado_por,cobro_id,importe,metodo_pago,created_at,nota,bono_activo_id,tipo_bono_id,tipo_movimiento,devolucion_id,vale_regalo_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,apellidos,email),vendedor:registrado_por(nombre,apellidos,email,rol)';
+      const colsBase = 'id,registrado_por,cobro_id,importe,metodo_pago,created_at,nota,detalle,bono_activo_id,tipo_bono_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,apellidos,email),vendedor:registrado_por(nombre,apellidos,email,rol)';
+      const colsDevol = 'id,registrado_por,cobro_id,importe,metodo_pago,created_at,nota,detalle,bono_activo_id,tipo_bono_id,tipo_movimiento,devolucion_id,vale_regalo_id,tipo_bono:tipo_bono_id(nombre),perfil:perfil_id(nombre,apellidos,email),vendedor:registrado_por(nombre,apellidos,email,rol)';
       let cols = colsDevol;
       for (;;) {
         const { data, error } = await novaSupabase
@@ -4392,7 +4506,11 @@
           .order('created_at', { ascending: false })
           .range(from, from + pageSize - 1);
         if (error) {
-          if (cols === colsDevol && /column .*tipo_movimiento|does not exist/i.test(error.message || '')) {
+          if (/column .*detalle|does not exist/i.test(error.message || '') && cols.includes('detalle')) {
+            cols = cols.replace(/,?detalle,/, ',').replace(',detalle', '');
+            continue;
+          }
+          if (cols.includes('tipo_movimiento') && /column .*tipo_movimiento|does not exist/i.test(error.message || '')) {
             cols = colsBase;
             continue;
           }
@@ -4404,7 +4522,7 @@
         from += pageSize;
         if (from > 50000) break;
       }
-      appState.finanzasConDevoluciones = cols === colsDevol;
+      appState.finanzasConDevoluciones = cols.includes('tipo_movimiento');
       return all;
     }
 
@@ -4497,6 +4615,9 @@
           ? `<button type="button" class="btn btn-ghost btn-sm js-anular-transaccion" data-id="${t.id}" data-es-bono="${esTienda ? '0' : '1'}" data-cliente="${escHtml(cliente)}" data-concepto="${concepto}" data-importe="${imp} €">Anular</button>`
           : '';
         const facturaDeCobro = t.cobro_id ? appState.facturasCobroMap[t.cobro_id] : null;
+        const btnTicket = !esReembolso
+          ? `<button type="button" class="btn btn-outline btn-sm js-ver-ticket" data-tx-id="${t.id}" title="Ver ticket">Ticket</button>`
+          : '';
         const btnFactura = (t.cobro_id && !esReembolso && !estaDevuelto && appState.finanzasConDevoluciones)
           ? (facturaDeCobro
               ? `<button type="button" class="btn btn-outline btn-sm js-ver-factura" data-factura-id="${facturaDeCobro.id}" title="Reimprimir factura ${escHtml(facturaDeCobro.numero)}">Factura ${escHtml(facturaDeCobro.numero)}</button>`
@@ -4508,7 +4629,7 @@
         const btnDevuelto = (estaDevuelto && !esReembolso)
           ? '<span class="badge badge-danger">Devuelto</span>'
           : '';
-        const acciones = [btnFactura, btnDevolver, btnAnular, btnDevuelto].filter(Boolean).join(' ') || (esReembolso ? '<span style="color:var(--color-muted);">—</span>' : '<span style="color:var(--color-muted);">—</span>');
+        const acciones = [btnTicket, btnFactura, btnDevolver, btnAnular, btnDevuelto].filter(Boolean).join(' ') || (esReembolso ? '<span style="color:var(--color-muted);">—</span>' : '<span style="color:var(--color-muted);">—</span>');
         return `<tr>
           <td>${escHtml(cliente)}</td>
           <td>${tipoBadge}</td>
@@ -4796,6 +4917,7 @@
       await Promise.allSettled([loadFacturas(), loadCajasHistorial(), loadDevoluciones(), loadValesRegalo()]);
       renderFinanzasRows();
       renderFinanzasDashboard();
+      renderLastTicket();
     }
 
     async function loadNotifs() {
@@ -5209,6 +5331,40 @@
     });
     document.getElementById('tpvAnularUltimoBtn')?.addEventListener('click', () => {
       anularUltimoCobroTpv();
+    });
+    document.getElementById('tpvLastTicket')?.addEventListener('click', async (e) => {
+      const btnTicket = e.target.closest('.js-tpv-ver-ticket');
+      const btnFactura = e.target.closest('.js-tpv-ver-factura');
+      const btnAnular = e.target.closest('.js-tpv-anular-cobro');
+      const txId = (btnTicket || btnFactura || btnAnular)?.getAttribute('data-tx-id');
+      if (!txId) return;
+      const tx = (appState.finanzasTxAll || []).find((x) => String(x.id) === String(txId));
+      if (!tx) {
+        toast('No se encontró el cobro.', 'error');
+        return;
+      }
+      if (btnTicket) {
+        printTicketTransaccion(tx);
+        return;
+      }
+      if (btnFactura) {
+        const cobroId = btnFactura.getAttribute('data-cobro-id') || tx.cobro_id;
+        if (!cobroId) {
+          toast('Este cobro no tiene factura asociada.', 'info');
+          return;
+        }
+        try {
+          const f = await emitirFacturaCobro(cobroId, { toastOnNew: false });
+          if (f) imprimirFactura(f);
+        } catch (err) {
+          toast(err.message || 'No se pudo abrir la factura', 'error');
+        }
+        return;
+      }
+      if (btnAnular) {
+        appState.lastTicket = ticketDesdeTransaccion(tx);
+        await anularUltimoCobroTpv();
+      }
     });
     document.getElementById('tpvCobrarEfectivo').addEventListener('click', () => tpvEjecutarCobro('efectivo'));
     document.getElementById('tpvCobrarTarjeta').addEventListener('click', () => tpvEjecutarCobro('tarjeta'));
@@ -5996,6 +6152,17 @@
     });
 
     document.getElementById('tab-finanzas')?.addEventListener('click', async (e) => {
+      const btnTicket = e.target.closest('.js-ver-ticket');
+      if (btnTicket) {
+        const txId = btnTicket.getAttribute('data-tx-id');
+        const t = (appState.finanzasTxAll || []).find((x) => String(x.id) === String(txId));
+        if (!t) {
+          toast('No se encontró la transacción.', 'error');
+          return;
+        }
+        printTicketTransaccion(t);
+        return;
+      }
       const btnFacturar = e.target.closest('.js-facturar-cobro');
       if (btnFacturar) {
         const cobroId = btnFacturar.getAttribute('data-cobro-id');
