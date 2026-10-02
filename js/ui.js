@@ -1,5 +1,13 @@
 /** Utilidades UI compartidas: toasts, spinners y errores amigables */
 
+function escHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function friendlyError(err) {
   const raw = (err && (err.message || err.error_description || err.msg)) || String(err || '');
   const map = [

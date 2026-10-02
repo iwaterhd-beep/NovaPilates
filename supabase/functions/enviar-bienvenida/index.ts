@@ -8,17 +8,19 @@ const LOGIN_URL = `${SITE_URL}/login.html`;
 const MAPS_URL =
   "https://www.google.com/maps/search/?api=1&query=N%C5%8CVA+Pilates+Sevilla";
 
-const corsHeaders: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function json(status: number, body: Record<string, unknown>) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+function corsFor(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") || "";
+  const allowed = new Set([
+    SITE_URL,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ]);
+  return {
+    "Access-Control-Allow-Origin": allowed.has(origin) ? origin : SITE_URL,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    Vary: "Origin",
+  };
 }
 
 function escapeHtml(value: string): string {
@@ -164,6 +166,13 @@ function buildWelcomeHtml(nombre: string): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = corsFor(req);
+  const json = (status: number, body: Record<string, unknown>) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -214,6 +223,15 @@ Deno.serve(async (req: Request) => {
 
     if (!email || !email.includes("@")) {
       return json(400, { error: "Email inválido" });
+    }
+
+    const { data: alumno } = await supabase
+      .from("perfiles")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+    if (!alumno) {
+      return json(400, { error: "Ese correo no corresponde a un alumno del estudio" });
     }
 
     const resendKey = Deno.env.get("RESEND_API_KEY");

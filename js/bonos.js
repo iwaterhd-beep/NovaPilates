@@ -11,15 +11,16 @@ function renderBonosCatalog() {
   if (!grid) return;
   grid.innerHTML = NOVA_MEMBERSHIPS.map((p) => {
     const isPriority = !!p.is_priority;
-    const n = Number(p.precio || 0);
-    const priceFormatted = Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',');
+    const priceFormatted = (p.precio == null || p.precio === '' || !Number.isFinite(Number(p.precio)))
+      ? 'Consultar'
+      : `${Number.isInteger(Number(p.precio)) ? String(p.precio) : Number(p.precio).toFixed(2).replace('.', ',')} €`;
     return `
       <article class="card plan-card ${isPriority ? 'plan-card--priority' : ''}" data-plan-key="${escBonos(p.id)}">
         <div>
           ${isPriority ? '<span class="plan-badge">La más completa</span>' : ''}
           <p class="plan-tag">${escBonos(p.web_tag)}</p>
           <h3 class="plan-title">${escBonos(p.nombre)}</h3>
-          <p class="plan-price">${priceFormatted} €<span class="plan-period">${escBonos(p.periodo_label || '/mes')}</span></p>
+          <p class="plan-price">${escBonos(priceFormatted)}<span class="plan-period">${escBonos(p.periodo_label || '')}</span></p>
           <p class="plan-card-desc">${escBonos(p.lema || p.descripcion || '')}</p>
           <ul class="plan-card-highlights">
             ${(p.highlights || []).map(h => `<li>${escBonos(h)}</li>`).join('')}

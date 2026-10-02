@@ -47,9 +47,15 @@ async function requireAuth(rolesPermitidos = null) {
     return null;
   }
 
+  const profile = await getUserProfile(session.user.id);
+  if (profile?.activo === false) {
+    await novaSupabase.auth.signOut();
+    window.location.replace('/login.html?cuenta=inactiva');
+    return null;
+  }
+
   if (!rolesPermitidos) return session.user;
 
-  const profile = await getUserProfile(session.user.id);
   const roles = Array.isArray(rolesPermitidos) ? rolesPermitidos : [rolesPermitidos];
   if (!roles.includes(profile?.rol)) {
     goLogin();

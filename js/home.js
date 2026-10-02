@@ -7,7 +7,9 @@
 }
 
 function formatPlanPrice(b) {
-  const n = Number(b.precio || 0);
+  if (b.precio == null || b.precio === '') return 'Consultar';
+  const n = Number(b.precio);
+  if (!Number.isFinite(n)) return 'Consultar';
   const formatted = Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',');
   return `${formatted} €`;
 }

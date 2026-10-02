@@ -32,7 +32,15 @@ const server = http.createServer((req, res) => {
     reqPath = '/index.html';
   }
 
-  let filePath = path.join(PUBLIC_DIR, reqPath);
+  const root = path.resolve(PUBLIC_DIR);
+  const rel = reqPath.replace(/^[/\\]+/, '').replace(/\\/g, '/');
+  let filePath = path.resolve(root, rel);
+  const rootPrefix = root.endsWith(path.sep) ? root : root + path.sep;
+  if (filePath !== root && !filePath.startsWith(rootPrefix)) {
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end('<h1>404 Not Found</h1>');
+    return;
+  }
 
   if (!path.extname(filePath) && fs.existsSync(filePath + '.html')) {
     filePath += '.html';

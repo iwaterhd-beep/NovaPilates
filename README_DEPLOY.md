@@ -63,7 +63,7 @@ Proyecto vacío:
    - `supabase_patch_facturacion.sql` (facturación por cobro: facturas secuenciales, config del emisor, CSV; **reemplaza** los dos parches TPV anteriores si se aplica: redefinir `tpv_cobrar_ticket` y `anular_transaccion_tpv`)
    - `supabase_patch_tipos_bono_web.sql` (planes en web + casilla visible_web)
    - `supabase_patch_eliminar_cliente.sql`
-   - `supabase_patch_perfiles_*.sql` (si faltan columnas)
+   - `supabase_patch_seguridad_2026.sql` (cerrar atajos de reservas/asistencia/bonos y escritura directa de facturas/caja)
 
 Notas importantes:
 

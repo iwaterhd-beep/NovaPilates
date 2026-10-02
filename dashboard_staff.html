@@ -1367,8 +1367,8 @@
 
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
-  <script src="/supabase.js?v=20260716b"></script>
-  <script src="/js/ui.js"></script>
+  <script src="/supabase.js?v=20260905s"></script>
+  <script src="/js/ui.js?v=20260905s"></script>
   <script src="/js/cookies-consent.js"></script>
   <script>
     const sidebarEl = document.getElementById('sidebar');
@@ -2639,7 +2639,7 @@
           ? `${total} usuario(s) en total`
           : `${list.length} de ${total} usuario(s)`;
       }
-      rowsU.innerHTML = list.map(x => `<tr><td>${x.nombre || '-'}</td><td>${x.email}</td><td>${x.rol}</td><td>${x.activo ? 'Sí' : 'No'}</td><td>${x.rol === 'cliente' ? `<button class="btn btn-outline btn-sm js-editar-cliente" data-id="${x.id}">Editar ficha</button>` : '-'}</td></tr>`).join('') || '<tr><td colspan="5">Ningún usuario coincide con los filtros.</td></tr>';
+      rowsU.innerHTML = list.map(x => `<tr><td>${escHtml(x.nombre || '-')}</td><td>${escHtml(x.email)}</td><td>${escHtml(x.rol)}</td><td>${x.activo ? 'Sí' : 'No'}</td><td>${x.rol === 'cliente' ? `<button class="btn btn-outline btn-sm js-editar-cliente" data-id="${escHtml(x.id)}">Editar ficha</button>` : '-'}</td></tr>`).join('') || '<tr><td colspan="5">Ningún usuario coincide con los filtros.</td></tr>';
     }
 
     function renderDisciplinasRows() {
@@ -4495,18 +4495,22 @@
       }
       appState.clasesLista = data || [];
       const rows = document.getElementById('rowsClases');
-      rows.innerHTML = (data || []).map(c => `
+      rows.innerHTML = (data || []).map((c) => {
+        const tituloClase = c.titulo || c.disciplina?.nombre || 'Clase';
+        const salaNombre = c.sala?.nombre || '';
+        return `
         <tr>
-          <td>${c.titulo || c.disciplina?.nombre || 'Clase'}<div style="font-size:.7rem;color:var(--color-muted)">${c.sala?.nombre || ''}</div></td>
+          <td>${escHtml(tituloClase)}<div style="font-size:.7rem;color:var(--color-muted)">${escHtml(salaNombre)}</div></td>
           <td>${new Date(c.fecha_hora).toLocaleString('es-ES')}</td>
-          <td>${c.aforo_max}</td>
+          <td>${escHtml(c.aforo_max)}</td>
           <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm js-editar-clase" data-id="${c.id}" data-titulo="${(c.titulo || '').replace(/"/g, '&quot;')}" data-fecha="${c.fecha_hora}" data-aforo="${c.aforo_max}">Editar</button>
-            <button class="btn btn-outline btn-sm js-duplicar-clase" data-id="${c.id}">Duplicar</button>
-            <button class="btn btn-danger btn-sm js-eliminar-clase" data-id="${c.id}">Eliminar</button>
-            <button class="btn btn-ghost btn-sm js-asistencia-clase" data-id="${c.id}" data-nombre="${(c.titulo || c.disciplina?.nombre || 'Clase').replace(/"/g, '&quot;')}">Asistencia</button>
+            <button class="btn btn-outline btn-sm js-editar-clase" data-id="${escHtml(c.id)}" data-titulo="${escHtml(c.titulo || '')}" data-fecha="${escHtml(c.fecha_hora)}" data-aforo="${escHtml(c.aforo_max)}">Editar</button>
+            <button class="btn btn-outline btn-sm js-duplicar-clase" data-id="${escHtml(c.id)}">Duplicar</button>
+            <button class="btn btn-danger btn-sm js-eliminar-clase" data-id="${escHtml(c.id)}">Eliminar</button>
+            <button class="btn btn-ghost btn-sm js-asistencia-clase" data-id="${escHtml(c.id)}" data-nombre="${escHtml(tituloClase)}">Asistencia</button>
           </td>
-        </tr>`).join('') || '<tr><td colspan="4">Sin clases</td></tr>';
+        </tr>`;
+      }).join('') || '<tr><td colspan="4">Sin clases</td></tr>';
     }
 
     async function loadAsistenciaClase(claseId, claseNombre) {
@@ -4527,13 +4531,13 @@
       const rows = document.getElementById('rowsAsistencia');
       rows.innerHTML = normales.map(r => `
         <tr>
-          <td>${r.perfil?.nombre || '-'}</td>
-          <td>${r.perfil?.email || '-'}</td>
-          <td>${r.estado}</td>
+          <td>${escHtml(r.perfil?.nombre || '-')}</td>
+          <td>${escHtml(r.perfil?.email || '-')}</td>
+          <td>${escHtml(r.estado)}</td>
           <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
-            <button class="btn btn-primary btn-sm js-asistio" data-reserva="${r.id}">Asistió</button>
-            <button class="btn btn-outline btn-sm js-noasistio" data-reserva="${r.id}">No asistió</button>
-            <button class="btn btn-ghost btn-sm js-confirmada" data-reserva="${r.id}">Confirmada</button>
+            <button class="btn btn-primary btn-sm js-asistio" data-reserva="${escHtml(r.id)}">Asistió</button>
+            <button class="btn btn-outline btn-sm js-noasistio" data-reserva="${escHtml(r.id)}">No asistió</button>
+            <button class="btn btn-ghost btn-sm js-confirmada" data-reserva="${escHtml(r.id)}">Confirmada</button>
           </td>
         </tr>`).join('') || '<tr><td colspan="4">No hay reservas activas para esta clase.</td></tr>';
       rows.dataset.claseId = claseId;
@@ -4541,13 +4545,13 @@
 
       const rowsW = document.getElementById('rowsWaitlist');
       rowsW.innerHTML = espera.map((r, idx) => `
-        <tr draggable="true" data-reserva-id="${r.id}" data-posicion="${r.posicion_espera || idx + 1}">
-          <td style="font-weight:600;cursor:grab;">&#x2630; #${r.posicion_espera || idx + 1}</td>
-          <td>${r.perfil?.nombre || '-'}</td>
-          <td>${r.perfil?.email || '-'}</td>
+        <tr draggable="true" data-reserva-id="${escHtml(r.id)}" data-posicion="${escHtml(r.posicion_espera || idx + 1)}">
+          <td style="font-weight:600;cursor:grab;">&#x2630; #${escHtml(r.posicion_espera || idx + 1)}</td>
+          <td>${escHtml(r.perfil?.nombre || '-')}</td>
+          <td>${escHtml(r.perfil?.email || '-')}</td>
           <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
-            <button class="btn btn-primary btn-sm js-wait-promote" data-id="${r.id}">Promover</button>
-            <button class="btn btn-danger btn-sm js-wait-remove" data-id="${r.id}">Quitar</button>
+            <button class="btn btn-primary btn-sm js-wait-promote" data-id="${escHtml(r.id)}">Promover</button>
+            <button class="btn btn-danger btn-sm js-wait-remove" data-id="${escHtml(r.id)}">Quitar</button>
           </td>
         </tr>
       `).join('') || '<tr><td colspan="4">Sin lista de espera.</td></tr>';
@@ -5113,7 +5117,7 @@
         .limit(40);
       const rows = document.getElementById('rowsNotifs');
       rows.innerHTML = (data || [])
-        .map(n => `<tr><td>${n.titulo}</td><td>${n.perfil?.nombre || n.perfil?.email || 'Aviso general'}</td><td>${n.tipo || 'info'}</td><td>${new Date(n.created_at).toLocaleString('es-ES')}</td></tr>`)
+        .map(n => `<tr><td>${escHtml(n.titulo)}</td><td>${escHtml(n.perfil?.nombre || n.perfil?.email || 'Aviso general')}</td><td>${escHtml(n.tipo || 'info')}</td><td>${escHtml(new Date(n.created_at).toLocaleString('es-ES'))}</td></tr>`)
         .join('') || '<tr><td colspan="4">Sin notificaciones</td></tr>';
     }
 

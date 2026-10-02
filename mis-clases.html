@@ -62,7 +62,7 @@
   </main>
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
+  <script src="supabase.js?v=20260905s"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/cookies-consent.js"></script>
   <script>
@@ -97,12 +97,12 @@
       return `
         <article class="day-detail-card">
           <div>
-            <h3>${c.titulo || c.disciplina?.nombre || 'Clase'}</h3>
-            <p>${fecha}</p>
-            <p>Disciplina: ${c.disciplina?.nombre || '-'}</p>
-            <p>Monitora: ${c.instructora?.nombre || 'Por asignar'}</p>
-            <p>Sala: ${c.sala?.nombre || '-'}</p>
-            <p>Duración: ${c.duracion_min || '-'} min</p>
+            <h3>${escHtml(c.titulo || c.disciplina?.nombre || 'Clase')}</h3>
+            <p>${escHtml(fecha)}</p>
+            <p>Disciplina: ${escHtml(c.disciplina?.nombre || '-')}</p>
+            <p>Monitora: ${escHtml(c.instructora?.nombre || 'Por asignar')}</p>
+            <p>Sala: ${escHtml(c.sala?.nombre || '-')}</p>
+            <p>Duración: ${escHtml(c.duracion_min || '-')} min</p>
           </div>
           <div class="day-detail-actions">${estadoBadge}</div>
         </article>

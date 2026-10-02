@@ -72,7 +72,7 @@
 
 <div class="toast-container" id="toastContainer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
+<script src="supabase.js?v=20260905s"></script>
 <script src="/js/ui.js"></script>
 <script src="/js/cookies-consent.js"></script>
 <script>
@@ -201,8 +201,8 @@
           item.dataset.dayKey = key;
           item.innerHTML = `
             <span class="calendar-class-time">${String(new Date(c.fecha_hora).getHours()).padStart(2, '0')}:${String(new Date(c.fecha_hora).getMinutes()).padStart(2, '0')}</span>
-            <span class="calendar-class-title">${c.titulo || c.disciplina?.nombre || 'Clase'}</span>
-            <span class="calendar-class-room">${c.sala?.nombre || 'Sala'}</span>
+            <span class="calendar-class-title">${escHtml(c.titulo || c.disciplina?.nombre || 'Clase')}</span>
+            <span class="calendar-class-room">${escHtml(c.sala?.nombre || 'Sala')}</span>
           `;
           body.appendChild(item);
         });
@@ -234,9 +234,9 @@
       card.className = 'day-detail-card';
       card.innerHTML = `
         <div>
-          <h3>${c.titulo || c.disciplina?.nombre || 'Clase'}</h3>
-          <p>${fmtDateTime(c.fecha_hora)} · ${c.sala?.nombre || 'Sala'} · ${c.duracion_min} min</p>
-          ${isWaitlist ? `<p style="margin-top:.2rem;color:var(--color-warning);font-size:.75rem;">Lista de espera · posición ${reserva.posicion_espera ?? '-'}</p>` : ''}
+          <h3>${escHtml(c.titulo || c.disciplina?.nombre || 'Clase')}</h3>
+          <p>${escHtml(fmtDateTime(c.fecha_hora))} · ${escHtml(c.sala?.nombre || 'Sala')} · ${escHtml(c.duracion_min)} min</p>
+          ${isWaitlist ? `<p style="margin-top:.2rem;color:var(--color-warning);font-size:.75rem;">Lista de espera · posición ${escHtml(reserva.posicion_espera ?? '-')}</p>` : ''}
         </div>
         <div class="day-detail-actions"></div>
       `;

@@ -503,7 +503,7 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
+<script src="supabase.js?v=20260905s"></script>
 <script src="/js/ui.js"></script>
 <script src="/js/cookies-consent.js"></script>
 <script>
@@ -589,12 +589,12 @@ function renderClase(reserva) {
       <div class="clase-fecha-mes">${MESES[fecha.getMonth()]}</div>
     </div>
     <div class="clase-info">
-      <div class="clase-nombre">${clase.disciplina?.nombre || clase.disciplina || 'Clase'}</div>
-      <div class="clase-meta">${DIAS[fecha.getDay()]} · ${fecha.getHours().toString().padStart(2,'0')}:${fecha.getMinutes().toString().padStart(2,'0')} · ${clase.sala?.nombre || clase.sala || ''}</div>
+      <div class="clase-nombre">${escHtml(clase.disciplina?.nombre || clase.disciplina || 'Clase')}</div>
+      <div class="clase-meta">${escHtml(DIAS[fecha.getDay()])} · ${fecha.getHours().toString().padStart(2,'0')}:${fecha.getMinutes().toString().padStart(2,'0')} · ${escHtml(clase.sala?.nombre || clase.sala || '')}</div>
     </div>
-    <div class="clase-dot" style="background:${clase.disciplina?.color_hex || '#c9a96e'}"></div>
+    <div class="clase-dot" style="background:${escHtml(clase.disciplina?.color_hex || '#c9a96e')}"></div>
     <div class="clase-actions">
-      <button class="btn btn-danger btn-sm cancelarBtn" data-id="${reserva.id}" data-nombre="${clase.disciplina?.nombre || 'Clase'}" data-fecha="${formatFecha(clase.fecha_hora || clase.fechaHora)}">
+      <button class="btn btn-danger btn-sm cancelarBtn" data-id="${escHtml(reserva.id)}" data-nombre="${escHtml(clase.disciplina?.nombre || 'Clase')}" data-fecha="${escHtml(formatFecha(clase.fecha_hora || clase.fechaHora))}">
         Cancelar
       </button>
     </div>`;
