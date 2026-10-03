@@ -1,7 +1,7 @@
 // NŌVA PILATES STUDIO - cliente Supabase
 // Seguridad: solo la clave pública "anon" / JWT anon. Nunca uses service_role en el navegador.
 const SUPABASE_URL = 'https://atdhljdogjhsoyraekwz.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0ZGhsamRvZ2poc295cmFla3d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMTg3MzcsImV4cCI6MjA5OTc5NDczN30.g7poBIKyTcMPvcGvRUDS169uktE-YWm9Y_F3Pc7evqs';
+const SUPABASE_ANON_KEY = 'sb_publishable_9LhLb5rNaX7hyPRASDU8Rg_nmAGe7XD';
 const novaSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,

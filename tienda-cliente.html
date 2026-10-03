@@ -13,7 +13,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
-  <link rel="stylesheet" href="portal.css?v=42" />
+  <link rel="stylesheet" href="portal.css?v=49" />
 </head>
 <body>
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -51,8 +51,8 @@
     <div class="content">
       <div class="page-header panel-shop-head">
         <div>
-          <h1 class="page-title">Merchand NŌVA</h1>
-          <p class="page-subtitle">Ropa, botellas y accesorios. Añade al carrito; el pago llegará con Medusa.</p>
+          <h1 class="page-title">NŌVA Ritual</h1>
+          <p class="page-subtitle">Ropa, botellas y accesorios. Añade al carrito; el pago en recepción o con Medusa cuando esté listo.</p>
         </div>
         <p id="shopStatus" class="panel-shop-status" role="status"></p>
       </div>
@@ -80,12 +80,13 @@
 
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
-  <script src="/supabase.js?v=20260716c"></script>
+  <script src="/supabase.js?v=20261003a"></script>
+  <script src="/js/avatar.js?v=1"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/cookies-consent.js"></script>
   <script src="js/medusa.js"></script>
-  <script src="js/cart.js?v=2"></script>
-  <script src="js/tienda.js?v=15"></script>
+  <script src="js/cart.js?v=3"></script>
+  <script src="js/tienda.js?v=16"></script>
   <script>
     const sidebarEl = document.getElementById('sidebar');
     document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
@@ -99,7 +100,8 @@
       if (!session) { window.location.href = 'login.html'; return; }
       const perfil = await getUserProfile(session.user.id);
       document.getElementById('userName').textContent = perfil.nombre || perfil.email;
-      document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
+      if (typeof paintNovaSidebarAvatar === 'function') paintNovaSidebarAvatar(perfil);
+      else document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
     }
     initPanel().catch((e) => console.error(e));
   </script>

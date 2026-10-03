@@ -6,14 +6,9 @@
   <title>Mi bono — NŌVA Pilates Studio</title>
   <meta name="description" content="Consulta el estado de tu bono activo y las sesiones disponibles." />
   <meta name="robots" content="noindex,nofollow" />
-  <meta property="og:title" content="Mi bono — NŌVA Pilates Studio" />
-  <meta property="og:description" content="Consulta el estado de tu bono activo y las sesiones disponibles." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/og-image.png" />
-  <meta name="twitter:card" content="summary" />
-  <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
-  <link rel="stylesheet" href="portal.css?v=42" />
+  <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-circulo-nova.png" />
+  <link rel="stylesheet" href="portal.css?v=49" />
 </head>
 <body>
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -43,26 +38,48 @@
     <header class="topbar"><span class="topbar-title">Mi bono</span></header>
     <div class="content">
       <div class="page-header">
-        <h1 class="page-title">Tu bono activo</h1>
-        <p class="page-subtitle">Controla tus sesiones, vigencia y progreso de uso de forma clara.</p>
-      </div>
-      <div class="card" id="bonoCard">Cargando bono...</div>
-      <div class="card" style="margin-top:1rem;">
-        <div class="card-label">Consejos rápidos</div>
-        <div style="display:grid;gap:.5rem;font-size:.8rem;color:var(--color-cream-dim);">
-          <p>• Si quieres asegurar tus horarios preferidos, reserva con antelación.</p>
-          <p>• Si no vas a asistir, cancela dentro del margen para recuperar la sesión.</p>
-          <p>• Para cambiar de bono o ampliar sesiones, contacta con recepción.</p>
+        <div>
+          <h1 class="page-title">Tu membresía</h1>
+          <p class="page-subtitle">Sesiones, vigencia y planes anteriores.</p>
         </div>
       </div>
+      <div class="mine-stats" id="membStats" hidden>
+        <div class="mine-stat"><div class="mine-stat-n" id="statRest">—</div><div class="mine-stat-l">Restantes</div></div>
+        <div class="mine-stat"><div class="mine-stat-n" id="statUsed">—</div><div class="mine-stat-l">Usadas</div></div>
+        <div class="mine-stat"><div class="mine-stat-n" id="statDays">—</div><div class="mine-stat-l">Días de vigencia</div></div>
+      </div>
+      <section class="mine-section">
+        <div class="mine-section-head">
+          <span class="mine-section-title">Activa</span>
+        </div>
+        <div id="bonoActive"></div>
+      </section>
+      <section class="mine-section" id="pastSection" hidden>
+        <div class="mine-section-head">
+          <span class="mine-section-title">Anteriores</span>
+        </div>
+        <div class="mine-list" id="bonoPast"></div>
+      </section>
+      <section class="mine-section">
+        <div class="mine-section-head">
+          <span class="mine-section-title">Consejos</span>
+        </div>
+        <ul class="memb-tips">
+          <li>Reserva con antelación los horarios que más usas.</li>
+          <li>Si no vas a ir, cancela a tiempo para recuperar la sesión.</li>
+          <li>Para cambiar de plan o ampliar sesiones, habla con recepción.</li>
+        </ul>
+      </section>
     </div>
   </main>
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=20260905s"></script>
+  <script src="supabase.js?v=20261003a"></script>
+  <script src="/js/avatar.js?v=1"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/cookies-consent.js"></script>
   <script>
+    const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     const sidebarEl = document.getElementById('sidebar');
     document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
     document.addEventListener('click', (e) => {
@@ -70,48 +87,123 @@
     });
     document.getElementById('logoutBtn').addEventListener('click', () => signOut());
 
+    function fmtDate(iso) {
+      const s = String(iso || '').slice(0, 10);
+      const [y, m, d] = s.split('-').map(Number);
+      if (!y || !m || !d) return '—';
+      return `${d} ${MESES[m - 1]}. ${y}`;
+    }
+
+    function daysLeft(fin) {
+      const s = String(fin || '').slice(0, 10);
+      if (!s) return null;
+      const end = new Date(`${s}T23:59:59`);
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      return Math.ceil((end - start) / 86400000);
+    }
+
+    function ringSvg(pct, label) {
+      const circ = 188.5;
+      const offset = circ - circ * Math.max(0, Math.min(1, pct));
+      return `<div class="bono-ring">
+        <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">
+          <circle class="bono-ring-bg" cx="36" cy="36" r="30"/>
+          <circle class="bono-ring-fill" cx="36" cy="36" r="30" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+        </svg>
+        <div class="bono-ring-label"><span class="bono-ring-num">${escHtml(label)}</span></div>
+      </div>`;
+    }
+
+    function emptyActive() {
+      return `<div class="mine-empty">
+        <p>Aún no tienes una membresía activa. En recepción te activan el plan.</p>
+        <a href="bonos.html" class="btn btn-primary btn-sm">Ver planes</a>
+      </div>`;
+    }
+
+    function cardHtml(b, past) {
+      const tipo = b.tipo_bono || {};
+      const ilimitado = !!tipo.ilimitado || b.sesiones_totales == null;
+      const usadas = Number(b.sesiones_usadas) || 0;
+      const total = ilimitado ? null : Number(b.sesiones_totales) || 0;
+      const rest = ilimitado ? null : Math.max(0, total - usadas);
+      const pct = ilimitado ? 1 : (total > 0 ? rest / total : 0);
+      const left = daysLeft(b.fecha_fin);
+      const vig = past
+        ? (left != null && left < 0 ? 'Caducada' : 'Inactiva')
+        : left == null
+          ? ''
+          : left < 0
+            ? 'Caducada'
+            : left === 0
+              ? 'Caduca hoy'
+              : `${left} día${left === 1 ? '' : 's'} de vigencia`;
+      const badge = past
+        ? '<span class="book-card-badge is-off">Inactiva</span>'
+        : '<span class="book-card-badge is-ok">Activa</span>';
+      const bar = ilimitado
+        ? '<p class="memb-card-meta">Sesiones ilimitadas</p>'
+        : `<div class="memb-bar-lab"><span>${usadas} usadas</span><span>${total} totales</span></div>
+           <div class="memb-bar"><span style="width:${Math.round((total ? usadas / total : 0) * 100)}%"></span></div>`;
+      const ringLabel = ilimitado ? '∞' : String(rest);
+      return `<article class="memb-card${past ? ' memb-past' : ''}">
+        ${ringSvg(ilimitado ? 1 : pct, ringLabel)}
+        <div class="memb-card-body">
+          <p class="memb-card-kicker">${escHtml(vig)}</p>
+          <h2 class="memb-card-title">${escHtml(tipo.nombre || 'Membresía')}</h2>
+          <p class="memb-card-meta">${escHtml(fmtDate(b.fecha_inicio))} → ${escHtml(fmtDate(b.fecha_fin))}</p>
+          ${bar}
+        </div>
+        ${badge}
+      </article>`;
+    }
+
     async function init() {
       const session = await getSession();
       if (!session) { window.location.href = 'login.html'; return; }
       const perfil = await getUserProfile(session.user.id);
       document.getElementById('userName').textContent = perfil.nombre || perfil.email;
-      document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
+      if (typeof paintNovaSidebarAvatar === 'function') paintNovaSidebarAvatar(perfil);
+      else document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
 
-      const bono = await getBonoActivo(session.user.id);
-      const el = document.getElementById('bonoCard');
-      if (!bono) {
-        el.innerHTML = '<div class="empty-state"><p>No tienes bono activo. Contacta con el centro.</p></div>';
-        return;
+      const hoy = new Date().toISOString().slice(0, 10);
+      const { data, error } = await novaSupabase
+        .from('bonos_activos')
+        .select('id,sesiones_totales,sesiones_usadas,fecha_inicio,fecha_fin,activo,tipo_bono:tipo_bono_id(nombre,ilimitado)')
+        .eq('perfil_id', perfil.id)
+        .order('fecha_fin', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      const rows = data || [];
+      const active = rows.find((b) => b.activo && String(b.fecha_fin).slice(0, 10) >= hoy) || null;
+      const past = rows.filter((b) => b !== active);
+
+      const activeEl = document.getElementById('bonoActive');
+      if (!active) {
+        activeEl.innerHTML = emptyActive();
+      } else {
+        const ilimitado = !!active.tipo_bono?.ilimitado || active.sesiones_totales == null;
+        const usadas = Number(active.sesiones_usadas) || 0;
+        const rest = ilimitado ? '∞' : Math.max(0, (Number(active.sesiones_totales) || 0) - usadas);
+        const d = daysLeft(active.fecha_fin);
+        document.getElementById('statRest').textContent = String(rest);
+        document.getElementById('statUsed').textContent = String(usadas);
+        document.getElementById('statDays').textContent = d == null ? '—' : String(Math.max(0, d));
+        document.getElementById('membStats').hidden = false;
+        activeEl.innerHTML = cardHtml(active, false);
       }
-      const total = bono.sesiones_totales ?? 'Ilimitado';
-      const usadas = bono.sesiones_usadas ?? 0;
-      const restantes = bono.sesiones_totales == null ? 'Ilimitado' : (bono.sesiones_totales - bono.sesiones_usadas);
-      const pct = bono.sesiones_totales ? Math.round((usadas / bono.sesiones_totales) * 100) : 0;
-      el.innerHTML = `
-        <div class="card-label">Bono actual</div>
-        <h2 style="font-family:var(--font-display);font-size:2rem;font-weight:300">${escHtml(bono.tipo_bono?.nombre || 'Bono activo')}</h2>
-        <p style="margin-top:.5rem;color:var(--color-muted)">Vigencia: ${escHtml(bono.fecha_inicio)} → ${escHtml(bono.fecha_fin)}</p>
-        <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
-          <span class="badge badge-accent">Totales: ${total}</span>
-          <span class="badge badge-warning">Usadas: ${usadas}</span>
-          <span class="badge badge-success">Restantes: ${restantes}</span>
-        </div>
-        ${bono.sesiones_totales ? `
-          <div style="margin-top:1rem;">
-            <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--color-muted);margin-bottom:.35rem;">
-              <span>Progreso de uso</span><span>${pct}%</span>
-            </div>
-            <div style="height:6px;background:var(--color-surface);border:0.5px solid var(--color-border);">
-              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--color-accent),var(--color-accent-lt));"></div>
-            </div>
-          </div>
-        ` : ''}
-      `;
+
+      if (past.length) {
+        document.getElementById('pastSection').hidden = false;
+        document.getElementById('bonoPast').innerHTML = past.map((b) => cardHtml(b, true)).join('');
+      }
     }
+
     init().catch((e) => {
-      document.getElementById('bonoCard').innerHTML = `<p style="color:var(--color-danger)">Error: ${escHtml(e.message)}</p>`;
+      const msg = typeof friendlyError === 'function' ? friendlyError(e) : (e.message || 'No se pudo cargar tu bono.');
+      document.getElementById('bonoActive').innerHTML = `<div class="mine-empty"><p>${escHtml(msg)}</p></div>`;
     });
   </script>
 </body>
 </html>
-

@@ -56,7 +56,6 @@ BEGIN
     NEW.rol := OLD.rol;
     NEW.activo := OLD.activo;
     NEW.notas := OLD.notas;
-    NEW.avatar_url := OLD.avatar_url;
   END IF;
 
   RETURN NEW;

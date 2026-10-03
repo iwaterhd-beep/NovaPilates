@@ -6,14 +6,9 @@
   <title>Mis clases — NŌVA Pilates Studio</title>
   <meta name="description" content="Historial y próximas clases reservadas en NŌVA Pilates Studio." />
   <meta name="robots" content="noindex,nofollow" />
-  <meta property="og:title" content="Mis clases — NŌVA Pilates Studio" />
-  <meta property="og:description" content="Historial y próximas clases reservadas en NŌVA Pilates Studio." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/og-image.png" />
-  <meta name="twitter:card" content="summary" />
-  <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
-  <link rel="stylesheet" href="portal.css?v=42" />
+  <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-circulo-nova.png" />
+  <link rel="stylesheet" href="portal.css?v=49" />
 </head>
 <body>
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -43,29 +38,39 @@
     <header class="topbar"><span class="topbar-title">Mis clases</span></header>
     <div class="content">
       <div class="page-header">
-        <h1 class="page-title">Tus clases</h1>
-        <p class="page-subtitle">Consulta las clases reservadas y tu historial con toda la información del centro.</p>
-      </div>
-      <div class="card" style="margin-bottom:1rem;">
-        <div class="card-label">Próximas clases</div>
-        <div id="upcomingList">
-          <p class="calendar-empty">Cargando...</p>
+        <div>
+          <h1 class="page-title">Tus clases</h1>
+          <p class="page-subtitle">Reservas, lista de espera e historial.</p>
         </div>
       </div>
-      <div class="card">
-        <div class="card-label">Historial</div>
-        <div id="historyList">
-          <p class="calendar-empty">Cargando...</p>
-        </div>
+      <div class="mine-stats">
+        <div class="mine-stat"><div class="mine-stat-n" id="statProx">—</div><div class="mine-stat-l">Próximas</div></div>
+        <div class="mine-stat"><div class="mine-stat-n" id="statWait">—</div><div class="mine-stat-l">En espera</div></div>
+        <div class="mine-stat"><div class="mine-stat-n" id="statDone">—</div><div class="mine-stat-l">Asistidas</div></div>
       </div>
+      <section class="mine-section">
+        <div class="mine-section-head">
+          <span class="mine-section-title">Próximas</span>
+          <a href="calendario.html" class="btn btn-outline btn-sm">Reservar</a>
+        </div>
+        <div class="mine-list" id="upcomingList"></div>
+      </section>
+      <section class="mine-section">
+        <div class="mine-section-head">
+          <span class="mine-section-title">Historial</span>
+        </div>
+        <div class="mine-list" id="historyList"></div>
+      </section>
     </div>
   </main>
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=20260905s"></script>
+  <script src="supabase.js?v=20261003a"></script>
+  <script src="/js/avatar.js?v=1"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/cookies-consent.js"></script>
   <script>
+    const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     const sidebarEl = document.getElementById('sidebar');
     document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
     document.addEventListener('click', (e) => {
@@ -74,6 +79,7 @@
     document.getElementById('logoutBtn').addEventListener('click', () => signOut());
 
     function toast(msg, type = 'info') {
+      if (typeof showToast === 'function') return showToast(msg, type);
       const c = document.getElementById('toastContainer');
       const el = document.createElement('div');
       el.className = `toast ${type}`;
@@ -82,31 +88,94 @@
       setTimeout(() => el.remove(), 3500);
     }
 
-    function renderClaseCard(r) {
+    function padTime(d) {
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function claseFoto(c) {
+      const n = `${c.titulo || ''} ${c.disciplina?.nombre || ''}`.toLowerCase();
+      if (n.includes('reformer')) return '/assets/branding/icon-reformer.png?v=3';
+      if (n.includes('suelo') || n.includes('esterilla')) return '/assets/branding/icon-esterilla.png?v=3';
+      if (n.includes('yoga') || n.includes('barre') || n.includes('sculpt')) return '/assets/branding/icon-equilibrio.png?v=3';
+      return '/assets/branding/logo-circulo-nova.png';
+    }
+
+    function whenLine(iso, dur) {
+      if (!iso) return 'Fecha por confirmar';
+      const start = new Date(iso);
+      const end = new Date(start);
+      end.setMinutes(end.getMinutes() + (Number(dur) || 60));
+      return `${start.getDate()} ${MESES[start.getMonth()]}. · ${padTime(start)} – ${padTime(end)}`;
+    }
+
+    function badge(r) {
+      if (r.lista_espera && r.estado !== 'cancelada') {
+        return { cls: 'is-wait', text: r.posicion_espera ? `Espera #${r.posicion_espera}` : 'En espera' };
+      }
+      if (r.estado === 'confirmada') return { cls: 'is-ok', text: 'Confirmada' };
+      if (r.estado === 'asistida') return { cls: 'is-done', text: 'Asistida' };
+      if (r.estado === 'cancelada') return { cls: 'is-off', text: 'Cancelada' };
+      return { cls: '', text: r.estado || 'NŌVA' };
+    }
+
+    function emptyHtml(text, withCta) {
+      const cta = withCta
+        ? '<a href="calendario.html" class="btn btn-primary btn-sm">Ver clases</a>'
+        : '';
+      return `<div class="mine-empty"><p>${escHtml(text)}</p>${cta}</div>`;
+    }
+
+    function renderCard(r, { canCancel } = {}) {
       const c = r.clase || {};
-      const fecha = c.fecha_hora ? new Date(c.fecha_hora).toLocaleString('es-ES') : '-';
-      const estadoBadge = r.lista_espera
-        ? `<span class="badge badge-warning">En espera${r.posicion_espera ? ` #${r.posicion_espera}` : ''}</span>`
-        : r.estado === 'confirmada'
-        ? '<span class="badge badge-success">Confirmada</span>'
-        : r.estado === 'asistida'
-          ? '<span class="badge badge-accent">Asistida</span>'
-          : r.estado === 'cancelada'
-            ? '<span class="badge badge-danger">Cancelada</span>'
-            : `<span class="badge badge-neutral">${r.estado || '-'}</span>`;
-      return `
-        <article class="day-detail-card">
-          <div>
-            <h3>${escHtml(c.titulo || c.disciplina?.nombre || 'Clase')}</h3>
-            <p>${escHtml(fecha)}</p>
-            <p>Disciplina: ${escHtml(c.disciplina?.nombre || '-')}</p>
-            <p>Monitora: ${escHtml(c.instructora?.nombre || 'Por asignar')}</p>
-            <p>Sala: ${escHtml(c.sala?.nombre || '-')}</p>
-            <p>Duración: ${escHtml(c.duracion_min || '-')} min</p>
-          </div>
-          <div class="day-detail-actions">${estadoBadge}</div>
-        </article>
-      `;
+      const b = badge(r);
+      const cancelled = r.estado === 'cancelada';
+      const wait = r.lista_espera && !cancelled
+        ? `<p class="book-card-wait">Lista de espera${r.posicion_espera ? ` · posición ${escHtml(r.posicion_espera)}` : ''}</p>`
+        : '';
+      const action = canCancel && !cancelled
+        ? `<button type="button" class="btn btn-outline btn-sm book-card-btn js-cancel" data-id="${escHtml(r.id)}" data-nombre="${escHtml(c.titulo || c.disciplina?.nombre || 'esta clase')}">${r.lista_espera ? 'Salir espera' : 'Cancelar'}</button>`
+        : '';
+      return `<article class="book-card${cancelled ? ' is-cancelled' : ''}${r.lista_espera && !cancelled ? ' is-reserved' : ''}">
+        <img class="book-card-photo" src="${escHtml(claseFoto(c))}" alt="" onerror="this.src='/assets/branding/logo-circulo-nova.png'" />
+        <div class="book-card-body">
+          <p class="book-card-when">${escHtml(whenLine(c.fecha_hora, c.duracion_min))}</p>
+          <h3 class="book-card-title">${escHtml(c.titulo || c.disciplina?.nombre || 'Clase')}</h3>
+          <p class="book-card-place">${escHtml(c.sala?.nombre || 'Sala')}${c.instructora?.nombre ? ` · ${escHtml(c.instructora.nombre)}` : ''}</p>
+          <p class="book-card-spots">${escHtml(c.duracion_min || 55)} min</p>
+          ${wait}
+          ${action}
+        </div>
+        <span class="book-card-badge ${b.cls}">${escHtml(b.text)}</span>
+      </article>`;
+    }
+
+    function byClaseTime(a, b, dir) {
+      const ta = new Date(a.clase?.fecha_hora || 0).getTime();
+      const tb = new Date(b.clase?.fecha_hora || 0).getTime();
+      return dir === 'desc' ? tb - ta : ta - tb;
+    }
+
+    async function loadLists(perfilId) {
+      const { data, error } = await novaSupabase
+        .from('reservas')
+        .select('id,estado,lista_espera,posicion_espera,fecha_reserva,clase:clase_id(fecha_hora,titulo,duracion_min,disciplina:disciplina_id(nombre),sala:sala_id(nombre),instructora:instructora_id(nombre))')
+        .eq('perfil_id', perfilId)
+        .order('fecha_reserva', { ascending: false })
+        .limit(80);
+      if (error) throw error;
+      return data || [];
+    }
+
+    function splitLists(rows) {
+      const now = Date.now();
+      const upcoming = rows.filter((r) => {
+        if (!r.clase?.fecha_hora) return false;
+        if (r.estado === 'cancelada' || r.estado === 'asistida') return false;
+        return new Date(r.clase.fecha_hora).getTime() >= now;
+      }).sort((a, b) => byClaseTime(a, b, 'asc'));
+      const upcomingIds = new Set(upcoming.map((r) => r.id));
+      const history = rows.filter((r) => !upcomingIds.has(r.id)).sort((a, b) => byClaseTime(a, b, 'desc'));
+      return { upcoming, history };
     }
 
     async function init() {
@@ -114,43 +183,53 @@
       if (!session) { window.location.href = 'login.html'; return; }
       const perfil = await getUserProfile(session.user.id);
       document.getElementById('userName').textContent = perfil.nombre || perfil.email;
-      document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
+      if (typeof paintNovaSidebarAvatar === 'function') paintNovaSidebarAvatar(perfil);
+      else document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
 
-      const { data, error } = await novaSupabase
-        .from('reservas')
-        .select('id,estado,lista_espera,posicion_espera,fecha_reserva,clase:clase_id(fecha_hora,titulo,duracion_min,disciplina:disciplina_id(nombre),sala:sala_id(nombre),instructora:instructora_id(nombre))')
-        .eq('perfil_id', perfil.id)
-        .order('fecha_reserva', { ascending: false })
-        .limit(50);
-      if (error) throw error;
+      const rows = await loadLists(perfil.id);
+      const { upcoming, history } = splitLists(rows);
+      const wait = upcoming.filter((r) => r.lista_espera).length;
+      const done = rows.filter((r) => r.estado === 'asistida').length;
 
-      const now = Date.now();
-      const upcoming = (data || []).filter(r => r.clase?.fecha_hora && new Date(r.clase.fecha_hora).getTime() >= now && r.estado !== 'cancelada');
-      const history = (data || []).filter(r => !r.clase?.fecha_hora || new Date(r.clase.fecha_hora).getTime() < now || r.estado === 'cancelada' || r.estado === 'asistida');
+      document.getElementById('statProx').textContent = String(upcoming.length);
+      document.getElementById('statWait').textContent = String(wait);
+      document.getElementById('statDone').textContent = String(done);
 
       const upcomingEl = document.getElementById('upcomingList');
       const historyEl = document.getElementById('historyList');
-
-      if (!data?.length) {
-        upcomingEl.innerHTML = '<div class="empty-state"><p>Aún no tienes clases registradas.</p></div>';
-        historyEl.innerHTML = '<div class="empty-state"><p>Tu historial aparecerá aquí.</p></div>';
-        return;
-      }
-
       upcomingEl.innerHTML = upcoming.length
-        ? upcoming.map(renderClaseCard).join('')
-        : '<div class="empty-state"><p>No tienes clases próximas.</p></div>';
-
+        ? upcoming.map((r) => renderCard(r, { canCancel: true })).join('')
+        : emptyHtml('No tienes clases próximas.', true);
       historyEl.innerHTML = history.length
-        ? history.map(renderClaseCard).join('')
-        : '<div class="empty-state"><p>No hay historial por ahora.</p></div>';
+        ? history.map((r) => renderCard(r, { canCancel: false })).join('')
+        : emptyHtml('Aún no hay historial.');
+
+      upcomingEl.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.js-cancel');
+        if (!btn) return;
+        const ok = typeof showConfirm === 'function'
+          ? await showConfirm('¿Cancelar esta reserva?')
+          : true;
+        if (!ok) return;
+        try {
+          if (typeof showPageSpinner === 'function') showPageSpinner(true);
+          await cancelarReservaSegura(btn.dataset.id);
+          toast('Reserva cancelada.', 'success');
+          location.reload();
+        } catch (err) {
+          toast(typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo cancelar'), 'error');
+        } finally {
+          if (typeof showPageSpinner === 'function') showPageSpinner(false);
+        }
+      });
     }
+
     init().catch((e) => {
-      document.getElementById('upcomingList').innerHTML = '<div class="empty-state"><p>No se pudieron cargar tus clases.</p></div>';
-      document.getElementById('historyList').innerHTML = `<div class="empty-state"><p>Error: ${e.message}</p></div>`;
-      toast(e.message || 'Error al cargar Mis clases', 'error');
+      const msg = typeof friendlyError === 'function' ? friendlyError(e) : (e.message || 'No se pudieron cargar tus clases.');
+      document.getElementById('upcomingList').innerHTML = emptyHtml(msg);
+      document.getElementById('historyList').innerHTML = '';
+      toast(msg, 'error');
     });
   </script>
 </body>
 </html>
-

@@ -50,20 +50,52 @@ let selectedProduct = null;
 function renderShopGrid() {
   const grid = document.getElementById('shopGrid');
   if (!grid) return;
+  if (!RITUAL_PRODUCTS.length) {
+    grid.innerHTML = '<div class="mine-empty" style="grid-column:1/-1"><p>El catálogo se está preparando. Vuelve en unos días o pregúntanos en recepción.</p></div>';
+    return;
+  }
+  const withCart = typeof cartAdd === 'function' && document.getElementById('cartDrawer');
   grid.innerHTML = RITUAL_PRODUCTS.map((p) => `
     <article class="shop-card">
-      <div class="shop-card-media" onclick="openProductModal('${p.id}')">
-        <img class="shop-card-img" src="${p.img}" alt="${escShop(p.title)}" onerror="this.src='/assets/branding/logo-circulo-nova.png'" loading="lazy" />
-      </div>
+      <button type="button" class="shop-card-media" onclick="openProductModal('${escShop(p.id)}')">
+        <img class="shop-card-img" src="${escShop(p.img)}" alt="${escShop(p.title)}" onerror="this.src='/assets/branding/logo-circulo-nova.png'" loading="lazy" />
+      </button>
       <div class="shop-card-body">
         <span class="shop-card-tag">${escShop(p.category)}</span>
         <h3 class="shop-card-title">${escShop(p.title)}</h3>
         <p class="shop-card-price">${p.price} €</p>
         <p class="shop-card-desc">${escShop(p.description)}</p>
-        <span class="shop-card-carta-note">Disponible en el estudio</span>
+        ${withCart
+          ? `<button type="button" class="btn btn-outline btn-sm shop-card-cta js-add-cart" data-id="${escShop(p.id)}">Añadir al carrito</button>`
+          : '<span class="shop-card-carta-note">Disponible en el estudio</span>'}
       </div>
     </article>
   `).join('');
+}
+
+function bindClientShopCart() {
+  const grid = document.getElementById('shopGrid');
+  if (!grid || typeof cartAdd !== 'function') return;
+  if (grid.dataset.cartBound === '1') return;
+  grid.dataset.cartBound = '1';
+  grid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.js-add-cart');
+    if (!btn) return;
+    e.preventDefault();
+    const p = RITUAL_PRODUCTS.find((x) => x.id === btn.dataset.id);
+    if (!p) return;
+    cartAdd({
+      id: p.id,
+      title: p.title,
+      price: p.price,
+      currency: 'eur',
+      thumbnail: p.img
+    });
+    btn.classList.add('is-added');
+    btn.textContent = 'Añadido';
+    if (typeof showToast === 'function') showToast('Añadido al carrito.', 'success');
+    if (typeof cartSetOpen === 'function') cartSetOpen(true);
+  });
 }
 
 function ensureProductModal() {
@@ -149,6 +181,7 @@ async function loadTiendaSections() {
     if (!res.ok) throw new Error('No se pudo cargar la vista de NŌVA Ritual.');
     root.innerHTML = await res.text();
     renderShopGrid();
+    bindClientShopCart();
     if (typeof initNovaNav === 'function') initNovaNav();
   } catch (err) {
     console.error(err);
@@ -156,3 +189,7 @@ async function loadTiendaSections() {
 }
 
 loadTiendaSections();
+if (document.getElementById('shopGrid') && !document.getElementById('page-root')) {
+  renderShopGrid();
+  bindClientShopCart();
+}

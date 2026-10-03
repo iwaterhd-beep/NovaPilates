@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
-  <link rel="stylesheet" href="portal.css?v=44" />
+  <link rel="stylesheet" href="portal.css?v=50" />
 </head>
 <body data-panel-build="2026-09-05-holded-export">
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -571,6 +571,10 @@
             <button class="btn btn-outline" id="recargarFichaClienteBtn" type="button">Recargar ficha</button>
           </div>
           <form id="editClienteForm" style="display:grid;gap:.8rem;margin-top:.8rem;">
+            <label class="avatar-picker-hit" for="editClienteAvatarFile" title="Cambiar foto">
+              <div class="avatar-picker-preview" id="editClienteAvatarPreview" aria-hidden="true">?</div>
+              <input id="editClienteAvatarFile" type="file" accept="image/*" hidden />
+            </label>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
               <input class="form-input" id="editClienteNombre" placeholder="Nombre" />
               <input class="form-input" id="editClienteApellidos" placeholder="Apellidos" />
@@ -1062,6 +1066,14 @@
       </div>
       <form id="nuevoClienteForm" class="modal-form-nuevo">
         <div class="modal-form-nuevo-grid">
+          <div class="form-group form-group--span-all">
+            <span class="form-label">Foto</span>
+            <label class="avatar-picker-hit" for="nuevoClienteAvatarFile" title="Cambiar foto">
+              <div class="avatar-picker-preview" id="nuevoClienteAvatarPreview" aria-hidden="true">?</div>
+              <input id="nuevoClienteAvatarFile" type="file" accept="image/*" hidden />
+            </label>
+            <p class="form-hint">Pulsa el círculo para hacerle una foto o elegirla de la galería.</p>
+          </div>
           <div class="form-group">
             <label class="form-label" for="modalNuevoNombre">Nombre</label>
             <input class="form-input" id="modalNuevoNombre" type="text" placeholder="Nombre" required />
@@ -1367,7 +1379,8 @@
 
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
-  <script src="/supabase.js?v=20260905s"></script>
+  <script src="/supabase.js?v=20261003a"></script>
+  <script src="/js/avatar.js?v=2"></script>
   <script src="/js/ui.js?v=20260905s"></script>
   <script src="/js/cookies-consent.js"></script>
   <script>
@@ -1636,6 +1649,8 @@
       deletingClaseId: null,
       createUserSource: 'usuarios',
       editingClienteId: null,
+      nuevoAvatarFile: null,
+      editAvatarFile: null,
       usuariosCatalogo: [],
       productosTienda: [],
       productosTiendaAll: [],
@@ -1836,6 +1851,13 @@
       document.getElementById('claseDeleteModal').classList.remove('open');
     }
 
+    function resetNuevoClienteFoto() {
+      appState.nuevoAvatarFile = null;
+      if (typeof applyNovaAvatar === 'function') {
+        applyNovaAvatar(document.getElementById('nuevoClienteAvatarPreview'), '', '?');
+      }
+    }
+
     function openNuevoClienteModal(source = 'usuarios') {
       appState.createUserSource = source;
       const rol = source === 'tpv' ? 'cliente' : 'cliente';
@@ -1843,6 +1865,7 @@
       document.getElementById('modalNuevoRol').disabled = source === 'tpv';
       initDobSelects('modalNuevoNac');
       clearDob('modalNuevoNac');
+      resetNuevoClienteFoto();
       document.getElementById('nuevoClienteModal').classList.add('open');
     }
 
@@ -1852,6 +1875,7 @@
       document.getElementById('nuevoClienteModal').classList.remove('open');
       document.getElementById('nuevoClienteForm').reset();
       clearDob('modalNuevoNac');
+      resetNuevoClienteFoto();
     }
 
     function buildClienteNotasDetalladas() {
@@ -1884,6 +1908,10 @@
       document.getElementById('editClienteDNI').value = '';
       document.getElementById('editClienteEmergencia').value = '';
       document.getElementById('editClienteNotas').value = '';
+      appState.editAvatarFile = null;
+      if (typeof applyNovaAvatar === 'function') {
+        applyNovaAvatar(document.getElementById('editClienteAvatarPreview'), '', '?');
+      }
     }
 
     function fillClienteEditor(perfil) {
@@ -1899,6 +1927,14 @@
       document.getElementById('editClienteDNI').value = perfil?.dni || '';
       document.getElementById('editClienteEmergencia').value = perfil?.telefono_emergencia || '';
       document.getElementById('editClienteNotas').value = perfil?.notas || '';
+      appState.editAvatarFile = null;
+      if (typeof applyNovaAvatar === 'function') {
+        applyNovaAvatar(
+          document.getElementById('editClienteAvatarPreview'),
+          perfil?.avatar_url || '',
+          perfil?.nombre || perfil?.email || '?'
+        );
+      }
     }
 
     /** PostgREST: Could not find the 'col' column of 'perfiles' in the schema cache */
@@ -1909,7 +1945,7 @@
 
     const COLS_SELECT_PERFIL_PRO = [
       'id', 'nombre', 'apellidos', 'email', 'telefono', 'fecha_nacimiento',
-      'direccion', 'ciudad', 'cp', 'dni', 'telefono_emergencia', 'notas', 'rol', 'activo'
+      'direccion', 'ciudad', 'cp', 'dni', 'telefono_emergencia', 'notas', 'rol', 'activo', 'avatar_url'
     ];
 
     async function loadClienteDetalleById(clienteId) {
@@ -2099,6 +2135,9 @@
 
       if (perfilId) {
         await aplicarFichaTrasAlta(perfilId);
+        if (appState.nuevoAvatarFile && typeof novaUploadAvatar === 'function') {
+          await novaUploadAvatar(perfilId, appState.nuevoAvatarFile);
+        }
       }
 
       await loadCatalogs();
@@ -2143,7 +2182,8 @@
       }
       staffProfile = profile;
       document.getElementById('userName').textContent = profile.nombre || profile.email;
-      document.getElementById('userAvatar').textContent = (profile.nombre?.[0] || 'S').toUpperCase();
+      if (typeof paintNovaSidebarAvatar === 'function') paintNovaSidebarAvatar(profile);
+      else document.getElementById('userAvatar').textContent = (profile.nombre?.[0] || 'S').toUpperCase();
       document.getElementById('userRole').textContent = profile.rol;
       const delCliente = document.getElementById('eliminarClienteBtn');
       if (delCliente) delCliente.style.display = profile.rol === 'admin' ? '' : 'none';
@@ -5840,6 +5880,10 @@
         };
 
         await perfilesUpdateConFallbackSchema(clienteId, payloadPro, payloadBase);
+        if (appState.editAvatarFile && typeof novaUploadAvatar === 'function') {
+          await novaUploadAvatar(clienteId, appState.editAvatarFile);
+          appState.editAvatarFile = null;
+        }
         toast('Ficha de cliente actualizada', 'success');
         await loadCatalogs();
       } catch (err) {
@@ -6441,6 +6485,22 @@
       if (!ok) return;
       initDobSelects('modalNuevoNac');
       initDobSelects('editClienteNac');
+      if (typeof novaBindAvatarPicker === 'function') {
+        novaBindAvatarPicker({
+          preview: document.getElementById('nuevoClienteAvatarPreview'),
+          fileInput: document.getElementById('nuevoClienteAvatarFile'),
+          immediate: false,
+          onPicked: (file) => { appState.nuevoAvatarFile = file; }
+        });
+        novaBindAvatarPicker({
+          preview: document.getElementById('editClienteAvatarPreview'),
+          fileInput: document.getElementById('editClienteAvatarFile'),
+          userId: () => appState.editingClienteId,
+          immediate: true,
+          onUploaded: () => { appState.editAvatarFile = null; },
+          onPicked: (file) => { appState.editAvatarFile = file; }
+        });
+      }
       await loadCatalogs();
       await Promise.all([loadClases(), loadBonos(), loadFinanzas(), loadNotifs()]);
       const hashTab = (location.hash || '').replace(/^#/, '');

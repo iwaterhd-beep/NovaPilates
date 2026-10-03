@@ -6,14 +6,9 @@
   <title>Notificaciones — NŌVA Pilates Studio</title>
   <meta name="description" content="Avisos del estudio: lista de espera, clases y comunicaciones." />
   <meta name="robots" content="noindex,nofollow" />
-  <meta property="og:title" content="Notificaciones — NŌVA Pilates Studio" />
-  <meta property="og:description" content="Avisos del estudio: lista de espera, clases y comunicaciones." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/og-image.png" />
-  <meta name="twitter:card" content="summary" />
-  <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
-  <link rel="stylesheet" href="portal.css?v=42" />
+  <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-circulo-nova.png" />
+  <link rel="stylesheet" href="portal.css?v=49" />
 </head>
 <body>
 <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -29,11 +24,11 @@
   <nav class="sidebar-nav">
     <div class="sidebar-section-label">Mi espacio</div>
     <a href="dashboard_cliente.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>Inicio</a>
-    <a href="notificaciones.html" class="sidebar-link active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Reservar clase</a>
+    <a href="calendario.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="14" height="13" rx="1"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="1" x2="5" y2="4"/><line x1="11" y1="1" x2="11" y2="4"/></svg>Reservar clase</a>
     <a href="mis-clases.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Mis clases</a>
     <a href="bono.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Mi bono</a>
     <a href="tienda-cliente.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 5h10l-1 8H4L3 5z"/><path d="M6 5V3.5a2 2 0 014 0V5"/></svg>Tienda</a>
-    <a href="notificaciones.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
+    <a href="notificaciones.html" class="sidebar-link active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 1a5 5 0 015 5c0 3 1 4 1 4H2s1-1 1-4a5 5 0 015-5z"/><line x1="8" y1="14" x2="8" y2="15"/></svg>Notificaciones</a>
     <div class="sidebar-section-label">Cuenta</div>
     <a href="perfil.html" class="sidebar-link"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Mi perfil</a>
   </nav>
@@ -43,26 +38,32 @@
     <header class="topbar"><span class="topbar-title">Notificaciones</span></header>
     <div class="content">
       <div class="page-header">
-        <h1 class="page-title">Centro de notificaciones</h1>
-        <p class="page-subtitle">Mantente al día con cambios de horario, recordatorios y avisos del estudio.</p>
-      </div>
-      <div class="card" style="margin-bottom:1rem;">
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm js-filter" data-filter="all">Todas</button>
-            <button class="btn btn-outline btn-sm js-filter" data-filter="unread">No leídas</button>
-            <button class="btn btn-outline btn-sm js-filter" data-filter="own">Mías</button>
-            <button class="btn btn-outline btn-sm js-filter" data-filter="global">Generales</button>
-          </div>
-          <button class="btn btn-ghost" id="markAllBtn">Marcar mías como leídas</button>
+        <div>
+          <h1 class="page-title">Avisos</h1>
+          <p class="page-subtitle">Horarios, lista de espera y mensajes del estudio.</p>
         </div>
       </div>
-      <div id="list" class="card">Cargando...</div>
+      <div class="mine-stats">
+        <div class="mine-stat"><div class="mine-stat-n" id="statAll">0</div><div class="mine-stat-l">Total</div></div>
+        <div class="mine-stat"><div class="mine-stat-n" id="statUnread">0</div><div class="mine-stat-l">No leídas</div></div>
+        <div class="mine-stat"><div class="mine-stat-n" id="statGlobal">0</div><div class="mine-stat-l">Generales</div></div>
+      </div>
+      <div class="notif-toolbar">
+        <div class="book-chips" style="margin:0">
+          <button type="button" class="book-chip is-on js-filter" data-filter="all">Todas</button>
+          <button type="button" class="book-chip js-filter" data-filter="unread">No leídas</button>
+          <button type="button" class="book-chip js-filter" data-filter="own">Mías</button>
+          <button type="button" class="book-chip js-filter" data-filter="global">Generales</button>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="markAllBtn">Marcar leídas</button>
+      </div>
+      <div id="list" class="notif-list"></div>
     </div>
   </main>
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
+  <script src="supabase.js?v=20261003a"></script>
+  <script src="/js/avatar.js?v=1"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/cookies-consent.js"></script>
   <script>
@@ -75,6 +76,7 @@
     document.getElementById('logoutBtn').addEventListener('click', () => signOut());
 
     function toast(msg, type = 'info') {
+      if (typeof showToast === 'function') return showToast(msg, type);
       const c = document.getElementById('toastContainer');
       const el = document.createElement('div');
       el.className = 'toast ' + type;
@@ -83,12 +85,18 @@
       setTimeout(() => el.remove(), 3500);
     }
 
-    function escHtml(s) {
-      return String(s ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+    function relTime(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      const mins = Math.floor((Date.now() - d.getTime()) / 60000);
+      if (mins < 1) return 'Ahora';
+      if (mins < 60) return `Hace ${mins} min`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `Hace ${hours} h`;
+      const days = Math.floor(hours / 24);
+      if (days === 1) return 'Ayer';
+      if (days < 7) return `Hace ${days} días`;
+      return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
     }
 
     function filteredItems() {
@@ -98,12 +106,61 @@
       return state.items;
     }
 
+    function emptyCopy() {
+      if (state.filter === 'unread') return { t: 'No tienes avisos sin leer.', cta: false };
+      if (state.filter === 'own') return { t: 'Aún no tienes avisos personales.', cta: false };
+      if (state.filter === 'global') return { t: 'No hay avisos generales del estudio.', cta: false };
+      return { t: 'Cuando el estudio te escriba, lo verás aquí.', cta: true };
+    }
+
+    function renderList() {
+      const el = document.getElementById('list');
+      const data = filteredItems();
+      const unread = state.items.filter((n) => !n.leida && n.perfil_id === state.perfilId).length;
+      const global = state.items.filter((n) => n.perfil_id == null).length;
+      document.getElementById('statAll').textContent = String(state.items.length);
+      document.getElementById('statUnread').textContent = String(unread);
+      document.getElementById('statGlobal').textContent = String(global);
+
+      if (!data.length) {
+        const empty = emptyCopy();
+        const cta = empty.cta ? '<a href="calendario.html" class="btn btn-primary btn-sm">Ver clases</a>' : '';
+        el.innerHTML = `<div class="mine-empty"><p>${escHtml(empty.t)}</p>${cta}</div>`;
+        return;
+      }
+
+      el.innerHTML = data.map((n) => {
+        const isOwn = n.perfil_id === state.perfilId;
+        const isPlaza = /plaza|lista de espera/i.test(`${n.titulo || ''} ${n.mensaje || ''}`);
+        const badge = n.leida
+          ? '<span class="book-card-badge is-done">Leída</span>'
+          : '<span class="book-card-badge is-ok">Nueva</span>';
+        const readBtn = (!n.leida && isOwn)
+          ? `<button type="button" class="btn btn-outline btn-sm js-read-one" data-id="${escHtml(n.id)}">Marcar leída</button>`
+          : '';
+        const links = isPlaza
+          ? '<p class="notif-time"><a href="calendario.html">Calendario</a> · <a href="mis-clases.html">Mis clases</a></p>'
+          : '';
+        const kind = isOwn ? 'Personal' : 'General';
+        return `<article class="notif-item${n.leida ? ' is-read' : ' is-new'}">
+          <span class="notif-mark" aria-hidden="true"></span>
+          <div>
+            <h3>${escHtml(n.titulo || 'Aviso')}</h3>
+            <p>${escHtml(n.mensaje || '')}</p>
+            <p class="notif-time">${escHtml(relTime(n.created_at))} · ${kind}${isPlaza ? ' · Lista de espera' : ''}</p>
+            ${links}
+          </div>
+          <div class="notif-actions">${badge}${readBtn}</div>
+        </article>`;
+      }).join('');
+    }
+
     async function loadNotifs() {
       if (typeof showPageSpinner === 'function') showPageSpinner(true);
       try {
         const { data, error } = await novaSupabase
           .from('notificaciones')
-          .select('*')
+          .select('id,titulo,mensaje,leida,created_at,tipo,perfil_id')
           .or('perfil_id.eq.' + state.perfilId + ',perfil_id.is.null')
           .order('created_at', { ascending: false })
           .limit(100);
@@ -115,40 +172,15 @@
       }
     }
 
-    function renderList() {
-      const el = document.getElementById('list');
-      const data = filteredItems();
-      el.innerHTML = '';
-      if (!data.length) {
-        el.innerHTML = '<div class="empty-state"><p>Sin notificaciones para este filtro.</p></div>';
-        return;
-      }
-      data.forEach((n) => {
-        const isOwn = n.perfil_id === state.perfilId;
-        const isPlaza = /plaza|lista de espera/i.test((n.titulo || '') + ' ' + (n.mensaje || ''));
-        const item = document.createElement('article');
-        item.className = 'day-detail-card';
-        item.style.marginBottom = '.6rem';
-        if (isPlaza && !n.leida) item.style.borderColor = 'var(--color-accent, #8a9a8c)';
-        const meta = escHtml(new Date(n.created_at).toLocaleString('es-ES')) + ' · ' + (isOwn ? 'Personal' : 'General') + (isPlaza ? ' · Lista de espera' : '');
-        const badge = n.leida ? '<span class="badge badge-neutral">Leída</span>' : '<span class="badge badge-accent">Nueva</span>';
-        const readBtn = (!n.leida && isOwn) ? '<button class="btn btn-outline btn-sm js-read-one" data-id="' + escHtml(n.id) + '">Marcar leída</button>' : '';
-        const plazaLinks = isPlaza ? '<p style="margin-top:.35rem;"><a href="/calendario.html" class="btn btn-outline btn-sm">Ver calendario</a> <a href="/mis-clases.html" class="btn btn-primary btn-sm">Mis clases</a></p>' : '';
-        item.innerHTML = '<div><h3 style="font-size:1.05rem;">' + escHtml(n.titulo || 'Aviso') + '</h3><p style="margin-top:.2rem;font-size:.82rem;color:var(--color-cream-dim)">' + escHtml(n.mensaje || '') + '</p><p style="font-size:.7rem;color:var(--color-muted);margin-top:.35rem;">' + meta + '</p>' + plazaLinks + '</div><div class="day-detail-actions">' + badge + readBtn + '</div>';
-        el.appendChild(item);
-      });
-    }
-
     document.querySelectorAll('.js-filter').forEach((btn) => {
       btn.addEventListener('click', () => {
         state.filter = btn.dataset.filter;
-        document.querySelectorAll('.js-filter').forEach((b) => b.classList.remove('btn-primary'));
-        btn.classList.add('btn-primary');
+        document.querySelectorAll('.js-filter').forEach((b) => b.classList.toggle('is-on', b === btn));
         renderList();
       });
     });
 
-    document.addEventListener('click', async (e) => {
+    document.getElementById('list').addEventListener('click', async (e) => {
       const b = e.target.closest('.js-read-one');
       if (!b) return;
       try {
@@ -159,9 +191,9 @@
           .eq('perfil_id', state.perfilId);
         if (error) throw error;
         await loadNotifs();
-        toast('Notificación marcada como leída', 'success');
+        toast('Marcada como leída.', 'success');
       } catch (err) {
-        toast(err.message || 'No se pudo marcar', 'error');
+        toast(typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo marcar'), 'error');
       }
     });
 
@@ -169,7 +201,7 @@
       try {
         const ids = state.items.filter((n) => !n.leida && n.perfil_id === state.perfilId).map((n) => n.id);
         if (!ids.length) {
-          toast('No tienes notificaciones personales pendientes', 'info');
+          toast('No tienes avisos personales pendientes.', 'info');
           return;
         }
         const { error } = await novaSupabase
@@ -179,9 +211,9 @@
           .eq('perfil_id', state.perfilId);
         if (error) throw error;
         await loadNotifs();
-        toast('Notificaciones personales marcadas como leídas', 'success');
+        toast('Avisos marcados como leídos.', 'success');
       } catch (err) {
-        toast(err.message || 'No se pudo completar', 'error');
+        toast(typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo completar'), 'error');
       }
     });
 
@@ -194,15 +226,15 @@
       const perfil = await getUserProfile(session.user.id);
       state.perfilId = perfil.id;
       document.getElementById('userName').textContent = perfil.nombre || perfil.email;
-      document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
-      document.querySelector('.js-filter[data-filter="all"]').classList.add('btn-primary');
+      if (typeof paintNovaSidebarAvatar === 'function') paintNovaSidebarAvatar(perfil);
+      else document.getElementById('userAvatar').textContent = (perfil.nombre?.[0] || 'C').toUpperCase();
       await loadNotifs();
     }
 
     init().catch((e) => {
-      document.getElementById('list').innerHTML = '<p style="color:var(--color-danger)">Error: ' + e.message + '</p>';
+      const msg = typeof friendlyError === 'function' ? friendlyError(e) : (e.message || 'No se pudieron cargar.');
+      document.getElementById('list').innerHTML = `<div class="mine-empty"><p>${escHtml(msg)}</p></div>`;
     });
   </script>
 </body>
 </html>
-

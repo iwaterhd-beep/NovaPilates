@@ -98,3 +98,95 @@ function cartCurrency(cart = cartRead()) {
   const first = cart.items[0];
   return (first && first.currency) || 'eur';
 }
+
+function cartMoney(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return '—';
+  return `${v.toFixed(0)} €`;
+}
+
+function cartRenderDrawer() {
+  const lines = document.getElementById('cartLines');
+  const badge = document.getElementById('cartBadge');
+  const totalEl = document.getElementById('cartTotal');
+  if (!lines) return;
+  const cart = cartRead();
+  const n = cartCount(cart);
+  if (badge) {
+    badge.hidden = n < 1;
+    badge.textContent = String(n);
+  }
+  if (totalEl) totalEl.textContent = cartMoney(cartSubtotal(cart));
+  if (!cart.items.length) {
+    lines.innerHTML = '<p class="cart-empty">Tu carrito está vacío.</p>';
+    return;
+  }
+  lines.innerHTML = cart.items.map((i) => `
+    <div class="cart-line" data-key="${escShopSafe(i.key)}">
+      <div class="cart-line-media">${i.thumbnail
+        ? `<img src="${escShopSafe(i.thumbnail)}" alt="">`
+        : `<span class="cart-line-letter">${escShopSafe((i.title || 'N').slice(0, 1))}</span>`}</div>
+      <div>
+        <div class="cart-line-title">${escShopSafe(i.title)}</div>
+        <div class="cart-line-price">${cartMoney(i.price)}</div>
+        <div class="cart-line-qty">
+          <button type="button" class="cart-qty-btn" data-act="minus" aria-label="Quitar">−</button>
+          <span class="cart-qty-val">${escShopSafe(i.qty)}</span>
+          <button type="button" class="cart-qty-btn" data-act="plus" aria-label="Añadir">+</button>
+          <button type="button" class="cart-line-remove" data-act="rm">Quitar</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escShopSafe(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function cartSetOpen(open) {
+  const drawer = document.getElementById('cartDrawer');
+  const backdrop = document.getElementById('cartBackdrop');
+  const btn = document.getElementById('cartOpenBtn');
+  if (!drawer) return;
+  drawer.hidden = !open;
+  if (backdrop) backdrop.hidden = !open;
+  requestAnimationFrame(() => {
+    drawer.classList.toggle('is-open', open);
+    if (backdrop) backdrop.classList.toggle('is-open', open);
+  });
+  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function initCartDrawer() {
+  const drawer = document.getElementById('cartDrawer');
+  if (!drawer || drawer.dataset.ready === '1') return;
+  drawer.dataset.ready = '1';
+  document.getElementById('cartOpenBtn')?.addEventListener('click', () => cartSetOpen(true));
+  document.getElementById('cartCloseBtn')?.addEventListener('click', () => cartSetOpen(false));
+  document.getElementById('cartBackdrop')?.addEventListener('click', () => cartSetOpen(false));
+  document.getElementById('cartClearBtn')?.addEventListener('click', () => {
+    cartClear();
+    cartRenderDrawer();
+  });
+  document.getElementById('cartLines')?.addEventListener('click', (e) => {
+    const line = e.target.closest('.cart-line');
+    if (!line) return;
+    const act = e.target.getAttribute('data-act');
+    const item = cartRead().items.find((i) => i.key === line.dataset.key);
+    if (!item || !act) return;
+    if (act === 'plus') cartSetQty(item.key, item.qty + 1);
+    if (act === 'minus') cartSetQty(item.key, item.qty - 1);
+    if (act === 'rm') cartRemove(item.key);
+    cartRenderDrawer();
+  });
+  window.addEventListener('nova:cart-change', cartRenderDrawer);
+  cartRenderDrawer();
+}
+
+document.addEventListener('DOMContentLoaded', initCartDrawer);
+initCartDrawer();

@@ -6,14 +6,9 @@
   <title>Mi perfil — NŌVA Pilates Studio</title>
   <meta name="description" content="Gestiona tus datos personales y preferencias de cuenta." />
   <meta name="robots" content="noindex,nofollow" />
-  <meta property="og:title" content="Mi perfil — NŌVA Pilates Studio" />
-  <meta property="og:description" content="Gestiona tus datos personales y preferencias de cuenta." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://nova-pilates.vercel.app/assets/branding/og-image.png" />
-  <meta name="twitter:card" content="summary" />
-  <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
-  <link rel="stylesheet" href="portal.css?v=42" />
+  <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/branding/logo-circulo-nova.png" />
+  <link rel="stylesheet" href="portal.css?v=50" />
 </head>
 <body>
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -43,75 +38,88 @@
     <header class="topbar"><span class="topbar-title">Mi perfil</span></header>
     <div class="content">
       <div class="page-header">
-        <h1 class="page-title">Tu perfil</h1>
-        <p class="page-subtitle">Mant�n tus datos actualizados para una mejor gesti�n de tus clases.</p>
+        <div>
+          <h1 class="page-title">Tu perfil</h1>
+          <p class="page-subtitle">Datos para reservas, facturas y emergencias.</p>
+        </div>
       </div>
-      <div class="card" style="margin-bottom:1rem;">
-        <div class="card-label">Datos personales</div>
-        <form id="perfilForm" style="display:grid;gap:.9rem;">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;">
+
+      <div class="prof-hero">
+        <label class="avatar-picker-hit" for="perfilAvatarFile" title="Cambiar foto">
+          <div class="prof-hero-av" id="heroAvatar" aria-hidden="true">P</div>
+          <input id="perfilAvatarFile" type="file" accept="image/*" hidden />
+        </label>
+        <div>
+          <h2 id="heroName">—</h2>
+          <p id="heroEmail"></p>
+          <div class="prof-hero-badges">
+            <span class="prof-pill book-card-badge is-done" id="heroRol">Cliente</span>
+            <span class="prof-pill book-card-badge is-ok" id="heroEstado">Activa</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="mine-section">
+        <div class="mine-section-head"><span class="mine-section-title">Datos personales</span></div>
+        <form id="perfilForm" class="prof-form">
+          <div class="prof-grid">
             <div>
               <label class="form-label" for="nombre">Nombre</label>
-              <input class="form-input" id="nombre" type="text" />
+              <input class="form-input" id="nombre" type="text" autocomplete="given-name" required />
             </div>
             <div>
               <label class="form-label" for="apellidos">Apellidos</label>
-              <input class="form-input" id="apellidos" type="text" />
+              <input class="form-input" id="apellidos" type="text" autocomplete="family-name" />
             </div>
             <div>
-              <label class="form-label" for="email">Email</label>
-              <input class="form-input" id="email" type="email" disabled />
-            </div>
-            <div>
-              <label class="form-label" for="telefono">Tel�fono</label>
-              <input class="form-input" id="telefono" type="text" placeholder="+34..." />
+              <label class="form-label" for="telefono">Teléfono</label>
+              <input class="form-input" id="telefono" type="tel" inputmode="tel" autocomplete="tel" placeholder="+34" />
             </div>
             <div>
               <label class="form-label" for="fechaNacimiento">Fecha de nacimiento</label>
               <input class="form-input" id="fechaNacimiento" type="date" />
             </div>
-            <div>
-              <label class="form-label" for="rol">Rol</label>
-              <input class="form-input" id="rol" type="text" disabled />
-            </div>
           </div>
-          <div style="font-size:.72rem;color:var(--color-muted);margin-top:-.2rem;">Direcci�n y documento (opcional, visible solo para ti y el centro).</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem;">
-            <div>
-              <label class="form-label" for="direccion">Direcci�n</label>
-              <input class="form-input" id="direccion" type="text" placeholder="Calle, n�mero, piso..." />
+
+          <p class="prof-note">Dirección y documento: solo los ves tú y el estudio, para facturas y emergencias.</p>
+          <div class="prof-grid">
+            <div class="span-2">
+              <label class="form-label" for="direccion">Dirección</label>
+              <input class="form-input" id="direccion" type="text" autocomplete="street-address" placeholder="Calle, número, piso" />
             </div>
             <div>
               <label class="form-label" for="ciudad">Ciudad</label>
-              <input class="form-input" id="ciudad" type="text" />
+              <input class="form-input" id="ciudad" type="text" autocomplete="address-level2" />
             </div>
             <div>
-              <label class="form-label" for="cp">C�digo postal</label>
-              <input class="form-input" id="cp" type="text" />
+              <label class="form-label" for="cp">Código postal</label>
+              <input class="form-input" id="cp" type="text" inputmode="numeric" autocomplete="postal-code" />
             </div>
             <div>
               <label class="form-label" for="dni">DNI / NIE</label>
-              <input class="form-input" id="dni" type="text" />
+              <input class="form-input" id="dni" type="text" autocomplete="off" />
             </div>
             <div>
-              <label class="form-label" for="telefonoEmergencia">Tel�fono de emergencia</label>
-              <input class="form-input" id="telefonoEmergencia" type="text" />
+              <label class="form-label" for="telefonoEmergencia">Teléfono de emergencia</label>
+              <input class="form-input" id="telefonoEmergencia" type="tel" inputmode="tel" />
             </div>
           </div>
-          <div style="display:flex;align-items:flex-end;justify-content:flex-end;">
+          <div class="prof-actions">
             <button class="btn btn-primary" id="guardarPerfilBtn" type="submit">Guardar cambios</button>
           </div>
         </form>
-      </div>
-      <div class="card">
-        <div class="card-label">Informaci�n de cuenta</div>
-        <div id="perfilInfo" style="font-size:.82rem;color:var(--color-cream-dim);display:grid;gap:.4rem;">Cargando...</div>
-      </div>
+      </section>
+
+      <section class="mine-section">
+        <div class="mine-section-head"><span class="mine-section-title">Cuenta</span></div>
+        <div class="prof-meta" id="perfilInfo"></div>
+      </section>
     </div>
   </main>
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
-  <script src="/supabase.js?v=20260716c"></script>
+  <script src="/supabase.js?v=20261003a"></script>
+  <script src="/js/avatar.js?v=2"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/cookies-consent.js"></script>
   <script>
@@ -124,6 +132,7 @@
     document.getElementById('logoutBtn').addEventListener('click', () => signOut());
 
     function toast(msg, type = 'info') {
+      if (typeof showToast === 'function') return showToast(msg, type);
       const c = document.getElementById('toastContainer');
       const el = document.createElement('div');
       el.className = 'toast ' + type;
@@ -132,12 +141,31 @@
       setTimeout(() => el.remove(), 3500);
     }
 
+    function fmtFecha(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '—';
+      return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function rolLabel(rol) {
+      if (rol === 'admin') return 'Administración';
+      if (rol === 'empleado') return 'Equipo';
+      return 'Cliente';
+    }
+
     function fillForm(p) {
-      document.getElementById('userName').textContent = p.nombre || p.email;
-      document.getElementById('userAvatar').textContent = (p.nombre?.[0] || 'C').toUpperCase();
+      const nombre = p.nombre || p.email || 'Hola';
+      document.getElementById('userName').textContent = nombre;
+      paintNovaSidebarAvatar(p);
+      applyNovaAvatar(document.getElementById('heroAvatar'), p.avatar_url, nombre);
+      document.getElementById('heroName').textContent = [p.nombre, p.apellidos].filter(Boolean).join(' ') || nombre;
+      document.getElementById('heroEmail').textContent = p.email || '';
+      document.getElementById('heroRol').textContent = rolLabel(p.rol);
+      document.getElementById('heroEstado').textContent = p.activo === false ? 'Inactiva' : 'Activa';
+      document.getElementById('heroEstado').className = 'prof-pill book-card-badge ' + (p.activo === false ? 'is-off' : 'is-ok');
       document.getElementById('nombre').value = p.nombre || '';
       document.getElementById('apellidos').value = p.apellidos || '';
-      document.getElementById('email').value = p.email || '';
       document.getElementById('telefono').value = p.telefono || '';
       document.getElementById('fechaNacimiento').value = p.fecha_nacimiento || '';
       document.getElementById('direccion').value = p.direccion || '';
@@ -145,12 +173,10 @@
       document.getElementById('cp').value = p.cp || '';
       document.getElementById('dni').value = p.dni || '';
       document.getElementById('telefonoEmergencia').value = p.telefono_emergencia || '';
-      document.getElementById('rol').value = p.rol || '';
       document.getElementById('perfilInfo').innerHTML =
-        '<p><strong>ID usuario:</strong> ' + (p.id || '') + '</p>' +
-        '<p><strong>Estado:</strong> ' + (p.activo ? 'Activo' : 'Inactivo') + '</p>' +
-        '<p><strong>Alta:</strong> ' + (p.created_at ? new Date(p.created_at).toLocaleString('es-ES') : '-') + '</p>' +
-        '<p><strong>�ltima actualizaci�n:</strong> ' + (p.updated_at ? new Date(p.updated_at).toLocaleString('es-ES') : '-') + '</p>';
+        '<p>Correo: ' + escHtml(p.email || '—') + '</p>' +
+        '<p>Alta en el estudio: ' + escHtml(fmtFecha(p.created_at)) + '</p>' +
+        '<p>Última actualización: ' + escHtml(fmtFecha(p.updated_at)) + '</p>';
     }
 
     async function init() {
@@ -158,6 +184,17 @@
       if (!session) { window.location.href = 'login.html'; return; }
       currentProfile = await getUserProfile(session.user.id);
       fillForm(currentProfile);
+      novaBindAvatarPicker({
+        preview: document.getElementById('heroAvatar'),
+        fileInput: document.getElementById('perfilAvatarFile'),
+        userId: () => currentProfile && currentProfile.id,
+        letter: () => (currentProfile && (currentProfile.nombre || currentProfile.email)) || 'C',
+        immediate: true,
+        onUploaded: (url) => {
+          if (currentProfile) currentProfile.avatar_url = url;
+          paintNovaSidebarAvatar(currentProfile);
+        }
+      });
     }
 
     document.getElementById('perfilForm').addEventListener('submit', async (e) => {
@@ -184,6 +221,7 @@
           dni: document.getElementById('dni').value.trim() || null,
           telefono_emergencia: document.getElementById('telefonoEmergencia').value.trim() || null
         };
+        if (typeof showPageSpinner === 'function') showPageSpinner(true);
         const { error: errPro } = await novaSupabase.from('perfiles').update(payloadPro).eq('id', currentProfile.id);
         if (errPro) {
           const { error: errBase } = await novaSupabase.from('perfiles').update(payloadBase).eq('id', currentProfile.id);
@@ -191,16 +229,18 @@
         }
         currentProfile = await getUserProfile(currentProfile.id);
         fillForm(currentProfile);
-        toast('Perfil actualizado correctamente', 'success');
+        toast('Perfil actualizado.', 'success');
       } catch (err) {
-        toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo guardar el perfil')), 'error');
+        toast((typeof friendlyError === 'function' ? friendlyError(err) : (err.message || 'No se pudo guardar')), 'error');
+      } finally {
+        if (typeof showPageSpinner === 'function') showPageSpinner(false);
       }
     });
 
     init().catch((e) => {
-      document.getElementById('perfilInfo').innerHTML = '<p style="color:var(--color-danger)">Error: ' + e.message + '</p>';
+      const msg = typeof friendlyError === 'function' ? friendlyError(e) : (e.message || 'No se pudo cargar el perfil.');
+      document.getElementById('perfilInfo').innerHTML = '<p>' + escHtml(msg) + '</p>';
     });
   </script>
 </body>
 </html>
-
