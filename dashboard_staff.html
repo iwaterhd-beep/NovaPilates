@@ -14,7 +14,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/branding/logo-circulo-nova.png" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png?v=5" />
-  <link rel="stylesheet" href="portal.css?v=50" />
+  <link rel="stylesheet" href="portal.css?v=53" />
 </head>
 <body data-panel-build="2026-09-05-holded-export">
   <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú"><span></span><span></span></button>
@@ -45,89 +45,99 @@
     <header class="topbar"><span class="topbar-title" id="pageTitle">Panel Staff</span></header>
     <div class="content">
       <section class="panel-tab" id="tab-clases" style="display:none;">
+        <div class="page-header page-header--calendar">
+          <div>
+            <h1 class="page-title">Clases</h1>
+            <p class="page-subtitle">Horario de la semana, plazas y asistencia en sala.</p>
+          </div>
+          <div class="clases-toolbar-actions">
+            <button type="button" class="btn btn-primary" id="abrirNuevaClaseBtn">Nueva clase</button>
+            <button type="button" class="btn btn-outline" id="abrirGeneradorSemanalBtn">Rellenar semana</button>
+            <button type="button" class="btn btn-outline" id="abrirNuevaDisciplinaBtn" style="display:none;">Nueva disciplina</button>
+          </div>
+        </div>
+
+        <div class="staff-cal-stats" id="staffCalStats"></div>
+
         <div class="card clases-shell">
-          <div class="clases-toolbar">
-            <div class="clases-toolbar-copy">
-              <div class="card-label">Calendario de clases</div>
-              <p class="clases-hint">Programa sesiones y gestiona reservas. Pulsa <strong>Nueva clase</strong> para añadir una al calendario.</p>
+          <div class="staff-cal-weekbar">
+            <button type="button" class="book-month-nav js-staff-week-prev" aria-label="Semana anterior">‹</button>
+            <div class="staff-cal-weekbar-mid">
+              <h2 class="staff-cal-month" id="staffCalMonth">—</h2>
+              <p class="staff-cal-range" id="staffCalRange"></p>
             </div>
-            <div class="clases-toolbar-actions">
-              <button type="button" class="btn btn-primary" id="abrirNuevaClaseBtn">Nueva clase</button>
-              <button type="button" class="btn btn-outline" id="abrirGeneradorSemanalBtn" style="border-color:var(--color-accent); color:var(--color-accent);">Generar semana completa (24 clases/día)</button>
-              <button type="button" class="btn btn-outline" id="abrirNuevaDisciplinaBtn" style="display:none;">Nueva disciplina</button>
-            </div>
-          </div>
-
-          <div class="clases-zone">
-            <div class="card-label">Próximas clases</div>
-            <div class="table-wrap">
-              <table><thead><tr><th>Clase</th><th>Fecha</th><th>Aforo</th><th>Acciones</th></tr></thead><tbody id="rowsClases"></tbody></table>
+            <div class="staff-cal-weekbar-actions">
+              <button type="button" class="book-hoy js-staff-week-hoy">Hoy</button>
+              <button type="button" class="book-month-nav js-staff-week-next" aria-label="Semana siguiente">›</button>
             </div>
           </div>
+          <div class="staff-cal-days" id="staffCalDays" role="tablist" aria-label="Días"></div>
+          <div class="staff-cal-list" id="rowsClases"></div>
+        </div>
 
-          <div class="clases-zone clases-detail-split" id="clasesDetailZone">
+        <div class="card clases-shell staff-cal-detail" id="clasesDetailZone" hidden>
+          <div class="clases-zone clases-detail-split">
             <div class="clases-detail-col">
               <div class="card-label">Asistencia</div>
-              <p id="asistenciaInfo" class="clases-detail-hint">Elige una clase en la tabla y pulsa «Asistencia».</p>
+              <p id="asistenciaInfo" class="clases-detail-hint">Elige una clase del horario.</p>
               <div class="table-wrap">
                 <table><thead><tr><th>Cliente</th><th>Email</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="rowsAsistencia"><tr><td colspan="4">Sin clase seleccionada</td></tr></tbody></table>
               </div>
             </div>
             <div class="clases-detail-col">
               <div class="card-label">Lista de espera</div>
-              <p id="waitlistInfo" class="clases-detail-hint">Misma clase que arriba.</p>
+              <p id="waitlistInfo" class="clases-detail-hint">La misma sesión.</p>
               <div class="table-wrap">
                 <table><thead><tr><th>Orden</th><th>Cliente</th><th>Email</th><th>Acciones</th></tr></thead><tbody id="rowsWaitlist"><tr><td colspan="4">Sin clase seleccionada</td></tr></tbody></table>
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="clases-zone clases-zone-admin" id="cardDisciplinasAdmin" style="display:none;">
-            <div class="card-label">Disciplinas del calendario</div>
-            <p class="clases-hint">Solo las activas aparecen al crear una clase. Desactiva las que ya no impartáis.</p>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Nombre</th><th>Orden</th><th>Estado</th><th>Acciones</th></tr></thead>
-                <tbody id="rowsDisciplinas"></tbody>
-              </table>
-            </div>
+        <div class="card clases-shell clases-zone-admin" id="cardDisciplinasAdmin" style="display:none;">
+          <div class="clases-zone" style="border-bottom:0;">
+            <div class="card-label">Tipos de clase</div>
+            <p class="clases-hint">Solo las activas salen al crear una sesión.</p>
+            <div class="staff-disc-grid" id="rowsDisciplinas"></div>
           </div>
         </div>
       </section>
 
       <section class="panel-tab" id="tab-bonos" style="display:none;">
+        <div class="page-header page-header--calendar">
+          <div>
+            <h1 class="page-title">Bonos</h1>
+            <p class="page-subtitle">Asigna una membresía o edita el catálogo del TPV y de la web.</p>
+          </div>
+          <div class="clases-toolbar-actions">
+            <button type="button" class="btn btn-primary" id="abrirAsignarBonoBtn">Asignar bono</button>
+            <button type="button" class="btn btn-outline" id="abrirNuevoTipoBonoBtn" style="display:none;">Nuevo bono</button>
+          </div>
+        </div>
+        <div class="staff-cal-stats" id="bonosStats"></div>
         <div class="card clases-shell">
-          <div class="clases-toolbar">
-            <div class="clases-toolbar-copy">
-              <div class="card-label">Bonos</div>
-              <p class="clases-hint">Asigna un bono a un cliente o crea tipos nuevos para el TPV y la web.</p>
-            </div>
-            <div class="clases-toolbar-actions">
-              <button type="button" class="btn btn-primary" id="abrirAsignarBonoBtn">Asignar bono</button>
-              <button type="button" class="btn btn-outline" id="abrirNuevoTipoBonoBtn" style="display:none;">Nuevo bono</button>
-            </div>
-          </div>
-
           <div class="clases-zone">
-            <div class="card-label">Bonos activos</div>
-            <p class="clases-hint" style="margin-bottom:.75rem;">Clientes con bono vigente. Al asignar uno nuevo se desactiva el anterior.</p>
-            <div class="table-wrap">
-              <table><thead><tr><th>Cliente</th><th>Bono</th><th>Uso</th><th>Vence</th></tr></thead><tbody id="rowsBonos"></tbody></table>
-            </div>
+            <div class="card-label">Clientes con bono vigente</div>
+            <p class="clases-hint">Al asignar uno nuevo se desactiva el anterior.</p>
+            <div class="staff-card-grid" id="rowsBonos"></div>
           </div>
-
-          <div class="clases-zone clases-zone-admin" id="cardBonosDesigner" style="display:none;">
-            <div class="card-label">Tipos de bono</div>
-            <p class="clases-hint" style="margin-bottom:.75rem;">Catálogo del TPV y de Planes NŌVA. Edita o crea con «Nuevo bono».</p>
-            <div class="table-wrap">
-              <table><thead><tr><th>Nombre</th><th>Sesiones</th><th>Días</th><th>Periodo</th><th>Precio</th><th>Activo</th><th>Web</th><th>Acciones</th></tr></thead><tbody id="rowsTiposBono"></tbody></table>
-            </div>
+        </div>
+        <div class="card clases-shell clases-zone-admin" id="cardBonosDesigner" style="display:none;">
+          <div class="clases-zone" style="border-bottom:0;">
+            <div class="card-label">Catálogo</div>
+            <p class="clases-hint">Tipos que se venden en TPV y, si quieres, en Planes NŌVA.</p>
+            <div class="staff-card-grid" id="rowsTiposBono"></div>
           </div>
         </div>
       </section>
 
       <section class="panel-tab" id="tab-tpv" style="display:none;">
-        <p class="tpv-intro">Busca un cliente, toca bonos o productos para el ticket y cobra a la derecha.</p>
+        <div class="page-header page-header--calendar">
+          <div>
+            <h1 class="page-title">TPV</h1>
+            <p class="page-subtitle">Busca a la clienta, toca bono o producto y cobra a la derecha.</p>
+          </div>
+        </div>
 
         <div class="tpv-bar-layout">
           <div class="tpv-workspace">
@@ -204,40 +214,31 @@
       </section>
 
       <section class="panel-tab" id="tab-productos" style="display:none;">
-        <div class="card clases-shell">
-          <div class="clases-toolbar">
-            <div class="clases-toolbar-copy">
-              <div class="card-label">Productos</div>
-              <p class="clases-hint">Catálogo de la tienda del TPV: fotos, categorías y precios para venta en el local.</p>
-            </div>
-            <div class="clases-toolbar-actions">
-              <button type="button" class="btn btn-primary" id="abrirNuevoProductoBtn">Nuevo producto</button>
-            </div>
+        <div class="page-header page-header--calendar">
+          <div>
+            <h1 class="page-title">Productos</h1>
+            <p class="page-subtitle">Catálogo de la tienda del TPV: fotos, precios y visibilidad.</p>
           </div>
-
-          <div class="clases-zone">
+          <div class="clases-toolbar-actions">
+            <button type="button" class="btn btn-primary" id="abrirNuevoProductoBtn">Nuevo producto</button>
+          </div>
+        </div>
+        <div class="card clases-shell">
+          <div class="clases-zone" style="border-bottom:0;">
             <div class="card-label">Catálogo</div>
-            <p class="clases-hint" style="margin-bottom:.75rem;">Activa o desactiva lo que aparece en la tienda del TPV.</p>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Producto</th>
-                    <th>Categoría</th>
-                    <th>Precio</th>
-                    <th>Estado</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="productosAdminRows"></tbody>
-              </table>
-            </div>
+            <p class="clases-hint">Activa o desactiva lo que aparece en el TPV.</p>
+            <div class="staff-card-grid staff-card-grid--prod" id="productosAdminRows"></div>
           </div>
         </div>
       </section>
 
       <section class="panel-tab" id="tab-finanzas" style="display:none;">
+        <div class="page-header page-header--calendar">
+          <div>
+            <h1 class="page-title">Finanzas</h1>
+            <p class="page-subtitle">Caja del día, cobros, facturas y exportar a Holded.</p>
+          </div>
+        </div>
         <div class="caja-estado-bar" id="cajaEstadoBar">
           <span class="caja-estado-dot" id="cajaEstadoDot" aria-hidden="true"></span>
           <p id="cajaEstado" class="caja-estado-text">Cargando estado de caja...</p>
@@ -424,37 +425,48 @@
       </section>
 
       <section class="panel-tab" id="tab-notificaciones" style="display:none;">
-        <div class="card" style="margin-bottom:1rem;">
-          <div class="card-label">Enviar notificación</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;">
-            <select class="form-input" id="notifDestino">
-              <option value="">Aviso general (tablero, no a cada cliente)</option>
-            </select>
-            <select class="form-input" id="notifTipo">
-              <option value="info">Info</option>
-              <option value="aviso">Aviso</option>
-              <option value="recordatorio">Recordatorio</option>
-              <option value="promo">Promoción</option>
-            </select>
-            <input class="form-input" id="notifTitulo" placeholder="Título de la notificación" />
-          </div>
-          <div style="margin-top:.8rem;">
-            <textarea class="form-input" id="notifMensaje" rows="4" placeholder="Mensaje..." style="resize:vertical;"></textarea>
-          </div>
-          <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
-            <button class="btn btn-primary" id="enviarNotifBtn">Enviar notificación</button>
+        <div class="page-header page-header--calendar">
+          <div>
+            <h1 class="page-title">Notificaciones</h1>
+            <p class="page-subtitle">Avisos al estudio o a una clienta concreta.</p>
           </div>
         </div>
-        <div class="card">
-          <div class="card-label">Notificaciones recientes enviadas</div>
-          <div class="table-wrap">
-            <table><thead><tr><th>Título</th><th>Destino</th><th>Tipo</th><th>Fecha</th></tr></thead><tbody id="rowsNotifs"></tbody></table>
+        <div class="card clases-shell" style="margin-bottom:1rem;">
+          <div class="clases-zone" style="border-bottom:0;">
+            <div class="card-label">Nueva notificación</div>
+            <div class="staff-form-grid">
+              <select class="form-input" id="notifDestino">
+                <option value="">Aviso general (tablero, no a cada cliente)</option>
+              </select>
+              <select class="form-input" id="notifTipo">
+                <option value="info">Info</option>
+                <option value="aviso">Aviso</option>
+                <option value="recordatorio">Recordatorio</option>
+                <option value="promo">Promoción</option>
+              </select>
+              <input class="form-input" id="notifTitulo" placeholder="Título" />
+            </div>
+            <textarea class="form-input" id="notifMensaje" rows="4" placeholder="Mensaje" style="resize:vertical;margin-top:.8rem;"></textarea>
+            <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
+              <button class="btn btn-primary" id="enviarNotifBtn">Enviar</button>
+            </div>
+          </div>
+        </div>
+        <div class="card clases-shell">
+          <div class="clases-zone" style="border-bottom:0;">
+            <div class="card-label">Enviadas</div>
+            <div class="staff-notif-list" id="rowsNotifs"></div>
           </div>
         </div>
       </section>
 
       <section class="panel-tab" id="tab-ajustes" style="display:none;">
-        <p class="tpv-intro">Parámetros generales del centro. Solo administración.</p>
+        <div class="page-header page-header--calendar">
+          <div>
+            <h1 class="page-title">Ajustes</h1>
+            <p class="page-subtitle">Reservas, márgenes y datos de facturación. Solo administración.</p>
+          </div>
+        </div>
         <div class="card" style="margin-bottom:1rem;">
           <div class="card-label">Política de reservas (margen en días)</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;align-items:end;">
@@ -518,49 +530,50 @@
       </section>
 
       <section class="panel-tab" id="tab-usuarios" style="display:none;">
-        <div class="card" id="cardCrearUsuario" style="margin-bottom:1rem;">
-          <div class="card-label">Crear usuario de acceso</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;">
-            <p style="margin:0;font-size:.78rem;color:var(--color-muted);">Abre el formulario completo para alta de cliente o empleado.</p>
+        <div class="page-header page-header--calendar">
+          <div>
+            <h1 class="page-title">Usuarios</h1>
+            <p class="page-subtitle">Cuentas del estudio y fichas de clientas.</p>
+          </div>
+          <div class="clases-toolbar-actions" id="cardCrearUsuario">
+            <button class="btn btn-outline" type="button" id="exportUsuariosCsvBtn">Exportar CSV</button>
             <button class="btn btn-primary" id="abrirNuevoClienteBtn">Nuevo usuario</button>
           </div>
-          <p style="margin-top:.6rem;font-size:.75rem;color:var(--color-muted);">Solo admin puede crear usuarios desde este formulario.</p>
         </div>
-        <div class="card">
-          <div class="card-label">Usuarios del centro</div>
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:.8rem;margin-bottom:.8rem;align-items:end;">
-            <div>
-              <label class="form-label" for="usuariosBuscar">Buscar</label>
-              <input class="form-input" id="usuariosBuscar" type="search" placeholder="Nombre, email, teléfono o DNI..." autocomplete="off" />
+        <div class="card clases-shell">
+          <div class="clases-zone">
+            <div class="card-label">Directorio</div>
+            <div class="staff-form-grid" style="margin:.75rem 0;">
+              <div>
+                <label class="form-label" for="usuariosBuscar">Buscar</label>
+                <input class="form-input" id="usuariosBuscar" type="search" placeholder="Nombre, email, teléfono o DNI" autocomplete="off" />
+              </div>
+              <div>
+                <label class="form-label" for="usuariosFiltroRol">Rol</label>
+                <select class="form-input" id="usuariosFiltroRol">
+                  <option value="">Todos</option>
+                  <option value="cliente">Cliente</option>
+                  <option value="empleado">Empleado</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label" for="usuariosFiltroActivo">Estado</label>
+                <select class="form-input" id="usuariosFiltroActivo">
+                  <option value="">Activos e inactivos</option>
+                  <option value="activo">Activos</option>
+                  <option value="inactivo">Inactivos</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label class="form-label" for="usuariosFiltroRol">Rol</label>
-              <select class="form-input" id="usuariosFiltroRol">
-                <option value="">Todos los roles</option>
-                <option value="cliente">Cliente</option>
-                <option value="empleado">Empleado</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            <div>
-              <label class="form-label" for="usuariosFiltroActivo">Estado</label>
-              <select class="form-input" id="usuariosFiltroActivo">
-                <option value="">Activos e inactivos</option>
-                <option value="activo">Solo activos</option>
-                <option value="inactivo">Solo inactivos</option>
-              </select>
-            </div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:.6rem;">
-            <p id="usuariosContador" style="margin:0;font-size:.75rem;color:var(--color-muted);"></p>
-            <button type="button" class="btn btn-outline btn-sm" id="exportUsuariosCsvBtn" title="Descarga los usuarios que ves ahora (mismos filtros y búsqueda)">Exportar CSV</button>
-          </div>
-          <div class="table-wrap">
-            <table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th><th>Acción</th></tr></thead><tbody id="rowsUsuarios"></tbody></table>
+            <p id="usuariosContador" class="clases-hint"></p>
+            <div class="staff-card-grid" id="rowsUsuarios"></div>
           </div>
         </div>
-        <div class="card" style="margin-top:1rem;">
-          <div class="card-label">Ficha de cliente (editar)</div>
+        <div class="card clases-shell" id="cardFichaCliente" style="margin-top:1rem;">
+          <div class="clases-zone" style="border-bottom:0;">
+          <div class="card-label">Ficha</div>
+          <p class="clases-hint">Pulsa una clienta en el directorio o elígela aquí.</p>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;align-items:end;">
             <div>
               <label class="form-label" for="editClienteSelect">Cliente</label>
@@ -609,6 +622,7 @@
               </div>
             </div>
           </form>
+          </div>
         </div>
       </section>
     </div>
@@ -1658,6 +1672,10 @@
       editBonoFile: null,
       disciplinasAll: [],
       clasesLista: [],
+      staffWeekStart: null,
+      staffSelectedDay: null,
+      staffSelectedClaseId: null,
+      clasesOcupacion: {},
       duplicandoClase: null,
       tpvCart: [],
       tpvCobrando: false,
@@ -2365,9 +2383,15 @@
     }
 
     function defaultClaseDateTimeLocal() {
-      const d = new Date();
-      d.setMinutes(0, 0, 0);
-      d.setHours(d.getHours() + 1);
+      const selected = appState.staffSelectedDay ? staffParseKey(appState.staffSelectedDay) : new Date();
+      const todayKey = staffDateKey(new Date());
+      const d = new Date(selected);
+      if (staffDateKey(d) === todayKey) {
+        d.setMinutes(0, 0, 0);
+        d.setHours(Math.max(d.getHours(), new Date().getHours()) + 1);
+      } else {
+        d.setHours(9, 0, 0, 0);
+      }
       const pad = (n) => String(n).padStart(2, '0');
       return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
@@ -2580,7 +2604,7 @@
       if (bonosDesigner) bonosDesigner.style.display = isAdmin ? '' : 'none';
       const btnNuevoTipo = document.getElementById('abrirNuevoTipoBonoBtn');
       if (btnNuevoTipo) btnNuevoTipo.style.display = isAdmin ? '' : 'none';
-      const crearUsuario = document.getElementById('cardCrearUsuario');
+      const crearUsuario = document.getElementById('abrirNuevoClienteBtn');
       if (crearUsuario) crearUsuario.style.display = isAdmin ? '' : 'none';
       const discAdmin = document.getElementById('cardDisciplinasAdmin');
       if (discAdmin && !isAdmin) discAdmin.style.display = 'none';
@@ -2679,7 +2703,22 @@
           ? `${total} usuario(s) en total`
           : `${list.length} de ${total} usuario(s)`;
       }
-      rowsU.innerHTML = list.map(x => `<tr><td>${escHtml(x.nombre || '-')}</td><td>${escHtml(x.email)}</td><td>${escHtml(x.rol)}</td><td>${x.activo ? 'Sí' : 'No'}</td><td>${x.rol === 'cliente' ? `<button class="btn btn-outline btn-sm js-editar-cliente" data-id="${escHtml(x.id)}">Editar ficha</button>` : '-'}</td></tr>`).join('') || '<tr><td colspan="5">Ningún usuario coincide con los filtros.</td></tr>';
+      rowsU.innerHTML = list.map(x => {
+        const full = [x.nombre, x.apellidos].filter(Boolean).join(' ') || x.email || 'Sin nombre';
+        const rol = x.rol === 'admin' ? 'Admin' : (x.rol === 'empleado' ? 'Equipo' : 'Cliente');
+        const edit = x.rol === 'cliente'
+          ? `<button class="btn btn-outline btn-sm js-editar-cliente" data-id="${escHtml(x.id)}">Ficha</button>`
+          : '';
+        return `<article class="staff-person-card">
+          <div class="staff-person-av">${escHtml((x.nombre || x.email || '?').charAt(0).toUpperCase())}</div>
+          <div class="staff-person-body">
+            <h3>${escHtml(full)}</h3>
+            <p>${escHtml(x.email || '')}${x.telefono ? ' · ' + escHtml(x.telefono) : ''}</p>
+          </div>
+          <span class="staff-class-pill" style="background:${x.activo === false ? '#8a7f74' : '#c9a96e'}">${escHtml(rol)}${x.activo === false ? ' · inactiva' : ''}</span>
+          <div class="staff-class-actions">${edit}</div>
+        </article>`;
+      }).join('') || '<div class="book-empty-card"><h3>Nadie coincide</h3><p>Prueba otro filtro o crea un usuario.</p></div>';
     }
 
     function renderDisciplinasRows() {
@@ -2691,17 +2730,19 @@
           const estado = x.activa
             ? '<span class="badge badge-accent">Activa</span>'
             : '<span class="badge badge-neutral">Inactiva</span>';
-          return `<tr>
-            <td><span style="display:inline-block;width:.65rem;height:.65rem;border-radius:2px;vertical-align:middle;margin-right:.35rem;background:${escHtml(x.color_hex || '#c9a96e')};"></span>${escHtml(x.nombre)}</td>
-            <td>${x.orden ?? 0}</td>
-            <td>${estado}</td>
-            <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
+          return `<article class="staff-disc-card">
+            <div class="staff-disc-name">
+              <span class="staff-disc-dot" style="background:${escHtml(x.color_hex || '#c9a96e')}"></span>
+              ${escHtml(x.nombre)}
+            </div>
+            <div class="staff-disc-meta">${estado}</div>
+            <div class="staff-disc-actions">
               <button type="button" class="btn btn-outline btn-sm js-editar-disciplina" data-id="${x.id}">Editar</button>
               <button type="button" class="btn btn-ghost btn-sm js-toggle-disciplina" data-id="${x.id}" data-activa="${x.activa ? '1' : '0'}">${x.activa ? 'Desactivar' : 'Activar'}</button>
-            </td>
-          </tr>`;
+            </div>
+          </article>`;
         })
-        .join('') || '<tr><td colspan="4">Sin disciplinas.</td></tr>';
+        .join('') || '<p class="clases-hint">Sin tipos de clase.</p>';
     }
 
     function openDisciplinaModal(row) {
@@ -2785,19 +2826,18 @@
       const rows = document.getElementById('rowsTiposBono');
       const list = appState.tiposBonoAll || [];
       rows.innerHTML = list.map(b => `
-        <tr>
-          <td>${escHtml(b.nombre)}</td>
-          <td>${b.sesiones ?? 'Ilimitado'}</td>
-          <td>${b.duracion_dias}</td>
-          <td>${escHtml(b.periodicidad || 'mensual')}</td>
-          <td>${Number(b.precio || 0).toFixed(2)} €</td>
-          <td>${b.activo ? 'Sí' : 'No'}</td>
-          <td>${b.visible_web ? 'Sí' : 'No'}</td>
-          <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
+        <article class="staff-disc-card">
+          <div class="staff-disc-name">
+            <span class="staff-disc-dot" style="background:${escHtml(b.color_hex || '#c9a96e')}"></span>
+            ${escHtml(b.nombre)}
+          </div>
+          <p class="clases-hint" style="margin:0;">${b.sesiones ?? 'Ilimitado'} ses. · ${escHtml(b.duracion_dias)} días · ${Number(b.precio || 0).toFixed(2)} €</p>
+          <div class="staff-disc-meta">${b.activo ? '<span class="badge badge-accent">TPV</span>' : '<span class="badge badge-neutral">Oculto</span>'}${b.visible_web ? ' <span class="badge badge-accent">Web</span>' : ''}</div>
+          <div class="staff-disc-actions">
             <button class="btn btn-outline btn-sm js-editar-tipo-bono" data-id="${b.id}">Editar</button>
-          </td>
-        </tr>
-      `).join('') || '<tr><td colspan="8">Sin tipos de bono.</td></tr>';
+          </div>
+        </article>
+      `).join('') || '<div class="book-empty-card"><h3>Sin tipos de bono</h3><p>Crea el primero con «Nuevo bono».</p></div>';
     }
 
     function renderTpvClientResults(query) {
@@ -3269,7 +3309,7 @@
       }
       const list = appState.productosTiendaAll || [];
       if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="6">Sin productos. Pulsa «Nuevo producto» para añadir el primero.</td></tr>';
+        tbody.innerHTML = '<div class="book-empty-card"><h3>Sin productos</h3><p>Añade el primero para la tienda del TPV.</p></div>';
         return;
       }
       tbody.innerHTML = list.map((p) => {
@@ -3278,16 +3318,17 @@
           ? `<img class="prod-admin-thumb" src="${escHtml(img)}" alt="" loading="lazy" />`
           : `<span class="prod-admin-thumb prod-admin-thumb--empty" aria-hidden="true">${escHtml((p.nombre || '·').charAt(0))}</span>`;
         return `
-        <tr>
-          <td>${thumb}</td>
-          <td>${escHtml(p.nombre)}</td>
-          <td>${escHtml(tpvCategoriaLabel(p.categoria))}</td>
-          <td>${Number(p.precio_referencia || 0).toFixed(2)} €</td>
-          <td>${p.activo ? 'Activo' : 'Inactivo'}</td>
-          <td>
+        <article class="staff-prod-card">
+          ${thumb}
+          <div class="staff-person-body">
+            <h3>${escHtml(p.nombre)}</h3>
+            <p>${escHtml(tpvCategoriaLabel(p.categoria))} · ${Number(p.precio_referencia || 0).toFixed(2)} €</p>
+          </div>
+          <span class="staff-class-pill" style="background:${p.activo ? '#c9a96e' : '#8a7f74'}">${p.activo ? 'Activo' : 'Oculto'}</span>
+          <div class="staff-class-actions">
             <button type="button" class="btn btn-outline btn-sm js-tpv-toggle-prod" data-id="${p.id}" data-activo="${p.activo ? '1' : '0'}">${p.activo ? 'Desactivar' : 'Activar'}</button>
-          </td>
-        </tr>`;
+          </div>
+        </article>`;
       }).join('');
     }
 
@@ -4519,38 +4560,167 @@
       });
     }
 
+    const STAFF_MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const STAFF_MESES_FULL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const STAFF_DIAS_L = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+
+    function staffStartOfWeek(d) {
+      const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const day = date.getDay();
+      date.setDate(date.getDate() + (day === 0 ? -6 : 1 - day));
+      return date;
+    }
+    function staffDateKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+    function staffParseKey(key) {
+      const [y, m, d] = String(key || '').split('-').map(Number);
+      return new Date(y, (m || 1) - 1, d || 1);
+    }
+    function staffPadTime(d) {
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+    function staffEnsureWeek() {
+      if (!(appState.staffWeekStart instanceof Date) || Number.isNaN(appState.staffWeekStart.getTime())) {
+        appState.staffWeekStart = staffStartOfWeek(new Date());
+      }
+      if (!appState.staffSelectedDay) appState.staffSelectedDay = staffDateKey(new Date());
+    }
+
     async function loadClases() {
+      const board = document.getElementById('rowsClases');
+      staffEnsureWeek();
+      const weekStart = appState.staffWeekStart;
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
       const { data, error } = await novaSupabase
         .from('clases')
         .select('id,titulo,fecha_hora,aforo_max,duracion_min,disciplina_id,sala_id,disciplina:disciplina_id(nombre),sala:sala_id(nombre)')
-        .gte('fecha_hora', new Date().toISOString())
+        .gte('fecha_hora', weekStart.toISOString())
+        .lt('fecha_hora', weekEnd.toISOString())
         .eq('cancelada', false)
         .order('fecha_hora', { ascending: true })
-        .limit(40);
+        .limit(250);
       if (error) {
         toast(error.message || 'No se pudieron cargar las clases', 'error');
         appState.clasesLista = [];
-        document.getElementById('rowsClases').innerHTML = '<tr><td colspan="4">No se pudieron cargar las sesiones.</td></tr>';
+        if (board) board.innerHTML = '<div class="book-empty-card"><h3>No se pudieron cargar las sesiones</h3></div>';
         return;
       }
       appState.clasesLista = data || [];
-      const rows = document.getElementById('rowsClases');
-      rows.innerHTML = (data || []).map((c) => {
+      appState.clasesOcupacion = {};
+      const ids = appState.clasesLista.map((c) => c.id);
+      if (ids.length) {
+        try {
+          const { data: occ } = await novaSupabase.rpc('ocupacion_clases', { p_clase_ids: ids });
+          (occ || []).forEach((row) => { appState.clasesOcupacion[row.clase_id] = Number(row.ocupadas) || 0; });
+        } catch (occErr) {
+          console.warn('Ocupación clases:', occErr);
+        }
+      }
+      const keys = [...Array(7)].map((_, i) => {
+        const d = new Date(weekStart);
+        d.setDate(d.getDate() + i);
+        return staffDateKey(d);
+      });
+      if (!keys.includes(appState.staffSelectedDay)) {
+        const todayKey = staffDateKey(new Date());
+        appState.staffSelectedDay = keys.includes(todayKey) ? todayKey : keys[0];
+      }
+      renderStaffCalendario();
+    }
+
+    function renderStaffCalendario() {
+      staffEnsureWeek();
+      const weekStart = appState.staffWeekStart;
+      const selected = staffParseKey(appState.staffSelectedDay);
+      const todayKey = staffDateKey(new Date());
+      const monthEl = document.getElementById('staffCalMonth');
+      const rangeEl = document.getElementById('staffCalRange');
+      const daysEl = document.getElementById('staffCalDays');
+      const board = document.getElementById('rowsClases');
+      const statsEl = document.getElementById('staffCalStats');
+      if (monthEl) monthEl.textContent = `${STAFF_MESES_FULL[selected.getMonth()]} ${selected.getFullYear()}`;
+      if (rangeEl) {
+        const end = new Date(weekStart);
+        end.setDate(end.getDate() + 6);
+        rangeEl.textContent = `${weekStart.getDate()} ${STAFF_MESES[weekStart.getMonth()]} — ${end.getDate()} ${STAFF_MESES[end.getMonth()]}`;
+      }
+
+      const counts = {};
+      (appState.clasesLista || []).forEach((c) => {
+        const k = staffDateKey(new Date(c.fecha_hora));
+        counts[k] = (counts[k] || 0) + 1;
+      });
+      if (daysEl) {
+        daysEl.innerHTML = [...Array(7)].map((_, i) => {
+          const day = new Date(weekStart);
+          day.setDate(day.getDate() + i);
+          const key = staffDateKey(day);
+          const n = counts[key] || 0;
+          const sel = key === appState.staffSelectedDay ? ' is-selected' : '';
+          const today = key === todayKey ? ' is-today' : '';
+          const has = n ? ' has-class' : '';
+          return `<button type="button" class="book-day js-staff-day${sel}${today}${has}" data-key="${escHtml(key)}" role="tab" aria-selected="${key === appState.staffSelectedDay}">
+            <span class="book-day-l">${STAFF_DIAS_L[day.getDay()]}</span>
+            <span class="book-day-n">${day.getDate()}</span>
+            <span class="book-day-dot" aria-hidden="true"></span>
+          </button>`;
+        }).join('');
+      }
+
+      const list = (appState.clasesLista || []).filter((c) => staffDateKey(new Date(c.fecha_hora)) === appState.staffSelectedDay);
+      const hoyN = (appState.clasesLista || []).filter((c) => staffDateKey(new Date(c.fecha_hora)) === todayKey).length;
+      if (statsEl) {
+        statsEl.innerHTML = `
+          <article class="staff-cal-stat"><span>Hoy</span><strong>${hoyN}</strong></article>
+          <article class="staff-cal-stat"><span>Esta semana</span><strong>${(appState.clasesLista || []).length}</strong></article>
+          <article class="staff-cal-stat"><span>${STAFF_DIAS_L[selected.getDay()]} ${selected.getDate()}</span><strong>${list.length}</strong></article>`;
+      }
+
+      if (!board) return;
+      if (!list.length) {
+        const weekEmpty = !(appState.clasesLista || []).length;
+        board.innerHTML = `<div class="book-empty-card">
+          <p class="book-empty-kicker">Horario</p>
+          <h3>${weekEmpty ? 'Esta semana no hay clases' : 'No hay clases este día'}</h3>
+          <p>${weekEmpty
+            ? 'Crea una sesión o rellena la semana para que las clientas puedan reservar.'
+            : 'Elige otro día de la franja o añade una clase a esta fecha.'}</p>
+          <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary btn-sm" id="staffEmptyNuevaBtn">Nueva clase</button>
+            ${weekEmpty ? '<button type="button" class="btn btn-outline btn-sm" id="staffEmptyGenBtn">Rellenar semana</button>' : ''}
+          </div>
+        </div>`;
+        return;
+      }
+
+      board.innerHTML = list.map((c) => {
+        const start = new Date(c.fecha_hora);
         const tituloClase = c.titulo || c.disciplina?.nombre || 'Clase';
-        const salaNombre = c.sala?.nombre || '';
-        return `
-        <tr>
-          <td>${escHtml(tituloClase)}<div style="font-size:.7rem;color:var(--color-muted)">${escHtml(salaNombre)}</div></td>
-          <td>${new Date(c.fecha_hora).toLocaleString('es-ES')}</td>
-          <td>${escHtml(c.aforo_max)}</td>
-          <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
+        const aforo = Number(c.aforo_max) || 0;
+        const ocup = appState.clasesOcupacion[c.id];
+        const plazas = ocup == null
+          ? (aforo ? `Hasta ${aforo} plazas` : 'Sin aforo')
+          : `${ocup}/${aforo} ocupadas`;
+        const on = c.id === appState.staffSelectedClaseId ? ' is-on' : '';
+        const disc = (appState.disciplinasAll || []).find((d) => d.id === c.disciplina_id);
+        const color = disc?.color_hex || '#c9a96e';
+        return `<article class="staff-class-card js-staff-clase${on}" data-id="${escHtml(c.id)}" data-nombre="${escHtml(tituloClase)}">
+          <div class="staff-class-time">${escHtml(staffPadTime(start))}<span>${Number(c.duracion_min) || 55} min</span></div>
+          <div class="staff-class-body">
+            <h3>${escHtml(tituloClase)}</h3>
+            <p>${escHtml(c.sala?.nombre || 'Sala')} · ${escHtml(plazas)}</p>
+          </div>
+          <span class="staff-class-pill" style="background:${escHtml(color)}">${escHtml(c.disciplina?.nombre || 'NŌVA')}</span>
+          <div class="staff-class-actions">
             <button class="btn btn-outline btn-sm js-editar-clase" data-id="${escHtml(c.id)}" data-titulo="${escHtml(c.titulo || '')}" data-fecha="${escHtml(c.fecha_hora)}" data-aforo="${escHtml(c.aforo_max)}">Editar</button>
             <button class="btn btn-outline btn-sm js-duplicar-clase" data-id="${escHtml(c.id)}">Duplicar</button>
-            <button class="btn btn-danger btn-sm js-eliminar-clase" data-id="${escHtml(c.id)}">Eliminar</button>
             <button class="btn btn-ghost btn-sm js-asistencia-clase" data-id="${escHtml(c.id)}" data-nombre="${escHtml(tituloClase)}">Asistencia</button>
-          </td>
-        </tr>`;
-      }).join('') || '<tr><td colspan="4">Sin clases</td></tr>';
+            <button class="btn btn-danger btn-sm js-eliminar-clase" data-id="${escHtml(c.id)}">Eliminar</button>
+          </div>
+        </article>`;
+      }).join('');
     }
 
     async function loadAsistenciaClase(claseId, claseNombre) {
@@ -4560,8 +4730,12 @@
         .eq('clase_id', claseId)
         .order('fecha_reserva', { ascending: true });
       if (error) throw error;
-      document.getElementById('asistenciaInfo').textContent = `Clase seleccionada: ${claseNombre}`;
-      document.getElementById('waitlistInfo').textContent = `Clase seleccionada: ${claseNombre}`;
+      document.getElementById('asistenciaInfo').textContent = `Sesión: ${claseNombre}`;
+      document.getElementById('waitlistInfo').textContent = `Sesión: ${claseNombre}`;
+      const detail = document.getElementById('clasesDetailZone');
+      if (detail) detail.hidden = false;
+      appState.staffSelectedClaseId = claseId;
+      renderStaffCalendario();
 
       const normales = (data || []).filter(r => !r.lista_espera && r.estado !== 'cancelada');
       const espera = (data || [])
@@ -4706,7 +4880,16 @@
         .order('created_at', { ascending: false })
         .limit(50);
       const rows = document.getElementById('rowsBonos');
-      rows.innerHTML = (data || []).map((b) => {
+      const stats = document.getElementById('bonosStats');
+      const list = data || [];
+      if (stats) {
+        const ilim = list.filter((b) => b.sesiones_totales == null).length;
+        stats.innerHTML = `
+          <article class="staff-cal-stat"><span>Vigentes</span><strong>${list.length}</strong></article>
+          <article class="staff-cal-stat"><span>Ilimitados</span><strong>${ilim}</strong></article>
+          <article class="staff-cal-stat"><span>Tipos</span><strong>${(appState.tiposBonoAll || []).length}</strong></article>`;
+      }
+      rows.innerHTML = list.map((b) => {
         const cliente = escHtml(b.perfil?.nombre || b.perfil?.email || '-');
         const bono = escHtml(b.tipo_bono?.nombre || '-');
         const uso = `${b.sesiones_usadas}/${b.sesiones_totales ?? '∞'}`;
@@ -4717,8 +4900,13 @@
             vence = d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
           }
         }
-        return `<tr><td>${cliente}</td><td>${bono}</td><td>${uso}</td><td>${escHtml(vence)}</td></tr>`;
-      }).join('') || '<tr><td colspan="4">Sin bonos activos. Pulsa «Asignar bono» para empezar.</td></tr>';
+        return `<article class="staff-person-card">
+          <div class="staff-person-body">
+            <h3>${cliente}</h3>
+            <p>${bono} · ${uso} · vence ${escHtml(vence)}</p>
+          </div>
+        </article>`;
+      }).join('') || '<div class="book-empty-card"><h3>Nadie tiene bono activo</h3><p>Asigna uno desde el botón de arriba.</p></div>';
     }
 
     async function fetchAllTransaccionesLista() {
@@ -5157,8 +5345,14 @@
         .limit(40);
       const rows = document.getElementById('rowsNotifs');
       rows.innerHTML = (data || [])
-        .map(n => `<tr><td>${escHtml(n.titulo)}</td><td>${escHtml(n.perfil?.nombre || n.perfil?.email || 'Aviso general')}</td><td>${escHtml(n.tipo || 'info')}</td><td>${escHtml(new Date(n.created_at).toLocaleString('es-ES'))}</td></tr>`)
-        .join('') || '<tr><td colspan="4">Sin notificaciones</td></tr>';
+        .map(n => `<article class="staff-notif-item">
+          <div>
+            <h3>${escHtml(n.titulo)}</h3>
+            <p>${escHtml(n.perfil?.nombre || n.perfil?.email || 'Aviso general')} · ${escHtml(n.tipo || 'info')}</p>
+          </div>
+          <span>${escHtml(new Date(n.created_at).toLocaleString('es-ES'))}</span>
+        </article>`)
+        .join('') || '<div class="book-empty-card"><h3>Aún no hay avisos</h3><p>El primero que envíes aparecerá aquí.</p></div>';
     }
 
     document.getElementById('nuevaClaseForm').addEventListener('submit', async (e) => {
@@ -5306,6 +5500,58 @@
     });
 
     document.addEventListener('click', async (e) => {
+      if (e.target.closest('#staffEmptyNuevaBtn')) {
+        openNuevaClaseModal();
+        return;
+      }
+      if (e.target.closest('#staffEmptyGenBtn')) {
+        document.getElementById('abrirGeneradorSemanalBtn')?.click();
+        return;
+      }
+      if (e.target.closest('.js-staff-week-prev')) {
+        staffEnsureWeek();
+        appState.staffWeekStart.setDate(appState.staffWeekStart.getDate() - 7);
+        const keep = staffParseKey(appState.staffSelectedDay);
+        const dow = keep.getDay();
+        const next = new Date(appState.staffWeekStart);
+        next.setDate(appState.staffWeekStart.getDate() + (dow === 0 ? 6 : dow - 1));
+        appState.staffSelectedDay = staffDateKey(next);
+        await loadClases();
+        return;
+      }
+      if (e.target.closest('.js-staff-week-next')) {
+        staffEnsureWeek();
+        appState.staffWeekStart.setDate(appState.staffWeekStart.getDate() + 7);
+        const keep = staffParseKey(appState.staffSelectedDay);
+        const dow = keep.getDay();
+        const next = new Date(appState.staffWeekStart);
+        next.setDate(appState.staffWeekStart.getDate() + (dow === 0 ? 6 : dow - 1));
+        appState.staffSelectedDay = staffDateKey(next);
+        await loadClases();
+        return;
+      }
+      if (e.target.closest('.js-staff-week-hoy')) {
+        appState.staffWeekStart = staffStartOfWeek(new Date());
+        appState.staffSelectedDay = staffDateKey(new Date());
+        await loadClases();
+        return;
+      }
+      const dayBtn = e.target.closest('.js-staff-day');
+      if (dayBtn) {
+        appState.staffSelectedDay = dayBtn.dataset.key;
+        renderStaffCalendario();
+        return;
+      }
+      const claseCard = e.target.closest('.js-staff-clase');
+      if (claseCard && !e.target.closest('button')) {
+        try {
+          await loadAsistenciaClase(claseCard.dataset.id, claseCard.dataset.nombre || 'Clase');
+        } catch (err) {
+          toast(err.message || 'No se pudo cargar asistencia', 'error');
+        }
+        return;
+      }
+
       const btnEditar = e.target.closest('.js-editar-clase');
       if (btnEditar) {
         openClaseEditModal({
@@ -5447,6 +5693,7 @@
           const sel = document.getElementById('editClienteSelect');
           sel.value = btnEditarCliente.dataset.id;
           await loadClienteDetalleById(btnEditarCliente.dataset.id);
+          document.getElementById('cardFichaCliente')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } catch (err) {
           toast(err.message || 'No se pudo abrir la ficha del cliente', 'error');
         }
@@ -6648,6 +6895,8 @@
 
         toast(`¡Semana generada con éxito! (${clasesToInsert.length} clases creadas: 12 Reformer + 12 Suelo al día)`, 'success', 5000);
         closeGeneradorSemanalModal();
+        appState.staffWeekStart = staffStartOfWeek(new Date(`${lunesVal}T12:00:00`));
+        appState.staffSelectedDay = lunesVal;
         await loadClases();
       } catch (err) {
         console.error('Error generando semana:', err);
