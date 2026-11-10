@@ -1,10 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const SITE_URL = "https://nova-pilates.vercel.app";
+const SITE_URL = "https://novapilatestudios.com";
 const LOGO_URL = `${SITE_URL}/assets/branding/logo-nova-main.PNG`;
 const STUDIO_IMG_URL = `${SITE_URL}/assets/branding/logo-nova-grande.png`;
-const LOGIN_URL = `${SITE_URL}/login.html`;
+const LOGIN_URL = `${SITE_URL}/login`;
 const MAPS_URL =
   "https://www.google.com/maps/search/?api=1&query=N%C5%8CVA+Pilates+Sevilla";
 
@@ -12,6 +12,8 @@ function corsFor(req: Request): Record<string, string> {
   const origin = req.headers.get("Origin") || "";
   const allowed = new Set([
     SITE_URL,
+    "https://www.novapilatestudios.com",
+    "https://nova-pilates.vercel.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
   ]);

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nova-pilates.vercel.app/sitemap.xml
+Sitemap: https://novapilatestudios.com/sitemap.xml

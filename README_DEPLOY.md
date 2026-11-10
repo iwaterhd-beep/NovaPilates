@@ -34,10 +34,11 @@ Hasta entonces la tienda muestra productos de vista previa. El **carrito** (`js/
 
 En Supabase → **Authentication → URL Configuration**:
 
-- **Site URL:** `https://nova-pilates.vercel.app`
+- **Site URL:** `https://novapilatestudios.com`
 - **Redirect URLs:**  
-  - `https://nova-pilates.vercel.app/**`  
-  - `http://localhost:8080/**` (desarrollo)
+  - `https://novapilatestudios.com/**`  
+  - `https://www.novapilatestudios.com/**`  
+  - `http://localhost:3000/**` (desarrollo)
 
 Recuperación de contraseña: el enlace debe abrir `/login.html?reset=true` (flujo implementado en `login.html`).
 
@@ -101,8 +102,9 @@ git push -u origin main
 2. Framework: **Other**  
 3. Deploy  
 
-URL de producción típica: `https://nova-pilates.vercel.app`  
-No uses URLs de deploy con hash (`…-xxxx-….vercel.app`) si están protección de Vercel Login: usa el dominio de producción.
+URL de producción: `https://novapilatestudios.com`  
+En Vercel → Project → Settings → Domains: añade `novapilatestudios.com` (principal) y `www.novapilatestudios.com` (redirige al apex).  
+No uses URLs de deploy con hash (`…-xxxx-….vercel.app`) si tienen protección de Vercel Login.
 
 `vercel.json` incluye rewrites (`/login`, `/staff`, legales, etc.) y `Cache-Control` en `supabase.js` / login.
 
