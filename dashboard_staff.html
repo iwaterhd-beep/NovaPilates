@@ -484,15 +484,15 @@
         </div>
         <div class="card">
           <div class="card-label">Datos de facturación</div>
-          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .9rem;">Estos datos aparecen como emisor en las facturas. Solo administración. La gestoría puede llevar Holded (u otro programa) aparte: el TPV sigue emitiendo las facturas aquí y en Finanzas hay un botón <strong>Exportar para Holded</strong> con el formato de importación de ventas.</p>
+          <p style="font-size:.75rem;color:var(--color-muted);margin:0 0 .9rem;">Estos datos aparecen como emisor en tickets y facturas (razón social, CIF y domicilio). Solo administración. La gestoría puede llevar Holded (u otro programa) aparte: el TPV sigue emitiendo las facturas aquí y en Finanzas hay un botón <strong>Exportar para Holded</strong> con el formato de importación de ventas.</p>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;">
             <div class="form-group" style="margin:0;">
-              <label class="form-label" for="facNombreEmisor">Nombre del emisor</label>
-              <input class="form-input" id="facNombreEmisor" value="NŌVA Pilates Studio" autocomplete="off" />
+              <label class="form-label" for="facNombreEmisor">Razón social</label>
+              <input class="form-input" id="facNombreEmisor" value="Nova Studios XXI. SL" autocomplete="off" />
             </div>
             <div class="form-group" style="margin:0;">
               <label class="form-label" for="facCif">CIF / NIF</label>
-              <input class="form-input" id="facCif" placeholder="Pendiente de publicar" autocomplete="off" />
+              <input class="form-input" id="facCif" placeholder="B-26.927.301" autocomplete="off" />
             </div>
             <div class="form-group" style="margin:0;">
               <label class="form-label" for="facDireccion">Dirección</label>
@@ -1109,7 +1109,7 @@
           </div>
           <div class="form-group form-group--hint">
             <label class="form-label" for="modalNuevoPassword">Contraseña</label>
-            <input class="form-input" id="modalNuevoPassword" type="password" placeholder="Opcional en clientes" minlength="6" />
+            <input class="form-input" id="modalNuevoPassword" type="password" placeholder="Opcional en clientes" minlength="8" />
             <p id="modalNuevoPasswordHint" class="form-hint">Vacía = el cliente la elige en el primer acceso (solo correo).</p>
           </div>
           <div class="form-group">
@@ -1393,7 +1393,7 @@
 
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
-  <script src="/supabase.js?v=20261003a"></script>
+  <script src="/supabase.js?v=20261110s"></script>
   <script src="/js/avatar.js?v=2"></script>
   <script src="/js/ui.js?v=20260905s"></script>
   <script src="/js/cookies-consent.js"></script>
@@ -1496,16 +1496,17 @@
     const TPV_LOGO_PRINT = `${location.origin}/assets/branding/logo-isotipo.svg`;
     const FACTURACION_PATCH = 'supabase_patch_facturacion.sql';
     const FACTURACION_DEFAULTS = {
-      nombre_emisor: 'NŌVA Pilates Studio',
-      cif: '[pendiente de publicar]',
-      direccion: '',
-      ciudad: 'Sevilla',
-      codigo_postal: '',
+      nombre_emisor: 'Nova Studios XXI. SL',
+      cif: 'B-26.927.301',
+      direccion: 'C/ Ronda de Altair, 57',
+      ciudad: 'Dos Hermanas, Sevilla',
+      codigo_postal: '41703',
       telefono: '',
       email: '',
       iva_porcentaje: 21,
       pie_factura: 'Desconecta de lo de fuera. Conecta contigo.'
     };
+    const MARCA_COMERCIAL = 'NŌVA Pilates Studio';
 
     const TAB_LABELS = {
       tpv: 'TPV',
@@ -2067,12 +2068,12 @@
         toast('Completa nombre y email.', 'error');
         return;
       }
-      if (rol !== 'cliente' && (!password || password.length < 6)) {
-        toast('Empleado necesita contraseña (mínimo 6 caracteres).', 'error');
+      if (rol !== 'cliente' && (!password || password.length < 8)) {
+        toast('Empleado necesita contraseña (mínimo 8 caracteres).', 'error');
         return;
       }
-      if (password && password.length < 6) {
-        toast('La contraseña debe tener al menos 6 caracteres.', 'error');
+      if (password && password.length < 8) {
+        toast('La contraseña debe tener al menos 8 caracteres.', 'error');
         return;
       }
       const fechaCheck = getDobIso('modalNuevoNac');
@@ -2784,25 +2785,25 @@
       appState.disciplinasAll = d || [];
       const disciplinasActivas = (appState.disciplinasAll || []).filter((x) => x.activa);
       const ds = document.getElementById('disciplinaSelect');
-      ds.innerHTML = disciplinasActivas.map((x) => `<option value="${x.id}">${escHtml(x.nombre)}</option>`).join('');
+      ds.innerHTML = disciplinasActivas.map((x) => `<option value="${escHtml(x.id)}">${escHtml(x.nombre)}</option>`).join('');
       if (staffProfile && staffProfile.rol === 'admin') renderDisciplinasRows();
       const ss = document.getElementById('salaSelect');
-      ss.innerHTML = (s || []).map(x => `<option value="${x.id}">${x.nombre}</option>`).join('');
+      ss.innerHTML = (s || []).map(x => `<option value="${escHtml(x.id)}">${escHtml(x.nombre)}</option>`).join('');
       const cs = document.getElementById('clienteSelect');
       const clientes = (c || []).filter(x => x.rol === 'cliente');
       appState.clientes = clientes;
-      cs.innerHTML = clientes.map(x => `<option value="${x.id}">${escHtml(nombreClienteDisplay(x))}</option>`).join('');
+      cs.innerHTML = clientes.map(x => `<option value="${escHtml(x.id)}">${escHtml(nombreClienteDisplay(x))}</option>`).join('');
       const editSel = document.getElementById('editClienteSelect');
-      editSel.innerHTML = '<option value="">Selecciona un cliente...</option>' + clientes.map(x => `<option value="${x.id}">${escHtml(nombreClienteDisplay(x))}</option>`).join('');
+      editSel.innerHTML = '<option value="">Selecciona un cliente...</option>' + clientes.map(x => `<option value="${escHtml(x.id)}">${escHtml(nombreClienteDisplay(x))}</option>`).join('');
       const notifDestino = document.getElementById('notifDestino');
       notifDestino.innerHTML = '<option value="">Aviso general (tablero, no a cada cliente)</option>' + (c || [])
         .filter(x => x.rol === 'cliente')
-        .map(x => `<option value="${x.id}">${escHtml(nombreClienteDisplay(x))}</option>`)
+        .map(x => `<option value="${escHtml(x.id)}">${escHtml(nombreClienteDisplay(x))}</option>`)
         .join('');
       const tbs = document.getElementById('tipoBonoSelect');
       appState.tiposBonoAll = tb || [];
       appState.tiposBono = appState.tiposBonoAll.filter(x => x.activo);
-      tbs.innerHTML = appState.tiposBono.map(x => `<option value="${x.id}" data-sesiones="${x.sesiones ?? ''}" data-dias="${x.duracion_dias}">${x.nombre}</option>`).join('');
+      tbs.innerHTML = appState.tiposBono.map(x => `<option value="${escHtml(x.id)}" data-sesiones="${escHtml(String(x.sesiones ?? ''))}" data-dias="${escHtml(String(x.duracion_dias ?? ''))}">${escHtml(x.nombre)}</option>`).join('');
 
       appState.usuariosCatalogo = c || [];
       renderUsuariosTabla();
@@ -2834,7 +2835,7 @@
           <p class="clases-hint" style="margin:0;">${b.sesiones ?? 'Ilimitado'} ses. · ${escHtml(b.duracion_dias)} días · ${Number(b.precio || 0).toFixed(2)} €</p>
           <div class="staff-disc-meta">${b.activo ? '<span class="badge badge-accent">TPV</span>' : '<span class="badge badge-neutral">Oculto</span>'}${b.visible_web ? ' <span class="badge badge-accent">Web</span>' : ''}</div>
           <div class="staff-disc-actions">
-            <button class="btn btn-outline btn-sm js-editar-tipo-bono" data-id="${b.id}">Editar</button>
+            <button class="btn btn-outline btn-sm js-editar-tipo-bono" data-id="${escHtml(b.id)}">Editar</button>
           </div>
         </article>
       `).join('') || '<div class="book-empty-card"><h3>Sin tipos de bono</h3><p>Crea el primero con «Nuevo bono».</p></div>';
@@ -2866,7 +2867,7 @@
         return;
       }
       wrap.innerHTML = matches.map(c => `
-        <button class="btn btn-outline btn-sm js-tpv-select-client" data-id="${c.id}" style="justify-content:space-between;">
+        <button class="btn btn-outline btn-sm js-tpv-select-client" data-id="${escHtml(c.id)}" style="justify-content:space-between;">
           <span>${escHtml(nombreClienteDisplay(c))}</span>
           <span style="opacity:.7">${escHtml(c.email || '')}</span>
         </button>
@@ -3492,10 +3493,12 @@
       return map[m] || String(m || '').replace(/^\w/, (c) => c.toUpperCase()) || '—';
     }
 
-    function tpvFacturaDesglose(total) {
+    function tpvFacturaDesglose(total, ivaPct) {
       const importe = Math.max(0, Number(total || 0));
-      const iva = importe / 1.21 * 0.21;
-      return { base: importe - iva, iva, total: importe };
+      const pct = Number(ivaPct != null ? ivaPct : 21) || 21;
+      const base = Math.round((importe / (1 + pct / 100)) * 100) / 100;
+      const iva = Math.round((importe - base) * 100) / 100;
+      return { base, iva, total: importe, pct };
     }
 
     function tpvTicketHtml(t) {
@@ -3522,7 +3525,7 @@
           </tr>`;
       }).join('');
       const direccion = [emisor.direccion, [emisor.codigo_postal, emisor.ciudad].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
-      const cifOk = emisor.cif && !String(emisor.cif).includes('pendiente');
+      const desglose = tpvFacturaDesglose(t.importe, emisor.iva);
 
       return `<!DOCTYPE html>
 <html lang="es">
@@ -3579,10 +3582,10 @@
 </head>
 <body>
   <div class="logo"><img src="${escHtml(TPV_LOGO_PRINT)}" alt="NŌVA Pilates" /></div>
-  <div class="brand">${escHtml(emisor.nombre || 'NŌVA Pilates Studio')}</div>
-  <div class="brand-sub">${escHtml(emisor.ciudad || 'Sevilla')}</div>
+  <div class="brand">${escHtml(MARCA_COMERCIAL)}</div>
+  <div class="brand-sub">${escHtml(emisor.nombre || FACTURACION_DEFAULTS.nombre_emisor)}</div>
   <div class="legal">
-    ${cifOk ? `CIF ${escHtml(emisor.cif)}<br />` : ''}
+    CIF ${escHtml(emisor.cif || FACTURACION_DEFAULTS.cif)}<br />
     ${direccion ? `${escHtml(direccion)}<br />` : ''}
     ${[emisor.telefono, emisor.email].filter(Boolean).map((x) => escHtml(x)).join(' · ')}
   </div>
@@ -3599,15 +3602,17 @@
   </table>
   <div class="sep-solid"></div>
   <table>
+    <tr><td>Base imponible</td><td class="right">${tpvFmtEur(desglose.base)}</td></tr>
+    <tr><td>IVA ${String(desglose.pct).replace('.', ',')}%</td><td class="right">${tpvFmtEur(desglose.iva)}</td></tr>
     <tr class="total-row"><td>Total</td><td class="right">${tpvFmtEur(t.importe)}</td></tr>
   </table>
-  <p class="iva">IVA incluido</p>
+  <p class="iva">Factura simplificada. IVA incluido.</p>
   <div class="sep"></div>
   <div class="row"><span class="k">Pago</span><span>${escHtml(metodo)}</span></div>
   ${t.valeCodigo ? `<div class="row"><span class="k">Ticket regalo</span><span>${escHtml(t.valeCodigo)} · resto ${tpvFmtEur(t.valeRestante)}</span></div>` : ''}
   ${t.nota ? `<div class="row"><span class="k">Nota</span><span>${escHtml(t.nota)}</span></div>` : ''}
   <div class="sep"></div>
-  <p class="footer"><strong>Gracias por confiar en NŌVA</strong>Reformer · Suelo · Yoga · Barre</p>
+  <p class="footer"><strong>Gracias por confiar en NŌVA</strong>${escHtml(emisor.nombre || FACTURACION_DEFAULTS.nombre_emisor)} · CIF ${escHtml(emisor.cif || FACTURACION_DEFAULTS.cif)}<br />Reformer · Suelo · Yoga · Barre</p>
 </body>
 </html>`;
     }
@@ -3719,12 +3724,18 @@
 
     function facturacionEmisor() {
       const c = appState.facturacionConfig || {};
+      const pick = (key) => {
+        const v = c[key];
+        if (v == null || String(v).trim() === '') return FACTURACION_DEFAULTS[key];
+        if (key === 'cif' && /pendiente/i.test(String(v))) return FACTURACION_DEFAULTS.cif;
+        return v;
+      };
       return {
-        nombre: c.nombre_emisor || FACTURACION_DEFAULTS.nombre_emisor,
-        cif: c.cif || FACTURACION_DEFAULTS.cif,
-        direccion: c.direccion || FACTURACION_DEFAULTS.direccion,
-        ciudad: c.ciudad || FACTURACION_DEFAULTS.ciudad,
-        codigo_postal: c.codigo_postal || FACTURACION_DEFAULTS.codigo_postal,
+        nombre: pick('nombre_emisor'),
+        cif: pick('cif'),
+        direccion: pick('direccion'),
+        ciudad: pick('ciudad'),
+        codigo_postal: pick('codigo_postal'),
         telefono: c.telefono || FACTURACION_DEFAULTS.telefono,
         email: c.email || FACTURACION_DEFAULTS.email,
         iva: Number(c.iva_porcentaje != null ? c.iva_porcentaje : FACTURACION_DEFAULTS.iva_porcentaje) || 21,
@@ -3786,11 +3797,11 @@
       const motivo = (d.motivoAnulacion || '').trim();
       const direccionEmisor = [
         emisor.direccion,
-        [emisor.ciudad, emisor.codigo_postal].filter(Boolean).join(', '),
+        [emisor.codigo_postal, emisor.ciudad].filter(Boolean).join(' '),
         'España'
       ].filter(Boolean).join(', ');
       const contactoEmisor = [emisor.telefono, emisor.email].filter(Boolean).join(' · ');
-      const cifPendiente = !emisor.cif || String(emisor.cif).includes('pendiente');
+      const cifPendiente = !emisor.cif || /pendiente/i.test(String(emisor.cif));
 
       const filas = lineas.map((l) => {
         const sub = l.qty * l.unit;
@@ -3868,8 +3879,8 @@
       <div class="brand-block">
         <img src="${escHtml(TPV_LOGO_PRINT)}" alt="NŌVA Pilates" />
         <div>
-          <div class="brand">${escHtml(emisor.nombre)}</div>
-          <div class="brand-sub">Reformer · Suelo · Yoga · Barre</div>
+          <div class="brand">${escHtml(MARCA_COMERCIAL)}</div>
+          <div class="brand-sub">${escHtml(emisor.nombre)}</div>
         </div>
       </div>
       <div class="right">
@@ -4012,8 +4023,8 @@
           <td>${estadoBadge}</td>
           <td>
             <div class="fin-actions">
-              <button type="button" class="btn btn-outline btn-sm js-ver-factura" data-factura-id="${f.id}">Ver</button>
-              ${anulada ? '' : `<button type="button" class="btn btn-ghost btn-sm js-anular-factura" data-factura-id="${f.id}">Anular</button>`}
+              <button type="button" class="btn btn-outline btn-sm js-ver-factura" data-factura-id="${escHtml(f.id)}">Ver</button>
+              ${anulada ? '' : `<button type="button" class="btn btn-ghost btn-sm js-anular-factura" data-factura-id="${escHtml(f.id)}">Anular</button>`}
             </div>
           </td>
         </tr>`;
@@ -4073,9 +4084,9 @@
       };
       set('facNombreEmisor', c.nombre_emisor ?? FACTURACION_DEFAULTS.nombre_emisor);
       set('facCif', c.cif ?? FACTURACION_DEFAULTS.cif);
-      set('facDireccion', c.direccion ?? '');
+      set('facDireccion', c.direccion ?? FACTURACION_DEFAULTS.direccion);
       set('facCiudad', c.ciudad ?? FACTURACION_DEFAULTS.ciudad);
-      set('facCodigoPostal', c.codigo_postal ?? '');
+      set('facCodigoPostal', c.codigo_postal ?? FACTURACION_DEFAULTS.codigo_postal);
       set('facTelefono', c.telefono ?? '');
       set('facEmail', c.email ?? '');
       set('facIva', c.iva_porcentaje ?? FACTURACION_DEFAULTS.iva_porcentaje);

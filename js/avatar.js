@@ -52,7 +52,7 @@
   async function novaUploadAvatar(userId, file) {
     if (!userId) throw new Error('Falta el usuario.');
     if (!file) throw new Error('Elige o haz una foto.');
-    if (file.size > 8 * 1024 * 1024) throw new Error('La foto supera 8 MB.');
+    if (file.size > 2 * 1024 * 1024) throw new Error('La foto supera 2 MB.');
     const packed = await novaCompressImage(file);
     const path = `${userId}/avatar.jpg`;
     const { error } = await novaSupabase.storage.from('avatares').upload(path, packed, {

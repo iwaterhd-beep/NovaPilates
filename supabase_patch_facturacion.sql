@@ -75,11 +75,11 @@ CREATE POLICY "Staff actualiza facturas" ON public.facturas
 -- ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.facturacion_config (
   id               INTEGER PRIMARY KEY CHECK (id = 1),
-  nombre_emisor    TEXT NOT NULL DEFAULT 'NŌVA Pilates Studio',
-  cif              TEXT NOT NULL DEFAULT '[pendiente de publicar]',
-  direccion        TEXT,
-  ciudad           TEXT DEFAULT 'Sevilla',
-  codigo_postal    TEXT,
+  nombre_emisor    TEXT NOT NULL DEFAULT 'Nova Studios XXI. SL',
+  cif              TEXT NOT NULL DEFAULT 'B-26.927.301',
+  direccion        TEXT DEFAULT 'C/ Ronda de Altair, 57',
+  ciudad           TEXT DEFAULT 'Dos Hermanas, Sevilla',
+  codigo_postal    TEXT DEFAULT '41703',
   telefono         TEXT,
   email            TEXT,
   iva_porcentaje   DECIMAL(5,2) NOT NULL DEFAULT 21 CHECK (iva_porcentaje >= 0 AND iva_porcentaje <= 100),
@@ -579,8 +579,8 @@ BEGIN
   ON CONFLICT (id) DO NOTHING;
 
   UPDATE public.facturacion_config
-  SET nombre_emisor    = coalesce(nullif(trim(p_nombre_emisor), ''), 'NŌVA Pilates Studio'),
-      cif              = coalesce(nullif(trim(p_cif), ''), '[pendiente de publicar]'),
+  SET       nombre_emisor    = coalesce(nullif(trim(p_nombre_emisor), ''), 'Nova Studios XXI. SL'),
+      cif              = coalesce(nullif(trim(p_cif), ''), 'B-26.927.301'),
       direccion        = nullif(trim(coalesce(p_direccion, '')), ''),
       ciudad           = nullif(trim(coalesce(p_ciudad, '')), ''),
       codigo_postal    = nullif(trim(coalesce(p_codigo_postal, '')), ''),

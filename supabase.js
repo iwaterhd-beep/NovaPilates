@@ -26,8 +26,9 @@ async function getSession() {
 }
 
 async function getCurrentUser() {
-  const session = await getSession();
-  return session?.user ?? null;
+  const { data: { user }, error } = await novaSupabase.auth.getUser();
+  if (error || !user) return null;
+  return user;
 }
 
 async function getUserProfile(userId) {
@@ -41,20 +42,20 @@ async function getUserProfile(userId) {
 }
 
 async function requireAuth(rolesPermitidos = null) {
-  const session = await getSession();
-  if (!session) {
+  const user = await getCurrentUser();
+  if (!user) {
     goLogin();
     return null;
   }
 
-  const profile = await getUserProfile(session.user.id);
+  const profile = await getUserProfile(user.id);
   if (profile?.activo === false) {
     await novaSupabase.auth.signOut();
     window.location.replace('/login.html?cuenta=inactiva');
     return null;
   }
 
-  if (!rolesPermitidos) return session.user;
+  if (!rolesPermitidos) return user;
 
   const roles = Array.isArray(rolesPermitidos) ? rolesPermitidos : [rolesPermitidos];
   if (!roles.includes(profile?.rol)) {

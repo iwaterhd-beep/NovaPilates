@@ -16,7 +16,7 @@ function friendlyError(err) {
     [/invalid login credentials/i, 'Correo o contraseña incorrectos.'],
     [/email not confirmed/i, 'Debes confirmar tu correo antes de entrar.'],
     [/user already registered/i, 'Ya existe una cuenta con ese correo.'],
-    [/password/i, 'Revisa la contraseña (mínimo 6 caracteres).'],
+    [/password/i, 'Revisa la contraseña (mínimo 8 caracteres en altas nuevas).'],
     [/jwt|session|auth/i, 'Tu sesión ha caducado. Vuelve a iniciar sesión.'],
     [/network|fetch|failed to fetch/i, 'No hay conexión. Comprueba internet e inténtalo de nuevo.'],
     [/no hay plazas/i, 'No quedan plazas en esta clase.'],
@@ -61,7 +61,7 @@ function showConfirm(message, { confirmLabel = 'Confirmar', cancelLabel = 'Cance
     overlay.className = 'nova-confirm-overlay';
     overlay.innerHTML = `
       <div class="nova-confirm" role="dialog" aria-modal="true">
-        <p>${message}</p>
+        <p>${typeof escHtml === 'function' ? escHtml(message) : String(message ?? '')}</p>
         <div class="nova-confirm-actions">
           <button type="button" class="nova-cookie-btn nova-cookie-btn--ghost" data-act="no">${cancelLabel}</button>
           <button type="button" class="nova-cookie-btn" data-act="yes">${confirmLabel}</button>

@@ -125,15 +125,15 @@
       </div>
 
       <div id="panel-reset" class="panel">
-        <p class="hint" id="resetHint">Elige una contraseña nueva (mínimo 6 caracteres).</p>
+        <p class="hint" id="resetHint">Elige una contraseña nueva (mínimo 8 caracteres).</p>
         <form id="resetForm" novalidate>
           <div class="group">
             <label for="newPassword">Nueva contraseña</label>
-            <input id="newPassword" type="password" required autocomplete="new-password" minlength="6" />
+            <input id="newPassword" type="password" required autocomplete="new-password" minlength="8" />
           </div>
           <div class="group">
             <label for="newPassword2">Repetir contraseña</label>
-            <input id="newPassword2" type="password" required autocomplete="new-password" minlength="6" />
+            <input id="newPassword2" type="password" required autocomplete="new-password" minlength="8" />
           </div>
           <button class="btn" id="resetBtn" type="submit">Guardar contraseña</button>
         </form>
@@ -144,7 +144,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
-  <script src="/supabase.js?v=20261003a"></script>
+  <script src="/supabase.js?v=20261110s"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/cookies-consent.js"></script>
   <script>
@@ -168,12 +168,12 @@
         document.getElementById('cardTitle').textContent = 'Crea tu contraseña';
         document.getElementById('cardSub').textContent = 'Es tu primer acceso a NŌVA';
         document.getElementById('resetHint').textContent =
-          'Elige la contraseña que quieras usar a partir de ahora (mínimo 6 caracteres).';
+          'Elige la contraseña que quieras usar a partir de ahora (mínimo 8 caracteres).';
       } else if (isReset) {
         document.getElementById('cardTitle').textContent = 'Nueva contraseña';
         document.getElementById('cardSub').textContent = 'Restablece el acceso a tu cuenta';
         document.getElementById('resetHint').textContent =
-          'Elige una contraseña nueva (mínimo 6 caracteres).';
+          'Elige una contraseña nueva (mínimo 8 caracteres).';
       } else {
         document.getElementById('cardTitle').textContent = 'Bienvenida';
         document.getElementById('cardSub').textContent = 'Accede a tu espacio personal';
@@ -189,8 +189,9 @@
     });
 
     async function redirectAfterLogin(user) {
-      const { data: sessionData } = await novaSupabase.auth.getSession();
-      if (!sessionData?.session) throw new Error('La sesion no se guardo. Prueba otra vez.');
+      const { data: { user: verified }, error: userErr } = await novaSupabase.auth.getUser();
+      if (userErr || !verified) throw new Error('La sesion no se guardo. Prueba otra vez.');
+      user = verified;
       const { data: profile } = await novaSupabase
         .from('perfiles')
         .select('rol,debe_definir_password,activo')
@@ -269,7 +270,7 @@
       const p1 = document.getElementById('newPassword').value;
       const p2 = document.getElementById('newPassword2').value;
       if (!p1 || !p2) return showMsg('Completa ambos campos.', 'error');
-      if (p1.length < 6) return showMsg('La contraseña debe tener al menos 6 caracteres.', 'error');
+      if (p1.length < 8) return showMsg('La contraseña debe tener al menos 8 caracteres.', 'error');
       if (p1 !== p2) return showMsg('Las contraseñas no coinciden.', 'error');
       try {
         showPageSpinner(true);

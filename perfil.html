@@ -118,7 +118,7 @@
   </main>
   <div class="toast-container" id="toastContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
-  <script src="/supabase.js?v=20261003a"></script>
+  <script src="/supabase.js?v=20261110s"></script>
   <script src="/js/avatar.js?v=2"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/cookies-consent.js"></script>
@@ -180,9 +180,9 @@
     }
 
     async function init() {
-      const session = await getSession();
-      if (!session) { window.location.href = 'login.html'; return; }
-      currentProfile = await getUserProfile(session.user.id);
+      const user = await getCurrentUser();
+      if (!user) { window.location.href = 'login.html'; return; }
+      currentProfile = await getUserProfile(user.id);
       fillForm(currentProfile);
       novaBindAvatarPicker({
         preview: document.getElementById('heroAvatar'),
