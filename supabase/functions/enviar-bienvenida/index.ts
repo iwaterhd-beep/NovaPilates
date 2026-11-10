@@ -6,7 +6,7 @@ const LOGO_URL = `${SITE_URL}/assets/branding/logo-nova-main.PNG`;
 const STUDIO_IMG_URL = `${SITE_URL}/assets/branding/logo-nova-grande.png`;
 const LOGIN_URL = `${SITE_URL}/login`;
 const MAPS_URL =
-  "https://www.google.com/maps/search/?api=1&query=N%C5%8CVA+Pilates+Sevilla";
+  "https://www.google.com/maps/search/?api=1&query=Av.+Jos%C3%A9+Rodr%C3%ADguez+de+la+Borbolla+Camoy%C3%A1n+10+Dos+Hermanas+Sevilla";
 
 function corsFor(req: Request): Record<string, string> {
   const origin = req.headers.get("Origin") || "";

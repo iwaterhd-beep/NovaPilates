@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS public.facturacion_config (
   id               INTEGER PRIMARY KEY CHECK (id = 1),
   nombre_emisor    TEXT NOT NULL DEFAULT 'Nova Studios XXI. SL',
   cif              TEXT NOT NULL DEFAULT 'B-26.927.301',
-  direccion        TEXT DEFAULT 'C/ Ronda de Altair, 57',
+  direccion        TEXT DEFAULT 'Av. José Rodríguez de la Borbolla Camoyán, 10',
   ciudad           TEXT DEFAULT 'Dos Hermanas, Sevilla',
   codigo_postal    TEXT DEFAULT '41703',
   telefono         TEXT,
