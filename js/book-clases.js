@@ -85,6 +85,7 @@
       perfilId: opts.perfilId,
       isPriority: !!opts.isPriority,
       isEssential: !!opts.isEssential,
+      isMorning: !!opts.isMorning,
       margenReservaDias: 0,
       margenCancelacionDias: 0,
       filtro: '',
@@ -355,14 +356,17 @@
       const reserva = state.reservasMap.get(c.id);
       const isReserved = reserva?.estado === 'confirmada' || reserva?.estado === 'asistida';
       const isWaitlist = isReserved && reserva?.lista_espera;
-      const canReserve = state.margenReservaDias === 0 || new Date(c.fecha_hora).getTime() >= Date.now() + state.margenReservaDias * 86400000;
-      const canCancel = state.margenCancelacionDias === 0 || new Date(c.fecha_hora).getTime() >= Date.now() + state.margenCancelacionDias * 86400000;
-      const isReformer = (c.sala?.nombre || '').toLowerCase().includes('reformer') || (c.titulo || '').toLowerCase().includes('reformer');
+      const start = new Date(c.fecha_hora);
+      const canReserve = state.margenReservaDias === 0 || start.getTime() >= Date.now() + state.margenReservaDias * 86400000;
+      const canCancel = state.margenCancelacionDias === 0 || start.getTime() >= Date.now() + state.margenCancelacionDias * 86400000;
 
       try {
-        if (!isReserved && state.isEssential && isReformer) {
-          notify('Tu membresía no incluye Reformer. Amplía en recepción.', 'warning');
-          return;
+        if (!isReserved && state.isMorning) {
+          const mins = start.getHours() * 60 + start.getMinutes();
+          if (mins < 8 * 60 || mins > 11 * 60) {
+            notify('Morning reserva solo clases de 8:00 a 11:00 h.', 'warning');
+            return;
+          }
         }
         if (!isReserved && !canReserve) {
           notify('Debes reservar con más antelación.', 'info');

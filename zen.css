@@ -615,13 +615,24 @@ body.nav-lock { overflow: hidden; }
 }
 .section-plans .plans-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.25rem;
   background: transparent;
-  max-width: 46rem;
+  max-width: 72rem;
   margin-left: auto;
   margin-right: auto;
   border: 0;
+}
+.section-plans .plans-legal {
+  max-width: 40rem;
+  margin: 1.75rem auto 0;
+  text-align: center;
+  color: var(--dash);
+  font-size: .78rem;
+  line-height: 1.55;
+}
+.section-plans .plans-legal p {
+  margin: 0 0 .35rem;
 }
 .section-plans .plans-grid .plan-card {
   background: var(--panel);

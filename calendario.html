@@ -65,7 +65,7 @@
 <script src="/js/avatar.js?v=1"></script>
 <script src="/js/ui.js"></script>
 <script src="/js/cookies-consent.js"></script>
-<script src="/js/book-clases.js?v=3"></script>
+<script src="/js/book-clases.js?v=4"></script>
 <script>
   const sidebarEl = document.getElementById('sidebar');
   document.getElementById('sidebarToggle').addEventListener('click', () => sidebarEl.classList.toggle('open'));
@@ -84,11 +84,13 @@
 
     let isPriority = false;
     let isEssential = false;
+    let isMorning = false;
     try {
       const bono = await getBonoActivo(perfil.id);
       const bonoNombre = bono?.tipo_bono?.nombre || '';
       isPriority = bonoNombre.toLowerCase().includes('priority') || perfil.rol === 'admin' || perfil.rol === 'empleado';
       isEssential = bonoNombre.toLowerCase().includes('essential');
+      isMorning = bonoNombre.toLowerCase().includes('morning');
       const badge = document.getElementById('userBonoBadge');
       if (badge) badge.textContent = bonoNombre || (perfil.rol === 'admin' ? 'Administrador' : 'Cliente');
       if (isPriority) {
@@ -102,7 +104,8 @@
     await initNovaClassBooker(document.getElementById('novaBookRoot'), {
       perfilId: perfil.id,
       isPriority,
-      isEssential
+      isEssential,
+      isMorning
     });
   }
 

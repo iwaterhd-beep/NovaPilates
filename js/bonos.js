@@ -31,6 +31,15 @@ function renderBonosCatalog() {
         </button>
       </article>`;
   }).join('');
+  let legal = document.getElementById('plansLegal');
+  if (!legal) {
+    legal = document.createElement('div');
+    legal.id = 'plansLegal';
+    legal.className = 'plans-legal';
+    grid.insertAdjacentElement('afterend', legal);
+  }
+  const lines = (typeof NOVA_MEMBERSHIP_CONDITIONS !== 'undefined' && NOVA_MEMBERSHIP_CONDITIONS) || [];
+  legal.innerHTML = lines.map((line) => `<p>${escBonos(line)}</p>`).join('');
 }
 
 function ensureStudioInviteModal() {

@@ -6,31 +6,48 @@ const NOVA_MEMBERSHIPS = [
   {
     id: 'nova-morning',
     web_tag: 'HORARIO DE MAÑANA',
-    nombre: 'NŌVA Morning Membership',
-    precio: null,
-    periodo_label: 'en recepción',
-    lema: 'Todas las disciplinas, solo en la franja de mañana.',
+    nombre: 'Morning',
+    precio: 84,
+    periodo_label: '/ 28 días',
+    lema: '20 clases por ciclo (hasta 5 por semana).',
     highlights: [
-      'Acceso a todas las disciplinas',
-      'Horario de mañana: desde la apertura hasta la última clase de esa franja',
-      'El horario exacto se confirma en el estudio'
+      'Horario de mañana: de 8:00 a 12:00 h',
+      'Última clase a las 11:00 h'
     ]
   },
   {
-    id: 'priority-membership',
-    web_tag: 'HORARIO COMPLETO',
-    nombre: 'NŌVA Priority Membership',
-    precio: 170,
-    periodo_label: '/mes',
-    is_priority: true,
-    lema: 'Todas las disciplinas, todo el horario de apertura.',
+    id: 'nova-essential',
+    web_tag: '8 CLASES',
+    nombre: 'Essential',
+    precio: 99,
+    periodo_label: '/ 28 días',
+    lema: '8 clases por ciclo (2 por semana).',
     highlights: [
-      'Acceso a todas las disciplinas durante el horario de apertura',
-      'Talleres, promociones y experiencias especiales',
-      'Nutrición mensual como parte de la experiencia NŌVA',
-      '5 bebidas al mes'
+      'Sin restricción de horarios',
+      'Acceso a las diferentes disciplinas'
+    ]
+  },
+  {
+    id: 'nova-priority',
+    web_tag: 'EXPERIENCIA COMPLETA',
+    nombre: 'Priority',
+    precio: 147,
+    periodo_label: '/ 28 días',
+    is_priority: true,
+    lema: '20 clases por ciclo (hasta 5 por semana).',
+    highlights: [
+      'Sin restricción de horarios',
+      'Acceso a todas las disciplinas',
+      'Experiencia NŌVA completa: talleres, eventos, regalos, productos, sorteos y beneficios exclusivos'
     ]
   }
+];
+
+const NOVA_MEMBERSHIP_CONDITIONS = [
+  'Validez: 28 días desde la activación.',
+  'Sin permanencia.',
+  'Pago flexible: domiciliación bancaria con renovación automática cada 28 días o pago presencial en recepción, sin renovación automática.',
+  'La renovación automática puede cancelarse antes del siguiente cobro.'
 ];
 
 function closeNovaNav() {

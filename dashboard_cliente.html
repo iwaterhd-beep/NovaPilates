@@ -487,7 +487,7 @@
 <script src="/js/avatar.js?v=1"></script>
 <script src="/js/ui.js"></script>
 <script src="/js/cookies-consent.js"></script>
-<script src="/js/book-clases.js?v=3"></script>
+<script src="/js/book-clases.js?v=4"></script>
 <script>
 // Helpers 
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -788,7 +788,8 @@ function renderProximas(perfil, bono) {
   initNovaClassBooker(cont, {
     perfilId: perfil.id,
     isPriority: bonoNombre.toLowerCase().includes('priority') || perfil.rol === 'admin' || perfil.rol === 'empleado',
-    isEssential: bonoNombre.toLowerCase().includes('essential')
+    isEssential: bonoNombre.toLowerCase().includes('essential'),
+    isMorning: bonoNombre.toLowerCase().includes('morning')
   }).catch((e) => {
     const msg = typeof friendlyError === 'function' ? friendlyError(e) : 'No se pudieron cargar las clases.';
     cont.innerHTML = `<div class="empty-state"><p>${typeof escHtml === 'function' ? escHtml(msg) : 'No se pudieron cargar las clases.'}</p></div>`;
